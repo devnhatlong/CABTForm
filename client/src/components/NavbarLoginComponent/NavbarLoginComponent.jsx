@@ -109,7 +109,7 @@ export const NavbarLoginComponent = () => {
             <WrapperHeaderContainerLogin>
                 <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{width: "100%", position: "fixed", zIndex: "1"}}>
                     {/* Sidebar Toggle (Topbar) */}
-                    <div>QUẢN LÝ SỐ HÓA</div>
+                    <div>Công an Bình Thuận Form</div>
                     {/* Topbar Navbar */}
                     <ul className="navbar-nav ml-auto">
                     {/* Nav Item - Search Dropdown (Visible Only XS) */}

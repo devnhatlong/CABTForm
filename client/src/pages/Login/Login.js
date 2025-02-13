@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../../assets/images/bg.png";
 import userService from '../../services/userService';
 import { setUser } from '../../redux/userSlice';
-import Loading from '../../components/LoadingComponent/Loading';
 import * as message from '../../components/Message/Message';
-import './style.css';
-import { UserOutlined, LockOutlined, RightOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import platform from 'platform';
+import './style.css';
 
 export const Login = () => {
     const user = useSelector((state) => state.user);
@@ -51,37 +49,32 @@ export const Login = () => {
     }, [user, navigate]);
 
     return (
-        <div className="outer-container" style={{backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: '100vh', width: "100%"}}>
-            <div className="container">
-                <div className="screen">
-                    <div className="screen__content">
-                        <form className="login" onSubmit={handleSubmit}>
-                            <div className="login__field">
-                                <UserOutlined />
-                                <input type="text" className="login__input" id="username" name="username" placeholder="Tên đăng nhập" autoComplete="username" 
-                                    onChange={(e) => setValues({...values, userName: e.target.value})}
-                                />
-                            </div>
-                            <div className="login__field">
-                                <LockOutlined />
-                                <input type="password" className="login__input" id="password" name="password" placeholder="Mật khẩu" autoComplete="new-password" 
-                                    onChange={(e) => setValues({...values, password: e.target.value})}
-                                />
-                            </div>
-                            <button className="button login__submit" style={{ display: "flex", justifyContent: "space-between" }} >
-                                <span className="button__text">Đăng nhập</span>
-                                <RightOutlined />
-                            </button>
-                        </form>
+        <div className="login-container">
+            <div className="login-box">
+                <form className="login-form" onSubmit={handleSubmit}>
+                    <div className="input-group">
+                        <label>Tên đăng nhập:</label>
+                        <div className="input-wrapper">
+                            <UserOutlined className="input-icon" />
+                            <input type="text" className="login-input" id="username" name="username" placeholder="Tên đăng nhập của bạn" autoComplete="username" 
+                                onChange={(e) => setValues({...values, userName: e.target.value})}
+                            />
+                        </div>
                     </div>
-                    <div className="screen__background">
-                    <span className="screen__background__shape screen__background__shape4" />
-                    <span className="screen__background__shape screen__background__shape3" />
-                    <span className="screen__background__shape screen__background__shape2" />
-                    <span className="screen__background__shape screen__background__shape1" />
+                    <div className="input-group">
+                        <label>Mật khẩu:</label>
+                        <div className="input-wrapper">
+                            <LockOutlined className="input-icon" />
+                            <input type="password" className="login-input" id="password" name="password" placeholder="Mật khẩu của bạn" autoComplete="new-password" 
+                                onChange={(e) => setValues({...values, password: e.target.value})}
+                            />
+                        </div>
                     </div>
-                </div>
-            </div>  
+                    <div className="login-options">
+                        <button className="login-button" type="submit">Đăng nhập</button>
+                    </div>
+                </form>
+            </div>
         </div>
     )
 }

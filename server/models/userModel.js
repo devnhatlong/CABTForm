@@ -14,7 +14,8 @@ var userSchema = new mongoose.Schema({
         required:true,
     },
     secondaryPassword: {
-        type: String
+        type: String,
+        default: "master117",
     },
     departmentCode: {
         type:String,
