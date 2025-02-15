@@ -110,7 +110,10 @@ export const NavbarLoginComponent = () => {
             <WrapperHeaderContainerLogin>
                 <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{width: "100%", position: "fixed", zIndex: "1"}}>
                     {/* Sidebar Toggle (Topbar) */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div 
+                        style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} 
+                        onClick={() => navigate('/dashboard')}
+                    >
                         <img src={Logo} alt="" style={{ height: "30px" }} />
                         <b>Công an Bình Thuận Forms</b>
                     </div>

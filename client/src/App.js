@@ -13,7 +13,7 @@ import Loading from './components/LoadingComponent/Loading';
 function App() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleGetDetailsUser = async () => {
     setIsLoading(true);
     const { accessToken, decoded } = handleDecoded();
@@ -27,21 +27,21 @@ function App() {
 
   useEffect(() => {
     handleGetDetailsUser();
-  }, []); 
+  }, []);
 
   return (
     <Loading isLoading={isLoading}>
-      <div className="App" id="wrapper">
-        <Router>
+      <Router>
+        <div className="App" id="wrapper">
           <Routes>
             <Route element={<PrivateRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} exact/>
-              <Route path="/" element={<Dashboard />} exact/>
+              {/* Cho phép Dashboard xử lý tất cả route con */}
+              <Route path="/*" element={<Dashboard />} />
             </Route>
             <Route path="/login" element={<Login />} />
           </Routes>
-        </Router>
-      </div>
+        </div>
+      </Router>
     </Loading>
   );
 }

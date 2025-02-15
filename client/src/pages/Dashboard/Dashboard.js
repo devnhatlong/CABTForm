@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavbarLoginComponent } from "../../components/NavbarLoginComponent/NavbarLoginComponent";
 import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined } from '@ant-design/icons';
 import { getItem } from "../../utils/utils";
@@ -7,13 +7,16 @@ import { AdminUser } from "../../components/AdminUser/AdminUser";
 import { useSelector } from 'react-redux';
 import { AdminDepartment } from "../../components/AdminDepartment/AdminDepartment";
 import FormBuilder from "../../components/FormBuilder/FormBuilder";
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
 
 export const Dashboard = () => {
     const user = useSelector((state) => state.user);
     const [collapsed, setCollapsed] = useState(true);
-    const [keySelected, setKeySelected] = useState('');
+
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const menuItemStyle = {
         whiteSpace: 'normal',
@@ -43,30 +46,10 @@ export const Dashboard = () => {
         },
     ].filter(Boolean);  // Remove null items
 
-    const renderPage = (key) => {
-        switch (key) {
-            case 'user':
-                return <AdminUser />;
-
-            case 'department':
-                return <AdminDepartment />;
-
-            case 'create-form':
-                return <FormBuilder />;
-
-            default:
-                return (
-                    <div style={{ padding: '24px', background: '#fff', minHeight: '280px' }}>
-                        <h1>Chào mừng đến với Dashboard</h1>
-                        <p>Sản phẩm của Đội Công nghệ thông tin - Phòng Tham mưu - Bình Thuận.</p>
-                        <p>Vui lòng chọn một tùy chọn từ menu để bắt đầu.</p>
-                    </div>
-                );
-        }
-    };
-
     const handleOnClick = ({ key }) => {
-        setKeySelected(key);
+        if (key === 'user') navigate('/admin/user');
+        else if (key === 'department') navigate('/admin/department');
+        else if (key === 'create-form') navigate('/admin/create-form');
     };
 
     const toggleCollapsed = () => {
@@ -94,7 +77,18 @@ export const Dashboard = () => {
                     />
                 </Sider>
                 <Content style={{ margin: '0px 12px', padding: 18, background: '#fff', minHeight: '280px' }}>
-                    {renderPage(keySelected)}
+                    <Routes>
+                        <Route path="/admin/user" element={<AdminUser />} />
+                        <Route path="/admin/department" element={<AdminDepartment />} />
+                        <Route path="/admin/create-form" element={<FormBuilder />} />
+                        <Route path="*" element={(
+                            <div style={{ padding: '24px', background: '#fff', minHeight: '280px' }}>
+                                <h1>Chào mừng đến với Dashboard</h1>
+                                <p>Sản phẩm của Đội Công nghệ thông tin - Phòng Tham mưu - Bình Thuận.</p>
+                                <p>Vui lòng chọn một tùy chọn từ menu để bắt đầu.</p>
+                            </div>
+                        )} />
+                    </Routes>
                 </Content>
             </Layout>
         </Layout>
