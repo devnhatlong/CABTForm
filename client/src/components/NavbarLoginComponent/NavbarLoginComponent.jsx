@@ -13,6 +13,7 @@ import Loading from '../LoadingComponent/Loading';
 import { useMutationHooks } from '../../hooks/useMutationHook';
 import InputComponent from '../InputComponent/InputComponent';
 import * as message from '../../components/Message/Message';
+import Logo  from '../../assets/images/google-forms-icon.svg'
 
 export const NavbarLoginComponent = () => {
     const user = useSelector((state) => state.user);
@@ -109,7 +110,10 @@ export const NavbarLoginComponent = () => {
             <WrapperHeaderContainerLogin>
                 <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{width: "100%", position: "fixed", zIndex: "1"}}>
                     {/* Sidebar Toggle (Topbar) */}
-                    <div>Công an Bình Thuận Form</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <img src={Logo} alt="" style={{ height: "30px" }} />
+                        <b>Công an Bình Thuận Forms</b>
+                    </div>
                     {/* Topbar Navbar */}
                     <ul className="navbar-nav ml-auto">
                     {/* Nav Item - Search Dropdown (Visible Only XS) */}

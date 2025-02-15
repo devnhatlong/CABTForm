@@ -35,6 +35,7 @@ function App() {
         <Router>
           <Routes>
             <Route element={<PrivateRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} exact/>
               <Route path="/" element={<Dashboard />} exact/>
             </Route>
             <Route path="/login" element={<Login />} />

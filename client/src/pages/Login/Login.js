@@ -44,7 +44,7 @@ export const Login = () => {
     useEffect(() => {
         if (user._id) {
             message.success("Đăng nhập thành công");
-            navigate('/');
+            navigate('/dashboard');
         }
     }, [user, navigate]);
 
@@ -56,7 +56,7 @@ export const Login = () => {
                         <label>Tên đăng nhập:</label>
                         <div className="input-wrapper">
                             <UserOutlined className="input-icon" />
-                            <input type="text" className="login-input" id="username" name="username" placeholder="Tên đăng nhập của bạn" autoComplete="username" 
+                            <input type="text" className="login-input" id="username" name="username" placeholder="Nhập tên đăng nhập" autoComplete="username" 
                                 onChange={(e) => setValues({...values, userName: e.target.value})}
                             />
                         </div>
@@ -65,7 +65,7 @@ export const Login = () => {
                         <label>Mật khẩu:</label>
                         <div className="input-wrapper">
                             <LockOutlined className="input-icon" />
-                            <input type="password" className="login-input" id="password" name="password" placeholder="Mật khẩu của bạn" autoComplete="new-password" 
+                            <input type="password" className="login-input" id="password" name="password" placeholder="Nhập mật khẩu" autoComplete="new-password" 
                                 onChange={(e) => setValues({...values, password: e.target.value})}
                             />
                         </div>
