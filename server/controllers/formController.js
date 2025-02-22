@@ -16,6 +16,26 @@ const createForm = asyncHandler(async (req, res) => {
     });
 });
 
+const getForms = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, title } = req.query;
+    const response = await FormService.getForms(Number(page), Number(limit), title);
+    res.status(200).json({
+        success: true,
+        data: response.forms,
+        total: response.total,
+    });
+});
+
+const getFormById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await FormService.getFormById(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || "Form not found",
+    });
+});
+
 const updateForm = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { title, fields } = req.body;
@@ -32,24 +52,6 @@ const updateForm = asyncHandler(async (req, res) => {
     });
 });
 
-const getForms = asyncHandler(async (req, res) => {
-    const response = await FormService.getForms();
-    res.status(200).json({
-        success: true,
-        data: response,
-    });
-});
-
-const getFormById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const response = await FormService.getFormById(id);
-
-    res.status(response ? 200 : 404).json({
-        success: !!response,
-        data: response || "Form not found",
-    });
-});
-
 const deleteForm = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const response = await FormService.deleteForm(id);
@@ -62,8 +64,8 @@ const deleteForm = asyncHandler(async (req, res) => {
 
 module.exports = {
     createForm,
-    updateForm,
     getForms,
     getFormById,
+    updateForm,
     deleteForm,
 };

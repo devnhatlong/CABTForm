@@ -63,7 +63,7 @@ const redirectToLogin = () => {
 const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/forms`;
 
 const formService = {
-    // Tạo form mới
+    // Tạo form mới (chỉ admin)
     createForm: async (data) => {
         try {
             const response = await axiosJWT.post(`${BASE_URL}/`, data);
@@ -74,21 +74,12 @@ const formService = {
         }
     },
 
-    // Cập nhật form
-    updateForm: async (id, data) => {
+    // Lấy danh sách form với phân trang và lọc
+    getAllForms: async (page, limit, title) => {
         try {
-            const response = await axiosJWT.put(`${BASE_URL}/${id}`, data);
-            return response.data;
-        } catch (error) {
-            console.error("Lỗi khi cập nhật form:", error);
-            throw error;
-        }
-    },
-
-    // Lấy danh sách form
-    getAllForms: async () => {
-        try {
-            const response = await axiosJWT.get(`${BASE_URL}/`);
+            const response = await axiosJWT.get(`${BASE_URL}/`, {
+                params: { page, limit, title }
+            });
             return response.data;
         } catch (error) {
             console.error("Lỗi khi lấy danh sách form:", error);
@@ -103,6 +94,17 @@ const formService = {
             return response.data.data;
         } catch (error) {
             console.error("Lỗi khi lấy chi tiết form:", error);
+            throw error;
+        }
+    },
+
+    // Cập nhật form (chỉ admin)
+    updateForm: async (id, data) => {
+        try {
+            const response = await axiosJWT.put(`${BASE_URL}/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi cập nhật form:", error);
             throw error;
         }
     },
