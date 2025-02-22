@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import userService from '../../services/userService';
 import { setUser } from '../../redux/userSlice';
 import * as message from '../../components/Message/Message';
@@ -11,7 +11,9 @@ import './style.css';
 export const Login = () => {
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/dashboard";
 
     const [values, setValues] = useState({
         userName: '',
@@ -44,9 +46,9 @@ export const Login = () => {
     useEffect(() => {
         if (user._id) {
             message.success("Đăng nhập thành công");
-            navigate('/dashboard');
+            navigate(from, { replace: true });
         }
-    }, [user, navigate]);
+    }, [user, navigate, from]);
 
     return (
         <div className="login-container">

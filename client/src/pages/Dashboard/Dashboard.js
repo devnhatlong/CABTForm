@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { NavbarLoginComponent } from "../../components/NavbarLoginComponent/NavbarLoginComponent";
 import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined } from '@ant-design/icons';
 import { getItem } from "../../utils/utils";
-import { Menu, Button, Layout } from 'antd';
+import { Menu, Layout } from 'antd';
 import { AdminUser } from "../../components/AdminUser/AdminUser";
 import { useSelector } from 'react-redux';
 import { AdminDepartment } from "../../components/AdminDepartment/AdminDepartment";
 import FormBuilder from "../../components/FormBuilder/FormBuilder";
 import FormList from "../../components/FormList/FormList";
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
 
@@ -17,7 +17,6 @@ export const Dashboard = () => {
     const [collapsed, setCollapsed] = useState(true);
 
     const navigate = useNavigate();
-    const location = useLocation();
 
     const menuItemStyle = {
         whiteSpace: 'normal',
@@ -27,7 +26,7 @@ export const Dashboard = () => {
     const items = [
         user?.role === "admin" && {
             key: 'admin',
-            label: 'Admin',
+            label: 'Quản trị',
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [
@@ -50,7 +49,7 @@ export const Dashboard = () => {
     const handleOnClick = ({ key }) => {
         if (key === 'user') navigate('/admin/user');
         else if (key === 'department') navigate('/admin/department');
-        else if (key === 'forms') navigate('/admin/forms');
+        else if (key === 'forms') navigate('/forms');
     };
 
     const toggleCollapsed = () => {
@@ -100,8 +99,8 @@ export const Dashboard = () => {
                     <Routes>
                         <Route path="/admin/user" element={<AdminUser />} />
                         <Route path="/admin/department" element={<AdminDepartment />} />
-                        <Route path="/admin/forms" element={<FormList />} />
-                        <Route path="/admin/forms/create-forms/:id" element={<FormBuilder />} />
+                        <Route path="/forms" element={<FormList />} />
+                        <Route path="/forms/create-forms/:id" element={<FormBuilder />} />
                         <Route path="*" element={(
                             <div style={{ padding: '24px', background: '#fff', minHeight: '280px' }}>
                                 <h1>CÔNG AN BÌNH THUẬN FORMS</h1>

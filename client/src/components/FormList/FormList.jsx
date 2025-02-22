@@ -21,7 +21,7 @@ const FormList = () => {
     const [total, setTotal] = useState(0);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 10
+        pageSize: 5
     });
     const user = useSelector((state) => state?.user);
     const searchInput = useRef(null);
@@ -60,7 +60,7 @@ const FormList = () => {
                 return;
             }
     
-            navigate(`/admin/forms/create-forms/${newForm.data._id}`);
+            navigate(`/forms/create-forms/${newForm.data._id}`);
         } catch (error) {
             console.error("Lỗi tạo form:", error);
             message.error("Lỗi khi tạo form!");

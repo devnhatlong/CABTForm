@@ -35,7 +35,6 @@ function App() {
         <div className="App" id="wrapper">
           <Routes>
             <Route element={<PrivateRoute />}>
-              {/* Cho phép Dashboard xử lý tất cả route con */}
               <Route path="/*" element={<Dashboard />} />
             </Route>
             <Route path="/login" element={<Login />} />
