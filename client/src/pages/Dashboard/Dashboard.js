@@ -57,6 +57,25 @@ export const Dashboard = () => {
         setCollapsed(!collapsed);
     };
 
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setCollapsed(true);
+            } else {
+                setCollapsed(false);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        // Set initial state
+        handleResize();
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <NavbarLoginComponent />

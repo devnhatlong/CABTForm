@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const formSchema = new mongoose.Schema({
-    title: { type: String, required: true },
+    title: { type: String },
     description: { type: String },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     fields: [
@@ -30,7 +30,6 @@ const formSchema = new mongoose.Schema({
             multiple: { type: Boolean, default: false },
         }
     ],
-    link: { type: String, unique: true, default: () => new mongoose.Types.ObjectId().toHexString() },
     isActive: { type: Boolean, default: true },
 }, {
     timestamps: true

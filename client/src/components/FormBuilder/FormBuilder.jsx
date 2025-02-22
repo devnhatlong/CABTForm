@@ -18,8 +18,6 @@ const FormBuilder = () => {
         if (formId) {
             try {
                 const data = await formService.getFormById(formId); // Gọi hàm lấy dữ liệu từ formService
-                setTitle(data.title);
-                setDescription(data.description);
                 setFields(data.fields);
             } catch (error) {
                 console.error("Lỗi khi lấy thông tin form:", error);

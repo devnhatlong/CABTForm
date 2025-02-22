@@ -2,9 +2,9 @@ const FormService = require("../services/formService");
 const asyncHandler = require("express-async-handler");
 
 const createForm = asyncHandler(async (req, res) => {
-    const { title, fields } = req.body;
+    const { createdBy } = req.body;
 
-    if (!title || !fields || !Array.isArray(fields)) {
+    if (!createdBy) {
         throw new Error("Missing or invalid inputs");
     }
 

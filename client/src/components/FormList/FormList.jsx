@@ -35,9 +35,6 @@ const FormList = () => {
             }
     
             const newForm = await formService.createForm({
-                title: "Form mới",
-                description: "",
-                fields: [],
                 createdBy: user._id,
             });
 
@@ -58,7 +55,7 @@ const FormList = () => {
             <div style={{ display: "flex", gap: "20px" }}>
                 <Button
                     onClick={createForm}
-                    style={{ height: "90px", width: "90px", borderRadius: "6px", borderStyle: "dashed" }}
+                    style={{ height: "120px", width: "160px", borderRadius: "6px" }}
                 >
                     <div>Tạo form</div>
                     <PlusOutlined style={{ fontSize: "40px", color: "#1677ff" }} />
