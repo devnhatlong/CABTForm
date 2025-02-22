@@ -4,6 +4,10 @@ const createForm = async (data) => {
     return await Form.create(data);
 };
 
+const updateForm = async (id, data) => {
+    return await Form.findByIdAndUpdate(id, data, { new: true });
+};
+
 const getForms = async () => {
     return await Form.find();
 };
@@ -18,6 +22,7 @@ const deleteForm = async (id) => {
 
 module.exports = {
     createForm,
+    updateForm,
     getForms,
     getFormById,
     deleteForm,

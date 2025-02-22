@@ -7,6 +7,7 @@ import { AdminUser } from "../../components/AdminUser/AdminUser";
 import { useSelector } from 'react-redux';
 import { AdminDepartment } from "../../components/AdminDepartment/AdminDepartment";
 import FormBuilder from "../../components/FormBuilder/FormBuilder";
+import FormList from "../../components/FormList/FormList";
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
@@ -41,7 +42,7 @@ export const Dashboard = () => {
             icon: <ProfileOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Tạo form', 'create-form', <FormOutlined />, null, null, menuItemStyle),
+                getItem('Danh sách form', 'forms', <FormOutlined />, null, null, menuItemStyle),
             ]
         },
     ].filter(Boolean);  // Remove null items
@@ -49,7 +50,7 @@ export const Dashboard = () => {
     const handleOnClick = ({ key }) => {
         if (key === 'user') navigate('/admin/user');
         else if (key === 'department') navigate('/admin/department');
-        else if (key === 'create-form') navigate('/admin/create-form');
+        else if (key === 'forms') navigate('/admin/forms');
     };
 
     const toggleCollapsed = () => {
@@ -80,10 +81,11 @@ export const Dashboard = () => {
                     <Routes>
                         <Route path="/admin/user" element={<AdminUser />} />
                         <Route path="/admin/department" element={<AdminDepartment />} />
-                        <Route path="/admin/create-form" element={<FormBuilder />} />
+                        <Route path="/admin/forms" element={<FormList />} />
+                        <Route path="/admin/forms/create-forms/:id" element={<FormBuilder />} />
                         <Route path="*" element={(
                             <div style={{ padding: '24px', background: '#fff', minHeight: '280px' }}>
-                                <h1>Chào mừng đến với Dashboard</h1>
+                                <h1>CÔNG AN BÌNH THUẬN FORMS</h1>
                                 <p>Sản phẩm của Đội Công nghệ thông tin - Phòng Tham mưu - Bình Thuận.</p>
                                 <p>Vui lòng chọn một tùy chọn từ menu để bắt đầu.</p>
                             </div>

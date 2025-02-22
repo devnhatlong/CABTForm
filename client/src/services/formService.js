@@ -2,10 +2,10 @@ import axios from 'axios';
 import { getTokenFromCookie } from '../utils/utils';
 import userService from './userService';
 
-export const axiosJWTWarningByAdmin = axios.create();
+export const axiosJWT = axios.create();
 
 // Add a request interceptor to add the JWT token to the authorization header
-axiosJWTWarningByAdmin.interceptors.request.use(
+axiosJWT.interceptors.request.use(
     (config) => {
         const accessToken = getTokenFromCookie("accessToken");
 
@@ -19,7 +19,7 @@ axiosJWTWarningByAdmin.interceptors.request.use(
 );
 
 // Add a response interceptor to refresh the JWT token if it's expired
-axiosJWTWarningByAdmin.interceptors.response.use(
+axiosJWT.interceptors.response.use(
     async (response) => response,
     async (error) => {
         const originalRequest = error.config;
@@ -31,7 +31,7 @@ axiosJWTWarningByAdmin.interceptors.response.use(
                 document.cookie = `accessToken=${newAccessToken}; path=/`;
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-                return axiosJWTWarningByAdmin(originalRequest);
+                return axiosJWT(originalRequest);
             } catch (refreshError) {
                 // Handle refresh token error
                 console.error(refreshError);
@@ -60,63 +60,63 @@ const redirectToLogin = () => {
     window.location.href = "/login";
 };
 
-const warningByAdminService = {
-    getUnitNotEnteredData1: async (month, year) => {
+const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/forms`;
+
+const formService = {
+    // Tạo form mới
+    createForm: async (data) => {
         try {
-            const response = await axiosJWTWarningByAdmin.get(`${process.env.REACT_APP_SERVER_URL}/warning-admin/get-unit-not-entered-data1`, {
-                params: {
-                  month,
-                  year,
-                }
-            });
+            const response = await axiosJWT.post(`${BASE_URL}/`, data);
             return response.data;
-        } 
-        catch (error) {
-            console.log(error);
+        } catch (error) {
+            console.error("Lỗi khi tạo form:", error);
+            throw error;
         }
     },
-    getUnitNotEnteredData2: async (month, year) => {
+
+    // Cập nhật form
+    updateForm: async (id, data) => {
         try {
-            const response = await axiosJWTWarningByAdmin.get(`${process.env.REACT_APP_SERVER_URL}/warning-admin/get-unit-not-entered-data2`, {
-                params: {
-                  month,
-                  year,
-                }
-            });
+            const response = await axiosJWT.put(`${BASE_URL}/${id}`, data);
             return response.data;
-        } 
-        catch (error) {
-            console.log(error);
+        } catch (error) {
+            console.error("Lỗi khi cập nhật form:", error);
+            throw error;
         }
     },
-    getUnitNotEnteredData3: async (month, year) => {
+
+    // Lấy danh sách form
+    getAllForms: async () => {
         try {
-            const response = await axiosJWTWarningByAdmin.get(`${process.env.REACT_APP_SERVER_URL}/warning-admin/get-unit-not-entered-data3`, {
-                params: {
-                    month,
-                    year,
-                }
-            });
+            const response = await axiosJWT.get(`${BASE_URL}/`);
             return response.data;
-        } 
-        catch (error) {
-            console.log(error);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách form:", error);
+            throw error;
         }
     },
-    getUnitNotEnteredData4: async (month, year) => {
+
+    // Lấy chi tiết form theo ID
+    getFormById: async (id) => {
         try {
-            const response = await axiosJWTWarningByAdmin.get(`${process.env.REACT_APP_SERVER_URL}/warning-admin/get-unit-not-entered-data4`, {
-                params: {
-                    month,
-                    year,
-                }
-            });
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
+            const response = await axiosJWT.get(`${BASE_URL}/${id}`);
+            return response.data.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết form:", error);
+            throw error;
         }
     },
+
+    // Xóa form (chỉ admin)
+    deleteForm: async (id) => {
+        try {
+            const response = await axiosJWT.delete(`${BASE_URL}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi xóa form:", error);
+            throw error;
+        }
+    }
 };
 
-export default warningByAdminService;
+export default formService;

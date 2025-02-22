@@ -30,7 +30,7 @@ const formSchema = new mongoose.Schema({
             multiple: { type: Boolean, default: false },
         }
     ],
-    link: { type: String, unique: true },
+    link: { type: String, unique: true, default: () => new mongoose.Types.ObjectId().toHexString() },
     isActive: { type: Boolean, default: true },
 }, {
     timestamps: true

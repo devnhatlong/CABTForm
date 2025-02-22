@@ -16,6 +16,22 @@ const createForm = asyncHandler(async (req, res) => {
     });
 });
 
+const updateForm = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { title, fields } = req.body;
+
+    if (!title || !fields || !Array.isArray(fields)) {
+        throw new Error("Missing or invalid inputs");
+    }
+
+    const response = await FormService.updateForm(id, req.body);
+
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        data: response || "Cannot update form",
+    });
+});
+
 const getForms = asyncHandler(async (req, res) => {
     const response = await FormService.getForms();
     res.status(200).json({
@@ -46,6 +62,7 @@ const deleteForm = asyncHandler(async (req, res) => {
 
 module.exports = {
     createForm,
+    updateForm,
     getForms,
     getFormById,
     deleteForm,
