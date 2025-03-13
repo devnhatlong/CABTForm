@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button, message, Space } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, message, Popover, Space } from "antd";
+import { PlusOutlined, SearchOutlined, MenuOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import formService from "../../services/formService";
 import { useSelector } from "react-redux";
@@ -10,7 +10,8 @@ import {
     FormListHeader,
     CreateFormButton,
     CreateFormIcon,
-    EmptyState
+    EmptyState,
+    ActionContent
 } from "./style"; // Import styled components
 import InputComponent from "../InputComponent/InputComponent";
 
@@ -18,14 +19,14 @@ const FormList = () => {
     const navigate = useNavigate();
     const [forms, setForms] = useState([]);
     const [loading, setLoading] = useState(false);
+    const user = useSelector((state) => state?.user);
+    const searchInput = useRef(null);
+    const [columnFilters, setColumnFilters] = useState({});
     const [total, setTotal] = useState(0);
     const [pagination, setPagination] = useState({
         currentPage: 1,
         pageSize: 5
     });
-    const user = useSelector((state) => state?.user);
-    const searchInput = useRef(null);
-    const [columnFilters, setColumnFilters] = useState({});
 
     useEffect(() => {
         fetchForms(pagination.currentPage, pagination.pageSize, columnFilters.title);
@@ -151,6 +152,29 @@ const FormList = () => {
         },
     });
 
+    const handleDeleteForm = async (id) => {
+        try {
+            await formService.deleteForm(id);
+            message.success("Xóa form thành công");
+            fetchForms();
+        } catch (error) {
+            message.error("Lỗi khi xóa form");
+        }
+    };
+
+    const content = (id) => (
+        <ActionContent>
+            <Button type="link" icon={<EditOutlined />} onClick={() => navigate(`/forms/edit-forms/${id}`)}>Chỉnh sửa</Button>
+            <Button type="link" icon={<DeleteOutlined />} danger onClick={() => handleDeleteForm(id)}>Xóa</Button>
+        </ActionContent>
+    );
+
+    const renderAction = (text, record) => (
+        <Popover content={content(record._id)} trigger="click" placement="bottom">
+            <MenuOutlined style={{ color: '#1677ff', fontSize: '18px', cursor: 'pointer' }} onClick={(e) => e.stopPropagation()} />
+        </Popover>
+    );
+
     const columns = [
         {
             title: 'Tên form',
@@ -174,6 +198,11 @@ const FormList = () => {
             dataIndex: 'updatedAt',
             key: 'updatedAt',
             render: (text) => new Date(text).toLocaleString(),
+        },
+        {
+            title: 'Hành động',
+            key: 'action',
+            render: renderAction,
         },
     ];
 
@@ -214,7 +243,7 @@ const FormList = () => {
                             return {
                                 onClick: (event) => {
                                     if (record._id) {
-                                        navigate(`/admin/forms/edit-forms/${record._id}`);
+                                        navigate(`/forms/edit-forms/${record._id}`);
                                     }
                                 },
                             };

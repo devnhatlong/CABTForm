@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import "./styles/sb-admin-2.min.css";
-import { Login } from './pages/Login/Login';
+import { Login } from './pages/Login/views/Login';
 import PrivateRoute from './routes/PrivateRoute';
-import { Dashboard } from './pages/Dashboard/Dashboard';
+import { Dashboard } from './pages/Dashboard/views/Dashboard';
 import userService from './services/userService';
 import { useDispatch } from 'react-redux';
 import { setUser } from './redux/userSlice';

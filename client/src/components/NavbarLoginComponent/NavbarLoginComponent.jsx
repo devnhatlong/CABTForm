@@ -115,7 +115,7 @@ export const NavbarLoginComponent = () => {
                         onClick={() => navigate('/dashboard')}
                     >
                         <img src={Logo} alt="" style={{ height: "30px" }} />
-                        <b>Công an Bình Thuận Forms</b>
+                        <b>Số Liệu Cơ Bản</b>
                     </div>
                     {/* Topbar Navbar */}
                     <ul className="navbar-nav ml-auto">

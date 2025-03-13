@@ -38,3 +38,9 @@ export const FormCard = styled(Card)`
 export const EmptyState = styled.div`
     margin-top: 20px;
 `;
+
+export const ActionContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+`;

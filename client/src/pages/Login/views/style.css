@@ -1,0 +1,122 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    background: linear-gradient(135deg, #dfcc80, #eadda9);
+    /* background: #EBEBEB; */
+}
+
+.login-box {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    width: 1024px;
+    max-width: 100%;
+    height: 600px;
+}
+
+.login-image {
+    flex: 1;
+    background: url('../../../assets/images/main.png') no-repeat center center;
+    background-size: cover;
+}
+
+.login-form-container {
+    width: 40%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-header h2 {
+    margin: 0;
+    color: #4a4a4a;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #4a4a4a;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: #a0a0a0;
+}
+
+.login-input {
+    width: 100%;
+    padding: 10px 10px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.login-options {
+    text-align: center;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background: #2BB3E7;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background: #2298c7;
+}
+
+.login-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    color: #4a4a4a;
+}
+
+/* Media query to hide login-image on small screens */
+@media (max-width: 992px) {
+    .login-box {
+        /* height: auto; */
+        width: auto;
+    }
+
+    .login-image {
+        display: none;
+    }
+
+    .login-form-container {
+        width: 100%;
+    }
+}
