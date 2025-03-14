@@ -169,12 +169,11 @@ export const NavbarLoginComponent = () => {
                                 aria-haspopup="true"
                                 aria-expanded="false"
                             >
-                            <span className="mr-2 d-none d-lg-inline text-gray-600 small">
-                                {user?.userName}
-                            </span>
-                            <img className="img-profile rounded-circle" src={iconUser} />
+                                <span className="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold">
+                                    {user?.userName}
+                                </span>
+                                <img className="img-profile rounded-circle" src={iconUser} />
                             </a>
-                            
                         </li>
                     </Popover>
                     </ul>

@@ -21,12 +21,14 @@ export const Dashboard = () => {
     const menuItemStyle = {
         whiteSpace: 'normal',
         lineHeight: 'normal',
+        fontSize: "14px",
+        fontWeight: "600"
     };
-
+    
     const items = [
         user?.role === "admin" && {
             key: 'admin',
-            label: 'Quản trị',
+            label: <span style={menuItemStyle}>Quản trị</span>,
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [

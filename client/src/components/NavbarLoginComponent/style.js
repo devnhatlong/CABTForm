@@ -7,6 +7,12 @@ export const WrapperContentPopup = styled .p `
     &:hover {
         color: #1677ff;
     }
+
+    margin: 5px;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid #ccc;
+    }
 `
 
 export const WrapperHeaderContainerLogin = styled.div `
