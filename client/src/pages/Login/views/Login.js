@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import userService from '../../../services/userService';
 import { setUser } from '../../../redux/userSlice';
 import * as message from '../../../components/Message/Message';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import platform from 'platform';
 import './style.css';
 
@@ -20,6 +20,8 @@ export const Login = () => {
         password: '',
         browser: ''
     });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const browser = platform.description ? platform.description : 'Unknown Browser';
@@ -53,7 +55,10 @@ export const Login = () => {
     return (
         <div className="login-container">
             <div className="login-box">
-                <div className="login-image"></div>
+                <div className="login-image">
+                    <div class="circle-login"></div>
+                    <div class="text-login"></div>
+                </div>
                 <div className="login-form-container">
                     <div className="login-header">
                         <h2>ĐĂNG NHẬP</h2>
@@ -70,9 +75,12 @@ export const Login = () => {
                         <div className="input-group">
                             <div className="input-wrapper">
                                 <LockOutlined className="input-icon" />
-                                <input type="password" className="login-input" id="password" name="password" placeholder="Nhập mật khẩu" autoComplete="new-password" 
+                                <input type={showPassword ? "text" : "password"} className="login-input" id="password" name="password" placeholder="Nhập mật khẩu" autoComplete="new-password" 
                                     onChange={(e) => setValues({...values, password: e.target.value})}
                                 />
+                                <span className="password-toggle-icon" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                </span>
                             </div>
                         </div>
                         <div className="login-options">

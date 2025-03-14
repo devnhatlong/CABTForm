@@ -9,6 +9,7 @@
 }
 
 .login-box {
+    position: relative;
     display: flex;
     background: white;
     border-radius: 10px;
@@ -20,9 +21,33 @@
 }
 
 .login-image {
+    position: relative;
     flex: 1;
-    background: url('../../../assets/images/main.png') no-repeat center center;
-    background-size: cover;
+    background: #eadda9;
+    padding: 10px;
+}
+
+.circle-login {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; /* Adjust size as needed */
+    height: 100%; /* Adjust size as needed */
+    background: url("../../../assets/images/circle.png") no-repeat center center;
+    background-size: contain;
+    animation: rotateBackground 20s linear infinite;
+}
+
+.text-login {
+    position: absolute;
+    top: 66%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; /* Adjust size as needed */
+    height: 100%; /* Adjust size as needed */
+    background-image: url("../../../assets/images/background_text.png");
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .login-form-container {
@@ -79,6 +104,15 @@
     font-size: 16px;
 }
 
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #a0a0a0;
+}
+
 .login-options {
     text-align: center;
 }
@@ -103,6 +137,15 @@
     justify-content: center;
     margin-top: 20px;
     color: #4a4a4a;
+}
+
+@keyframes rotateBackground {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
 }
 
 /* Media query to hide login-image on small screens */
