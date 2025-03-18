@@ -179,6 +179,18 @@ const userService = {
         } catch (error) {
             throw error; // Rethrow the error for handling in interceptor
         }
+    },
+    importUsersFromExcel: async (formData) => {
+        try {
+            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/import-from-excel`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
     }
 };
 

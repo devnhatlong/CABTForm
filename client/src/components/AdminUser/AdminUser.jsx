@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { WrapperHeader } from './style';
-import { Button, Form, Select, Space, Popover } from "antd";
+import { CreateFormButton, CreateFormIcon, FormListHeader, WrapperButtonName, WrapperHeader } from './style';
+import { Button, Form, Select, Space, Popover, Upload } from "antd";
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../InputComponent/InputComponent';
 import ModalComponent from '../ModalComponent/ModalComponent';
@@ -10,7 +10,7 @@ import * as message from '../../components/Message/Message';
 import { useMutationHooks } from '../../hooks/useMutationHook';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux'
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, MenuOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, MenuOutlined, ImportOutlined } from '@ant-design/icons'
 import DrawerComponent from '../DrawerComponent/DrawerComponent';
 import { WrapperContentPopup } from '../NavbarLoginComponent/style';
 import Moment from 'react-moment';
@@ -444,7 +444,7 @@ export const AdminUser = () => {
 
     const content = (
         <div>
-            <WrapperContentPopup  onClick={() => setIsModalChangePasswordOpen(true)}>Đổi mật khẩu</WrapperContentPopup>
+            <WrapperContentPopup onClick={() => setIsModalChangePasswordOpen(true)}>Đổi mật khẩu</WrapperContentPopup>
         </div>
     );
 
@@ -476,12 +476,12 @@ export const AdminUser = () => {
             ...getColumnSearchProps('departmentCode', 'mã phòng')
         },
         {
-            title: 'Tên phòng',
+            title: 'Tên đơn vị',
             dataIndex: 'departmentName',
             key: 'departmentName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentName', 'tên phòng')
+            ...getColumnSearchProps('departmentName', 'tên đơn vị')
         },
         {
             title: 'Vai trò',
@@ -604,14 +604,49 @@ export const AdminUser = () => {
         modalChangePasswordForm.resetFields();
     }
 
+    const handleUpload = async ({ file, onSuccess, onError }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        try {
+            const response = await userService.importUsersFromExcel(formData);
+    
+            if (response.success) {
+                message.success('Import thành công');
+                queryLetter.refetch(); // Refresh the user list
+            } else {
+                message.error(response.message || 'Import thất bại');
+            }
+        } catch (error) {
+            console.error('Error importing users:', error);
+            message.error('Import thất bại');
+            onError(error);
+        }
+    };
+
     return (
         <div>
             <WrapperHeader>Quản lý người dùng</WrapperHeader>
             <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
-                <Button style={{height: "90px", width: "90px", borderRadius: "6px", borderStyle: "dashed"}} onClick={() => setIsModalOpen(true)}>
-                    <div>Thêm</div>
-                    <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
-                </Button>
+                <FormListHeader>
+                    <CreateFormButton onClick={() => setIsModalOpen(true)}>
+                        <WrapperButtonName>Thêm tài khoản</WrapperButtonName>
+                        <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
+                    </CreateFormButton>
+                </FormListHeader>
+                <FormListHeader>
+                    <Upload
+                        name="file"
+                        accept=".xlsx, .xls"
+                        showUploadList={false}
+                        customRequest={handleUpload}
+                    >
+                        <CreateFormButton>
+                            <WrapperButtonName>Import Excel</WrapperButtonName>
+                            <ImportOutlined style={{ fontSize: "40px", color: "#5eb12b" }} />
+                        </CreateFormButton>
+                    </Upload>
+                </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>
                 <TableComponent handleDeleteMultiple={handleDeleteMultipleUsers} columns={columns} data={dataTable} isLoading={isLoadingLetter || isLoadingResetFilter} resetSelection={resetSelection}

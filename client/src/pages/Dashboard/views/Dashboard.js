@@ -22,7 +22,7 @@ export const Dashboard = () => {
         whiteSpace: 'normal',
         lineHeight: 'normal',
         fontSize: "14px",
-        fontWeight: "600"
+        fontWeight: "700"
     };
     
     const items = [
