@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { WrapperHeader } from './style';
+import { CreateFormButton, FormListHeader, WrapperButtonName, WrapperHeader } from './style';
 import { Button, Form, Space, Upload } from "antd";
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../InputComponent/InputComponent';
@@ -10,9 +10,10 @@ import * as message from '../Message/Message';
 import { useMutationHooks } from '../../hooks/useMutationHook';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux'
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, UploadOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, UploadOutlined, ImportOutlined } from '@ant-design/icons'
 import DrawerComponent from '../DrawerComponent/DrawerComponent';
 import ExcelJS from 'exceljs';
+import { useNavigate } from 'react-router';
 
 export const AdminDepartment = () => {
     const [modalForm] = Form.useForm();
@@ -33,6 +34,14 @@ export const AdminDepartment = () => {
         currentPage: 1,
         pageSize: 5 // Số lượng mục trên mỗi trang
     });
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(user?.role !== "admin") {
+            navigate(`/dashboard`);
+        }
+    }, [user]);
 
     const [stateDepartment, setStateDepartment] = useState({
         departmentCode: "",
@@ -483,23 +492,49 @@ export const AdminDepartment = () => {
         setIsOpenDrawer(false);
     };
 
+    const handleUpload = async ({ file, onSuccess, onError }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        try {
+            const response = await departmentService.importFromExcel(formData);
+    
+            if (response.success) {
+                message.success('Import thành công');
+                queryLetter.refetch(); // Refresh the user list
+            } else {
+                message.error(response.message || 'Import thất bại');
+            }
+        } catch (error) {
+            console.error('Error importing users:', error);
+            message.error('Import thất bại');
+            onError(error);
+        }
+    };
+
     return (
         <div>
             <WrapperHeader>Quản lý đơn vị / phòng ban</WrapperHeader>
             <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
-                <Button style={{height: "90px", width: "90px", borderRadius: "6px", borderStyle: "dashed"}} onClick={() => setIsModalOpen(true)}>
-                    <div>Thêm</div>
-                    <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
-                </Button>
-                {/* <Upload
-                    beforeUpload={(file) => {
-                        handleExcelUpload(file);
-                        return false; // Prevent default Ant Design upload behavior
-                    }}
-                    showUploadList={false} // Hide default upload list
-                >
-                    <Button icon={<UploadOutlined />} type="primary">Upload Excel</Button>
-                </Upload> */}
+                <FormListHeader>
+                    <CreateFormButton onClick={() => setIsModalOpen(true)}>
+                        <WrapperButtonName>Thêm đơn vị</WrapperButtonName>
+                        <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
+                    </CreateFormButton>
+                </FormListHeader>
+                <FormListHeader>
+                    <Upload
+                        name="file"
+                        accept=".xlsx, .xls"
+                        showUploadList={false}
+                        customRequest={handleUpload}
+                    >
+                        <CreateFormButton>
+                            <WrapperButtonName>Import Excel</WrapperButtonName>
+                            <ImportOutlined style={{ fontSize: "40px", color: "#5eb12b" }} />
+                        </CreateFormButton>
+                    </Upload>
+                </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>
                 <TableComponent handleDeleteMultiple={handleDeleteMultipleUsers} columns={columns} data={dataTable} isLoading={isLoadingLetter || isLoadingResetFilter} resetSelection={resetSelection}

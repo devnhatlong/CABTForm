@@ -16,6 +16,7 @@ import { WrapperContentPopup } from '../NavbarLoginComponent/style';
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
+import { useNavigate } from 'react-router';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();
@@ -38,6 +39,13 @@ export const AdminUser = () => {
         currentPage: 1,
         pageSize: 5 // Số lượng mục trên mỗi trang
     });
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(user?.role !== "admin") {
+            navigate(`/dashboard`);
+        }
+    }, [user]);
 
     const [passwordChangedByAdmin, setPasswordChangedByAdmin] = useState({
         password: "",

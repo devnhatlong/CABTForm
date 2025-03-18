@@ -120,6 +120,18 @@ const departmentService = {
         } catch (error) {
             console.log(error);
         }
+    },
+    importFromExcel: async (formData) => {
+        try {
+            const response = await axiosDepartment.post(`${process.env.REACT_APP_SERVER_URL}/department/import-from-excel`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
     }
 };
 
