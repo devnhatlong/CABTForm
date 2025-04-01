@@ -51,7 +51,7 @@ export const Dashboard = () => {
             icon: <IdcardOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Danh sách vụ việc', 'social_order_list', null, null, menuChildrenItemStyle),
+                getItem('Danh sách vụ việc TTXH', 'social_order_list', null, null, menuChildrenItemStyle),
                 getItem('Tra cứu đối tượng', 'criminal_information_lookup', null, null, menuChildrenItemStyle),
                 getItem('Thống kê số liệu', 'statistics_social_order_incident', null, null, menuChildrenItemStyle),
             ]
@@ -83,7 +83,13 @@ export const Dashboard = () => {
     const handleOnClick = ({ key }) => {
         if (key === 'user') navigate('/admin/user');
         else if (key === 'department') navigate('/admin/department');
-        else if (key === 'forms') navigate('/forms');
+        else if (key === 'social_order_list') navigate('/social_order/social_order_list');
+        else if (key === 'criminal_information_lookup') navigate('/social_order/criminal_information_lookup');
+        else if (key === 'statistics_social_order_incident') navigate('/social_order/statistics_social_order_incident');
+        else if (key === 'traffic_incident_list') navigate('/traffic/traffic_incident_list');
+        else if (key === 'statistics_traffic_incident') navigate('/traffic/statistics_traffic_incident');
+        else if (key === 'fires_and_explosions_list') navigate('/fire_protection_and_prevention/fires_and_explosions_list');
+        else if (key === 'statistics_fires_and_explosions') navigate('/fire_protection_and_prevention/statistics_fires_and_explosions');
     };
 
     const onOpenChange = (keys) => {
@@ -145,7 +151,7 @@ export const Dashboard = () => {
                 </Sider>
                 <Content
                     style={{
-                        marginLeft: collapsed ? 80 : 250, // Đẩy nội dung sang phải tùy thuộc vào trạng thái của Sider
+                        marginLeft: collapsed ? 100 : 260, // Đẩy nội dung sang phải tùy thuộc vào trạng thái của Sider
                         margin: '0px 12px',
                         padding: 18,
                         background: '#fff',
