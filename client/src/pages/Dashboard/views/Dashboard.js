@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { NavbarLoginComponent } from "../../../components/NavbarLoginComponent/NavbarLoginComponent";
-import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined } from '@ant-design/icons';
-import { getItem } from "../../../utils/utils";
-import { Menu, Layout } from 'antd';
-import { AdminUser } from "../../../components/AdminUser/AdminUser";
-import { useSelector } from 'react-redux';
-import { AdminDepartment } from "../../../components/AdminDepartment/AdminDepartment";
-import FormBuilder from "../../../components/FormBuilder/FormBuilder";
-import FormList from "../../../components/FormList/FormList";
 import { Routes, Route, useNavigate } from 'react-router-dom';
+import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined } from '@ant-design/icons';
+import { Menu, Layout } from 'antd';
+import { useSelector } from 'react-redux';
+
+import { NavbarLoginComponent } from "../../../components/NavbarLoginComponent/NavbarLoginComponent";
+import { getItem } from "../../../utils/utils";
+import { AdminUser } from "../../AdminUser/views/AdminUser";
+import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
 
 const { Sider, Content } = Layout;
 
@@ -101,8 +100,6 @@ export const Dashboard = () => {
                     <Routes>
                         <Route path="/admin/user" element={<AdminUser />} />
                         <Route path="/admin/department" element={<AdminDepartment />} />
-                        <Route path="/forms" element={<FormList />} />
-                        <Route path="/forms/create-forms/:id" element={<FormBuilder />} />
                         <Route path="*" element={(
                             <div style={{ padding: '24px', background: '#fff', minHeight: '280px' }}>
                                 <h1>Số Liệu Cơ Bản</h1>

@@ -1,22 +1,23 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { CreateFormButton, CreateFormIcon, FormListHeader, WrapperButtonName, WrapperHeader } from './style';
+import { CreateFormButton, CreateFormIcon, FormListHeader, WrapperButtonName, WrapperHeader } from '../styles/style';
 import { Button, Form, Select, Space, Popover, Upload } from "antd";
-import TableComponent from '../TableComponent/TableComponent';
-import InputComponent from '../InputComponent/InputComponent';
-import ModalComponent from '../ModalComponent/ModalComponent';
-import userService from '../../services/userService';
-import Loading from '../LoadingComponent/Loading';
-import * as message from '../../components/Message/Message';
-import { useMutationHooks } from '../../hooks/useMutationHook';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux'
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, MenuOutlined, ImportOutlined } from '@ant-design/icons'
-import DrawerComponent from '../DrawerComponent/DrawerComponent';
-import { WrapperContentPopup } from '../NavbarLoginComponent/style';
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 import { useNavigate } from 'react-router';
+
+import TableComponent from '../../../components/TableComponent/TableComponent';
+import InputComponent from '../../../components/InputComponent/InputComponent';
+import ModalComponent from '../../../components/ModalComponent/ModalComponent';
+import userService from '../../../services/userService';
+import Loading from '../../../components/LoadingComponent/Loading';
+import * as message from '../../../components/Message/Message';
+import { useMutationHooks } from '../../../hooks/useMutationHook';
+import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
+import { WrapperContentPopup } from '../../../components/NavbarLoginComponent/style';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();

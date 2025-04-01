@@ -1,19 +1,20 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { CreateFormButton, FormListHeader, WrapperButtonName, WrapperHeader } from './style';
+import { CreateFormButton, FormListHeader, WrapperButtonName, WrapperHeader } from '../styles/style';
 import { Button, Form, Space, Upload } from "antd";
-import TableComponent from '../TableComponent/TableComponent';
-import InputComponent from '../InputComponent/InputComponent';
-import ModalComponent from '../ModalComponent/ModalComponent';
-import departmentService from '../../services/departmentService';
-import Loading from '../LoadingComponent/Loading';
-import * as message from '../Message/Message';
-import { useMutationHooks } from '../../hooks/useMutationHook';
-import { useQuery } from '@tanstack/react-query';
-import { useSelector } from 'react-redux'
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, UploadOutlined, ImportOutlined } from '@ant-design/icons'
-import DrawerComponent from '../DrawerComponent/DrawerComponent';
 import ExcelJS from 'exceljs';
 import { useNavigate } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
+
+import TableComponent from '../../../components/TableComponent/TableComponent';
+import InputComponent from '../../../components/InputComponent/InputComponent';
+import ModalComponent from '../../../components/ModalComponent/ModalComponent';
+import Loading from '../../../components/LoadingComponent/Loading';
+import * as message from '../../../components/Message/Message';
+import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
+import departmentService from '../../../services/departmentService';
+import { useMutationHooks } from '../../../hooks/useMutationHook';
 
 export const AdminDepartment = () => {
     const [modalForm] = Form.useForm();

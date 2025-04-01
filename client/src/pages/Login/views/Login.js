@@ -6,7 +6,7 @@ import { setUser } from '../../../redux/userSlice';
 import * as message from '../../../components/Message/Message';
 import { UserOutlined, LockOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import platform from 'platform';
-import './style.css';
+import '../styles/style.css';
 
 export const Login = () => {
     const user = useSelector((state) => state.user);
