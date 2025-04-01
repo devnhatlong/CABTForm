@@ -35,8 +35,8 @@ export const Login = () => {
             
             if (response.success) {
                 await dispatch(setUser(response.message.userData));
-                document.cookie = `accessToken=${response.accessToken}; path=/`;
-                document.cookie = `refreshToken=${response.newRefreshToken}; path=/`;
+                document.cookie = `accessToken_SLCB=${response.accessToken}; path=/`;
+                document.cookie = `refreshToken_SLCB=${response.newRefreshToken}; path=/`;
             } else {
                 message.error("Sai tài khoản hoặc mật khẩu");
             }

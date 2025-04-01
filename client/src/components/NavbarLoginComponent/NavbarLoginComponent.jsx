@@ -90,14 +90,14 @@ export const NavbarLoginComponent = () => {
     );
 
     const handleLogout = async () => {
-        let refreshToken = getTokenFromCookie("refreshToken");
+        let refreshToken = getTokenFromCookie("refreshToken_SLCB");
 
         if (refreshToken) {
             await userService.logout(refreshToken);
 
             // Clear tokens from cookie
-            document.cookie = "accessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "refreshToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "accessToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "refreshToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             // clear redux
             dispatch(clearUser());
         }
@@ -108,7 +108,7 @@ export const NavbarLoginComponent = () => {
     return (
         <div>
             <WrapperHeaderContainerLogin>
-                <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{width: "100%", position: "fixed", zIndex: "1"}}>
+                <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style={{width: "100%", position: "fixed", zIndex: "999"}}>
                     {/* Sidebar Toggle (Topbar) */}
                     <div 
                         style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} 
