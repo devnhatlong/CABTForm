@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined, IdcardOutlined, CarOutlined, FireOutlined } from '@ant-design/icons';
+import { UserOutlined, GroupOutlined, ProfileOutlined, FormOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
 
@@ -8,6 +8,7 @@ import { NavbarLoginComponent } from "../../../components/NavbarLoginComponent/N
 import { getItem } from "../../../utils/utils";
 import { AdminUser } from "../../AdminUser/views/AdminUser";
 import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
+import { FieldOfWork } from "../../FieldOfWork/views/FieldOfWork";
 import '../styles/style.css';
 
 const { Sider, Content } = Layout;
@@ -34,17 +35,6 @@ export const Dashboard = () => {
     };
     
     const items = [
-        user?.role === "admin" && {
-            key: 'admin',
-            label: <span style={menuItemStyle}>Quản trị</span>,
-            icon: <UserOutlined />,
-            style: menuItemStyle,
-            children: [
-                getItem('Người dùng', 'user', null, null, menuChildrenItemStyle),
-                getItem('Đơn vị / Phòng ban', 'department', null, null, menuChildrenItemStyle),
-            ]
-        },
-
         {
             key: 'social_order',
             label: 'Vụ việc về TTXH',
@@ -78,18 +68,50 @@ export const Dashboard = () => {
                 getItem('Thống kê vụ cháy/nổ', 'statistics_fires_and_explosions', null, null, menuChildrenItemStyle),
             ]
         },
+
+        {
+            key: 'manage_category',
+            label: 'Quản lý danh mục',
+            icon: <SnippetsOutlined />,
+            style: menuItemStyle,
+            children: [
+                getItem('Lĩnh vực vụ việc', 'field_of_work', null, null, menuChildrenItemStyle),
+                getItem('Tội danh', 'crime', null, null, menuChildrenItemStyle),
+            ]
+        },
+
+        user?.role === "admin" && {
+            key: 'admin',
+            label: <span style={menuItemStyle}>Quản trị</span>,
+            icon: <UserOutlined />,
+            style: menuItemStyle,
+            children: [
+                getItem('Người dùng', 'user', null, null, menuChildrenItemStyle),
+                getItem('Đơn vị / Phòng ban', 'department', null, null, menuChildrenItemStyle),
+            ]
+        },
     ].filter(Boolean);  // Remove null items
 
     const handleOnClick = ({ key }) => {
         if (key === 'user') navigate('/admin/user');
         else if (key === 'department') navigate('/admin/department');
+
+        // social_order
         else if (key === 'social_order_list') navigate('/social_order/social_order_list');
         else if (key === 'criminal_information_lookup') navigate('/social_order/criminal_information_lookup');
         else if (key === 'statistics_social_order_incident') navigate('/social_order/statistics_social_order_incident');
+
+        // traffic
         else if (key === 'traffic_incident_list') navigate('/traffic/traffic_incident_list');
         else if (key === 'statistics_traffic_incident') navigate('/traffic/statistics_traffic_incident');
+
+        // fire_protection_and_prevention
         else if (key === 'fires_and_explosions_list') navigate('/fire_protection_and_prevention/fires_and_explosions_list');
         else if (key === 'statistics_fires_and_explosions') navigate('/fire_protection_and_prevention/statistics_fires_and_explosions');
+
+        // manage_category
+        else if (key === 'field_of_work') navigate('/manage_category/field_of_work');
+        else if (key === 'crime') navigate('/manage_category/crime');
     };
 
     const onOpenChange = (keys) => {
@@ -159,6 +181,7 @@ export const Dashboard = () => {
                     }}
                 >
                     <Routes>
+                        <Route path="/manage_category/field_of_work" element={<FieldOfWork />} />
                         <Route path="/admin/user" element={<AdminUser />} />
                         <Route path="/admin/department" element={<AdminDepartment />} />
                         <Route path="*" element={(

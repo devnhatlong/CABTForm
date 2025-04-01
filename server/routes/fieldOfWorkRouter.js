@@ -1,0 +1,13 @@
+const router = require("express").Router();
+const ctrls = require("../controllers/fieldOfWorkController");
+const { upload } = require('../middlewares/multerMiddleware');
+const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
+
+router.post("/", verifyAccessToken , ctrls.createFieldOfWork);
+router.get("/", ctrls.getFieldOfWorks);
+router.get("/:id", ctrls.getFieldOfWorkById);
+router.put("/:id", verifyAccessToken, ctrls.updateFieldOfWork);
+router.delete("/delete-multiple", verifyAccessToken, ctrls.deleteMultipleFieldOfWorks);
+router.delete("/:id", verifyAccessToken, ctrls.deleteFieldOfWork);
+
+module.exports = router;
