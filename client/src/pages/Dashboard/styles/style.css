@@ -1,0 +1,21 @@
+.ant-menu-submenu-title .anticon svg {
+    font-size: 18px; /* Tăng kích thước icon */
+}
+
+.ant-menu-submenu-title:hover {
+    background-color: #f0f0f0; /* Màu nền khi hover */
+    color: #1677ff !important; /* Màu chữ khi hover */
+}
+
+.ant-menu-item:hover {
+    background-color: #f0f0f0; /* Màu nền khi hover */
+    color: #1677ff !important; /* Màu chữ khi hover */
+}
+
+.ant-menu-item a {
+    color: inherit; /* Đảm bảo màu chữ kế thừa */
+}
+
+.ant-menu-item a:hover {
+    color: #1677ff !important; /* Màu chữ khi hover */
+}
