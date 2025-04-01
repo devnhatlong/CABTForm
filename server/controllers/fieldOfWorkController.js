@@ -23,7 +23,7 @@ const getFieldOfWorks = asyncHandler(async (req, res) => {
     const response = await FieldOfWorkService.getFieldOfWorks(
         Number(page),
         limit ? Number(limit) : undefined,
-        req.query.fieldName.fieldName,
+        req.query.fieldName,
         sort,
         fields
     );
