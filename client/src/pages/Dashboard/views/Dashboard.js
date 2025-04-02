@@ -10,6 +10,7 @@ import { AdminUser } from "../../AdminUser/views/AdminUser";
 import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
 import { FieldOfWork } from "../../FieldOfWork/views/FieldOfWork";
 import '../styles/style.css';
+import { Crime } from "../../Crime/views/Crime";
 
 const { Sider, Content } = Layout;
 
@@ -23,14 +24,14 @@ export const Dashboard = () => {
     const menuItemStyle = {
         whiteSpace: 'normal',
         lineHeight: 'normal',
-        fontSize: "15px",
+        fontSize: "16px",
         fontWeight: "600",
     };
 
     const menuChildrenItemStyle = {
         display: "flex",
         alignItems: "center",
-        fontSize: "15px",
+        fontSize: "16px",
         fontWeight: "600",
     };
     
@@ -151,7 +152,7 @@ export const Dashboard = () => {
                     collapsible
                     collapsed={collapsed}
                     onCollapse={toggleCollapsed}
-                    width={250}
+                    width={300}
                     style={{
                         background: '#fff',
                         boxShadow: '2px 0 8px 0 rgba(29, 35, 41, 0.05)',
@@ -173,7 +174,7 @@ export const Dashboard = () => {
                 </Sider>
                 <Content
                     style={{
-                        marginLeft: collapsed ? 100 : 260, // Đẩy nội dung sang phải tùy thuộc vào trạng thái của Sider
+                        marginLeft: collapsed ? 100 : 310, // Đẩy nội dung sang phải tùy thuộc vào trạng thái của Sider
                         margin: '0px 12px',
                         padding: 18,
                         background: '#fff',
@@ -184,6 +185,7 @@ export const Dashboard = () => {
                 >
                     <Routes>
                         <Route path="/manage_category/field_of_work" element={<FieldOfWork />} />
+                        <Route path="/manage_category/crime" element={<Crime />} />
                         <Route path="/admin/user" element={<AdminUser />} />
                         <Route path="/admin/department" element={<AdminDepartment />} />
                         <Route path="*" element={(

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { CreateFormButton, FormListHeader, WrapperButtonName, WrapperHeader } from '../styles/style';
-import { Button, Form, Space, Upload } from "antd";
+import { Button, Form, Input, Space, Upload } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, UploadOutlined, ImportOutlined } from '@ant-design/icons'
 import ExcelJS from 'exceljs';
 import { useNavigate } from 'react-router';
@@ -13,11 +13,11 @@ import ModalComponent from '../../../components/ModalComponent/ModalComponent';
 import Loading from '../../../components/LoadingComponent/Loading';
 import * as message from '../../../components/Message/Message';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
-import departmentService from '../../../services/departmentService';
+import fieldOfWorkService from '../../../services/fieldOfWorkService';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
-import ImportExcel from '../../../components/ImportExcel/ImportExcel';
+import ImportExcel from "../../../components/ImportExcel/ImportExcel";
 
-export const AdminDepartment = () => {
+export const Crime = () => {
     const [modalForm] = Form.useForm();
     const [drawerForm] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,28 +45,22 @@ export const AdminDepartment = () => {
         }
     }, [user]);
 
-    const [stateDepartment, setStateDepartment] = useState({
-        departmentCode: "",
-        departmentName: "",
+    const [stateField, setStateField] = useState({
+        fieldName: "",
+        fieldCode : "",
+        description  : ""
     });
 
-    const [stateDepartmentDetail, setStateDepartmentDetail] = useState({
-        departmentCode: "",
-        departmentName: "",
+    const [stateFieldDetail, setStateFieldDetail] = useState({
+        fieldName: "",
+        fieldCode : "",
+        description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { 
-                departmentCode,
-                departmentName
-            } = data;
-
-            const response = departmentService.createDepartment({
-                departmentCode,
-                departmentName
-            });
-
+            const { fieldName, fieldCode, description } = data;
+            const response = fieldOfWorkService.createFieldOfWork({ fieldName, fieldCode, description });
             return response;
         }
     )
@@ -74,35 +68,34 @@ export const AdminDepartment = () => {
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = departmentService.updateDepartment(id, { ...rests });
+            const response = fieldOfWorkService.updateFieldOfWork(id, { ...rests });
             return response;
         }
     );
     
     const mutationDeleted = useMutationHooks(
         (data) => { 
-          const { id } = data;
-    
-          const res = departmentService.deleteDepartment(id);
-    
-          return res;
+            const { id } = data;
+            const response = fieldOfWorkService.deleteFieldOfWork(id);
+            return response;
         }
     );
 
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const res = departmentService.deleteMultipleDepartments(ids);
+          const response = fieldOfWorkService.deleteMultipleRecords(ids);
     
-          return res;
+          return response;
         }
     );
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateDepartment({
-            departmentCode: "",
-            departmentName: ""
+        setStateField({
+            fieldName: "",
+            fieldCode: "",
+            description: ""
         });
 
         modalForm.resetFields();
@@ -113,18 +106,19 @@ export const AdminDepartment = () => {
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isLoadingDeleted } = mutationDeleted;
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
-    const getAllDepartment = async (currentPage, pageSize, filters) => {
-        const response = await departmentService.getAllDepartment(currentPage, pageSize, filters);
+    const getAllRecords = async (currentPage, pageSize, filters) => {
+        const response = await fieldOfWorkService.getFieldOfWorks(currentPage, pageSize, filters);
         return response;
     };
 
-    const fetchGetDetailDepartment = async (rowSelected) => {
-        const response = await departmentService.getDetailDepartment(rowSelected);
-        
-        if (response?.department) {
-            setStateDepartmentDetail({
-                departmentCode: response?.department?.departmentCode,
-                departmentName: response?.department?.departmentName
+    const fetchGetDetailRecord = async (rowSelected) => {
+        const response = await fieldOfWorkService.getFieldOfWorkById(rowSelected);
+
+        if (response?.data) {
+            setStateFieldDetail({
+                fieldName: response?.data?.fieldName,
+                fieldCode: response?.data?.fieldCode,
+                description: response?.data?.description
             })
         }
         setIsLoadingUpdate(false);
@@ -144,13 +138,13 @@ export const AdminDepartment = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateDepartmentDetail)
-    }, [stateDepartmentDetail, drawerForm])
+        drawerForm.setFieldsValue(stateFieldDetail)
+    }, [stateFieldDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
             setIsLoadingUpdate(true);
-            fetchGetDetailDepartment(rowSelected);
+            fetchGetDetailRecord(rowSelected);
         }
     }, [rowSelected])
 
@@ -170,17 +164,17 @@ export const AdminDepartment = () => {
     }
 
     const query = useQuery({
-        queryKey: ['departments'],
-        queryFn: () => getAllDepartment(pagination.currentPage, pagination.pageSize, filters),
+        queryKey: ['allRecords'],
+        queryFn: () => getAllRecords(pagination.currentPage, pagination.pageSize, filters),
         retry: 3,
         retryDelay: 1000,
     });
 
-    const { isLoading: isLoadingLetter, data: departments } = query;
+    const { isLoading: isLoadingAllRecords, data: allRecords } = query;
 
     useEffect(() => {
         if(isSuccess && data?.success) {
-            message.success("Tạo đơn vị / phòng ban thành công");
+            message.success(data?.message);
             handleCancel();
         }
         else if (isError) {
@@ -193,20 +187,20 @@ export const AdminDepartment = () => {
 
     useEffect(() => {
         if(isSuccessUpdated && dataUpdated?.success) {
-            message.success("Cập nhật đơn vị / phòng ban thành công");
+            message.success(dataUpdated?.message);
             handleCloseDrawer();
         }
         else if (isError) {
             message.error("Có gì đó sai sai");
         }
-        else if (isSuccess && !dataUpdated?.success) {
+        else if (isSuccessUpdated && !dataUpdated?.success) {
             message.error(dataUpdated?.message);
         }
     }, [isSuccessUpdated]);
 
     useEffect(() => {
         if(isSuccessDeleted && dataDeleted?.success) {
-            message.success(`Đã xóa đơn vị / phòng ban: ${dataDeleted.deletedUser.userName}`);
+            message.success(dataDeleted?.message);
             handleCancelDelete();
         }
         else if (isErrorDeleted) {
@@ -216,10 +210,11 @@ export const AdminDepartment = () => {
 
     useEffect(() => {
         if (isSuccessDeletedMultiple && dataDeletedMultiple) {
-            if (dataDeletedMultiple.deletedLetter.deletedCount > 0) {
-                message.success("Xóa đơn vị / phòng ban thành công");
+            console.log(dataDeletedMultiple);
+            if (dataDeletedMultiple.deletedCount > 0) {
+                message.success(dataDeletedMultiple.message);
             } else {
-                message.error("Không có đơn vị / phòng ban nào được xóa");
+                message.error(dataDeletedMultiple.message);
             }
         } else if (isErrorDeletedMultiple) {
             message.error("Có gì đó sai sai");
@@ -231,7 +226,7 @@ export const AdminDepartment = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateDepartment, {
+        mutation.mutate(stateField, {
             onSettled: () => {
                 query.refetch();
             }
@@ -242,7 +237,7 @@ export const AdminDepartment = () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateDepartmentDetail
+                ...stateFieldDetail
             }, 
             {
                 onSettled: () => {
@@ -265,7 +260,7 @@ export const AdminDepartment = () => {
         )
     }
 
-    const handleDeleteMultipleUsers = (ids) => {
+    const handleDeleteMultipleRecords = (ids) => {
         mutationDeletedMultiple.mutate(
           {
             ids: ids,
@@ -280,33 +275,33 @@ export const AdminDepartment = () => {
     }
 
     useEffect(() => {
-        if (departments?.departments) {
-            const updatedDataTable = fetchDataForDataTable(departments);
+        if (allRecords?.data) {
+            const updatedDataTable = fetchDataForDataTable(allRecords);
             setDataTable(updatedDataTable);
         }
-    }, [departments]);
+    }, [allRecords]);
 
-    const fetchDataForDataTable = (departmentData) => {
-        return departmentData?.departments?.map((department) => {
+    const fetchDataForDataTable = (allRecords) => {
+        return allRecords?.data?.map((record) => {
             return {
-                ...department, 
-                key: department._id,
-                createdAt: new Date(department.createdAt),
-                updatedAt: new Date(department.updatedAt),
+                ...record, 
+                key: record._id,
+                createdAt: new Date(record.createdAt),
+                updatedAt: new Date(record.updatedAt),
             };
         });
     };
 
     const handleOnChange = (name, value) => {
-        setStateDepartment({
-            ...stateDepartment,
+        setStateField({
+            ...stateField,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateDepartmentDetail({
-            ...stateDepartmentDetail,
+        setStateFieldDetail({
+            ...stateFieldDetail,
             [name]: value
         });
     };
@@ -393,20 +388,26 @@ export const AdminDepartment = () => {
 
     const columns = [
         {
-            title: 'Mã phòng',
-            dataIndex: 'departmentCode',
-            key: 'departmentCode',
+            title: 'Tên tội danh',
+            dataIndex: 'fieldName',
+            key: 'fieldName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentCode', 'mã phòng')
+            ...getColumnSearchProps('fieldName', 'tên tội danh')
         },
         {
-            title: 'Tên phòng',
-            dataIndex: 'departmentName',
-            key: 'departmentName',
+            title: 'Mã tội danh',
+            dataIndex: 'fieldCode',
+            key: 'fieldCode',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentName', 'tên phòng')
+        },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            key: 'description',
+            filteredValue: null, // Loại bỏ filter mặc định
+            onFilter: null, // Loại bỏ filter mặc định
         },
         {
           title: buttonReloadTable,
@@ -424,8 +425,8 @@ export const AdminDepartment = () => {
             return updatedFilters;
         });
 
-        // Tiếp tục với cuộc gọi hàm getAllDepartment và truyền filters vào đó.
-        getAllDepartment(pagination.currentPage, pagination.pageSize, filters)
+        // Tiếp tục với cuộc gọi hàm getAllRecords và truyền filters vào đó.
+        getAllRecords(pagination.currentPage, pagination.pageSize, filters)
         .then(response => {
             // Xử lý response...
             query.refetch();
@@ -463,8 +464,8 @@ export const AdminDepartment = () => {
             });
         }
 
-        // Tiếp tục với cuộc gọi hàm getAllDepartment và truyền filters vào đó để xóa filter cụ thể trên server.
-        getAllDepartment(pagination.currentPage, pagination.pageSize, filters)
+        // Tiếp tục với cuộc gọi hàm getAllRecords và truyền filters vào đó để xóa filter cụ thể trên server.
+        getAllRecords(pagination.currentPage, pagination.pageSize, filters)
             .then(response => {
                 // Xử lý response nếu cần
                 query.refetch();
@@ -490,13 +491,13 @@ export const AdminDepartment = () => {
 
     // Đóng DrawerComponent
     const handleCloseDrawer = () => {
-        fetchGetDetailDepartment(rowSelected);
+        fetchGetDetailRecord(rowSelected);
         setIsOpenDrawer(false);
     };
 
     return (
         <div>
-            <WrapperHeader>Quản lý đơn vị / phòng ban</WrapperHeader>
+            <WrapperHeader>Danh sách tội danh</WrapperHeader>
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
                     <Button 
@@ -510,12 +511,12 @@ export const AdminDepartment = () => {
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
                     >
-                        Thêm đơn vị
+                        Thêm tội danh
                     </Button>
                 </FormListHeader>
                 <FormListHeader>
                     <ImportExcel
-                        service={departmentService.importFromExcel}
+                        service={fieldOfWorkService.importFromExcel}
                         onSuccess={(response) => {
                             message.success(`Import thành công: ${response.successCount} bản ghi`);
                             query.refetch(); // Làm mới danh sách sau khi import thành công
@@ -527,11 +528,11 @@ export const AdminDepartment = () => {
                 </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>
-                <TableComponent handleDeleteMultiple={handleDeleteMultipleUsers} columns={columns} data={dataTable} isLoading={isLoadingLetter || isLoadingResetFilter} resetSelection={resetSelection}
+                <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
                     pagination={{
                         current: pagination.currentPage,
                         pageSize: pagination.pageSize,
-                        total: departments?.totalRecord,
+                        total: allRecords?.total,
                         onChange: handlePageChange,
                         showSizeChanger: false
                     }}
@@ -546,9 +547,10 @@ export const AdminDepartment = () => {
                     }}
                 />
             </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Tạo đơn vị / phòng ban" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <Loading isLoading = {isPending}>
+            <ModalComponent form={modalForm} forceRender width={500} title="Thêm tội danh" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <Loading isLoading={isPending}>
                     <Form
+                        form={modalForm}
                         name="modalForm"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 17 }}
@@ -556,33 +558,65 @@ export const AdminDepartment = () => {
                         initialValues={{ remember: true }}
                         onFinish={onFinish}
                         autoComplete="on"
-                        form={modalForm}
                     >
                         <Form.Item
-                            label="Mã phòng"
-                            name="departmentCode"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã phòng!' }]}
+                            label="Tên tội danh"
+                            name="fieldName"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tội danh!' }]}
                         >
-                            <InputComponent name="departmentCode" value={stateDepartment.departmentCode} onChange={(e) => handleOnChange('departmentCode', e.target.value)} />
+                            <InputComponent 
+                                name="fieldName" 
+                                value={stateField.fieldName} 
+                                placeholder="Nhập tên tội danh" 
+                                onChange={(e) => handleOnChange('fieldName', e.target.value)} 
+                            />
                         </Form.Item>
 
                         <Form.Item
-                            label="Tên phòng"
-                            name="departmentName"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên phòng!' }]}
+                            label="Mã tội danh"
+                            name="fieldCode"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
                         >
-                            <InputComponent name="departmentName" value={stateDepartment.departmentName} onChange={(e) => handleOnChange('departmentName', e.target.value)} />
+                            <InputComponent 
+                                name="fieldCode" 
+                                value={stateField.fieldCode} 
+                                placeholder="Nhập mã tội danh" 
+                                onChange={(e) => handleOnChange('fieldCode', e.target.value)} 
+                            />
                         </Form.Item>
 
-                        <Form.Item wrapperCol={{ offset: 14, span: 24 }}>
-                            <Button type="primary" htmlType="submit">Tạo đơn vị / phòng ban</Button>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Input.TextArea 
+                                name="description" 
+                                value={stateField.description} 
+                                onChange={(e) => handleOnChange('description', e.target.value)} 
+                                rows={4} // Số dòng hiển thị mặc định
+                                placeholder="Nhập mô tả..." 
+                            />
+                        </Form.Item>
+
+                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                            <Button type="primary" htmlType="submit">Lưu</Button>
                         </Form.Item>
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết đơn vị / phòng ban" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
-                <Loading isLoading = {isLoadingUpdate}>
+            <DrawerComponent form={drawerForm} title="Chi tiết tội danh" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+                <Loading isLoading={isLoadingUpdate}>
                     <Form
+                        form={drawerForm}
                         name="drawerForm"
                         labelCol={{ span: 8 }}
                         wrapperCol={{ span: 15 }}
@@ -590,33 +624,71 @@ export const AdminDepartment = () => {
                         initialValues={{ remember: true }}
                         onFinish={onUpdateLetter}
                         autoComplete="on"
-                        form={drawerForm}
                     >
                         <Form.Item
-                            label="Mã phòng"
-                            name="departmentCode"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã phòng!' }]}
+                            label="Tên tội danh"
+                            name="fieldName"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tội danh!' }]}
                         >
-                            <InputComponent name="departmentCode" value={stateDepartmentDetail.departmentCode} onChange={(e) => handleOnChangeDetail('departmentCode', e.target.value)} />
+                            <InputComponent 
+                                name="fieldName" 
+                                value={stateFieldDetail.fieldName} 
+                                placeholder="Nhập tên tội danh" 
+                                onChange={(e) => handleOnChangeDetail('fieldName', e.target.value)} 
+                            />
                         </Form.Item>
 
                         <Form.Item
-                            label="Tên phòng"
-                            name="departmentName"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên phòng!' }]}
+                            label="Mã tội danh"
+                            name="fieldCode"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
                         >
-                            <InputComponent name="departmentName" value={stateDepartmentDetail.departmentName} onChange={(e) => handleOnChangeDetail('departmentName', e.target.value)} />
+                            <InputComponent 
+                                name="fieldCode" 
+                                value={stateFieldDetail.fieldCode} 
+                                placeholder="Nhập mã tội danh" 
+                                onChange={(e) => handleOnChangeDetail('fieldCode', e.target.value)} 
+                            />
                         </Form.Item>
 
-                        <Form.Item wrapperCol={{ offset: 14, span: 24 }}>
-                            <Button type="primary" htmlType="submit">Cập nhật đơn vị / phòng ban</Button>
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Input.TextArea 
+                                name="description" 
+                                value={stateFieldDetail.description} 
+                                onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
+                                rows={4} // Số dòng hiển thị mặc định
+                                placeholder="Nhập mô tả..." 
+                            />
+                        </Form.Item>
+
+                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                            <Button type="primary" htmlType="submit">Cập nhật</Button>
                         </Form.Item>
                     </Form>
                 </Loading>
             </DrawerComponent>
-            <ModalComponent width={400} title="Xóa đơn vị / phòng ban" open={isModalOpenDelete} onCancel={handleCancelDelete} onOk={handleDeleteLetter}>
+            <ModalComponent 
+                width={400} 
+                title="Xóa tội danh" 
+                open={isModalOpenDelete} 
+                onCancel={handleCancelDelete} 
+                onOk={handleDeleteLetter}
+                centered 
+            >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa đơn vị / phòng ban?</div>
+                    <div>Bạn có muốn xóa tội danh này không?</div>
                 </Loading>
             </ModalComponent>
         </div>

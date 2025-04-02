@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Table } from 'antd';
 import Loading from '../LoadingComponent/Loading';
 import { useSelector } from 'react-redux'
+import { StyledTable } from './style';
 
 const TableComponent = (props) => {
   const { selectionType = 'checkbox', data = [], isLoading = false, columns = [], handleDeleteMultiple, resetSelection } = props;
@@ -29,7 +30,8 @@ const TableComponent = (props) => {
             Xóa tất cả
           </div>
         )}
-        <Table
+        <StyledTable
+        style={{ fontSize: '16px' }}
           rowSelection={{
           type: selectionType,
             ...rowSelection,

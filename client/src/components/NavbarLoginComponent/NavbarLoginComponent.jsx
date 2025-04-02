@@ -115,7 +115,7 @@ export const NavbarLoginComponent = () => {
                         onClick={() => navigate('/dashboard')}
                     >
                         <img src={Logo} alt="" style={{ height: "30px" }} />
-                        <b>Số Liệu Cơ Bản</b>
+                        <h3 style={{ margin: 0, color: "#012970", fontWeight: 500 }}>Số Liệu Cơ Bản</h3>
                     </div>
                     {/* Topbar Navbar */}
                     <ul className="navbar-nav ml-auto">
@@ -169,7 +169,7 @@ export const NavbarLoginComponent = () => {
                                 aria-haspopup="true"
                                 aria-expanded="false"
                             >
-                                <span className="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold">
+                                <span className="mr-2 d-none d-lg-inline" style={{ color: "#012970", fontWeight: 500 }}>
                                     {user?.userName}
                                 </span>
                                 <img className="img-profile rounded-circle" src={iconUser} />

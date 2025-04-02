@@ -621,6 +621,12 @@ export const AdminUser = () => {
                 <FormListHeader>
                     <Button 
                         type="primary" 
+                        style={{
+                            display: 'flex',
+                            fontSize: '16px',
+                            height: '40px',
+                            alignItems: 'center'
+                        }}
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
                     >

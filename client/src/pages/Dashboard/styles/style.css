@@ -1,21 +1,13 @@
-.ant-menu-submenu-title .anticon svg {
+.ant-menu-submenu-title .anticon svg,
+.ant-menu-title-content {
     font-size: 18px; /* Tăng kích thước icon */
 }
 
-.ant-menu-submenu-title:hover {
-    background-color: #f0f0f0; /* Màu nền khi hover */
-    color: #1677ff !important; /* Màu chữ khi hover */
+.ant-menu-light .ant-menu-submenu-title {
+    color: #012970; /* Màu chữ của menu */
 }
 
-.ant-menu-item:hover {
-    background-color: #f0f0f0; /* Màu nền khi hover */
-    color: #1677ff !important; /* Màu chữ khi hover */
-}
-
-.ant-menu-item a {
-    color: inherit; /* Đảm bảo màu chữ kế thừa */
-}
-
-.ant-menu-item a:hover {
-    color: #1677ff !important; /* Màu chữ khi hover */
+.ant-menu-light .ant-menu-item-selected,
+.ant-menu-light .ant-menu-submenu-selected >.ant-menu-submenu-title {
+    color: #4154f1;
 }

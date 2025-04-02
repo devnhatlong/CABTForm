@@ -2,9 +2,9 @@ import { Button, Upload } from "antd";
 import { styled } from "styled-components";
 
 export const WrapperHeader = styled.h1 `
-    color: #000;
-    font-size: 20px;
-    font-weight: 700;
+    color: #012970;
+    font-size: 30px;
+    font-weight: 500;
 `
 
 export const WrapperButtonName = styled.span `

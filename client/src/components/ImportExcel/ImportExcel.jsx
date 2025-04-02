@@ -76,6 +76,10 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                     icon={<UploadOutlined />} 
                     loading={isImporting}
                     style={{
+                        display: 'flex',
+                        fontSize: '16px',
+                        height: '40px',
+                        alignItems: 'center',
                         backgroundColor: "#5eb12b",
                         borderColor: "#5eb12b",
                     }}
@@ -97,6 +101,10 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                         type="link" 
                         onClick={handleShowLog}
                         style={{
+                            display: 'flex',
+                            fontSize: '16px',
+                            height: '40px',
+                            alignItems: 'center',
                             backgroundColor: "white",
                             borderColor: "red",
                             color: "red",
