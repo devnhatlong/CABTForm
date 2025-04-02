@@ -3,6 +3,7 @@ const ctrls = require("../controllers/fieldOfWorkController");
 const { upload } = require('../middlewares/multerMiddleware');
 const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
 
+router.post("/import-from-excel", verifyAccessToken, upload.single("file"), ctrls.importFromExcel);
 router.post("/", verifyAccessToken , ctrls.createFieldOfWork);
 router.get("/", ctrls.getFieldOfWorks);
 router.get("/:id", ctrls.getFieldOfWorkById);

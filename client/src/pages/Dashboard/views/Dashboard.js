@@ -178,6 +178,8 @@ export const Dashboard = () => {
                         padding: 18,
                         background: '#fff',
                         minHeight: '280px',
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Thêm shadow
+                        borderRadius: '8px', // Tùy chọn: Thêm bo góc nếu cần
                     }}
                 >
                     <Routes>

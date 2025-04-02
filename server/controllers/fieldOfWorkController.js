@@ -1,5 +1,74 @@
 const FieldOfWorkService = require("../services/fieldOfWorkService");
 const asyncHandler = require("express-async-handler");
+const FieldOfWork = require("../models/fieldOfWorkModel");
+const xlsx = require('xlsx');
+
+const importFromExcel = async (req, res) => {
+    try {
+        // Check if a file is provided
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        // Read the Excel file from buffer
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const data = xlsx.utils.sheet_to_json(sheet);
+
+        const errors = []; // Lưu danh sách lỗi
+        let successCount = 0; // Đếm số bản ghi thành công
+
+        // Iterate over the data and create field of work
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            const { fieldName, fieldCode, description } = row;
+
+            // Kiểm tra nếu thiếu fieldName hoặc fieldCode
+            if (!fieldName || !fieldCode) {
+                errors.push({
+                    row: i + 1,
+                    message: "Thiếu tên hoặc mã lĩnh vực",
+                });
+                continue;
+            }
+
+            // Kiểm tra xem fieldName hoặc fieldCode đã tồn tại hay chưa
+            const existingField = await FieldOfWork.findOne({
+                $or: [{ fieldName }, { fieldCode }],
+            });
+
+            if (existingField) {
+                errors.push({
+                    row: i + 1,
+                    message: `Tên hoặc mã lĩnh vực đã tồn tại (fieldName: ${fieldName}, fieldCode: ${fieldCode})`,
+                });
+                continue;
+            }
+
+            // Tạo mới lĩnh vực
+            const newField = new FieldOfWork({
+                fieldName,
+                fieldCode,
+                description,
+            });
+
+            await newField.save();
+            successCount++; // Tăng số bản ghi thành công
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Import hoàn tất",
+            successCount,
+            errorCount: errors.length,
+            errors, // Trả về danh sách lỗi
+        });
+    } catch (error) {
+        console.error('Error importing field of work:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 const createFieldOfWork = asyncHandler(async (req, res) => {
     const { fieldName, fieldCode } = req.body;
@@ -97,6 +166,7 @@ const deleteMultipleFieldOfWorks = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+    importFromExcel,
     createFieldOfWork,
     getFieldOfWorks,
     getFieldOfWorkById,

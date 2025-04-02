@@ -13,9 +13,9 @@ import ModalComponent from '../../../components/ModalComponent/ModalComponent';
 import Loading from '../../../components/LoadingComponent/Loading';
 import * as message from '../../../components/Message/Message';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
-import departmentService from '../../../services/departmentService';
 import fieldOfWorkService from '../../../services/fieldOfWorkService';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
+import ImportExcel from "../../../components/ImportExcel/ImportExcel";
 
 export const FieldOfWork = () => {
     const [modalForm] = Form.useForm();
@@ -495,48 +495,54 @@ export const FieldOfWork = () => {
         setIsOpenDrawer(false);
     };
 
-    const handleUpload = async ({ file, onSuccess, onError }) => {
-        const formData = new FormData();
-        formData.append('file', file);
+    // const handleUpload = async ({ file, onSuccess, onError }) => {
+    //     const formData = new FormData();
+    //     formData.append('file', file);
     
-        try {
-            const response = await departmentService.importFromExcel(formData);
+    //     try {
+    //         const response = await fieldOfWorkService.importFromExcel(formData);
     
-            if (response.success) {
-                message.success('Import thành công');
-                query.refetch(); // Refresh the user list
-            } else {
-                message.error(response.message || 'Import thất bại');
-            }
-        } catch (error) {
-            console.error('Error importing users:', error);
-            message.error('Import thất bại');
-            onError(error);
-        }
-    };
+    //         if (response.success) {
+    //             message.success('Import thành công');
+    //             query.refetch(); // Refresh the user list
+    //         } else {
+    //             message.error(response.message || 'Import thất bại');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error importing users:', error);
+    //         message.error('Import thất bại');
+    //         onError(error);
+    //     }
+    // };
 
     return (
         <div>
             <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
             <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
                 <FormListHeader>
-                    <CreateFormButton onClick={() => setIsModalOpen(true)}>
-                        <WrapperButtonName>Thêm lĩnh vực</WrapperButtonName>
-                        <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
-                    </CreateFormButton>
+                    <Button 
+                        type="primary" 
+                        icon={<PlusOutlined />} 
+                        onClick={() => setIsModalOpen(true)}
+                        style={{
+                            backgroundColor: "#5eb12b",
+                            borderColor: "#5eb12b",
+                        }}
+                    >
+                        Thêm lĩnh vực
+                    </Button>
                 </FormListHeader>
                 <FormListHeader>
-                    <Upload
-                        name="file"
-                        accept=".xlsx, .xls"
-                        showUploadList={false}
-                        customRequest={handleUpload}
-                    >
-                        <CreateFormButton>
-                            <WrapperButtonName>Import Excel</WrapperButtonName>
-                            <ImportOutlined style={{ fontSize: "40px", color: "#5eb12b" }} />
-                        </CreateFormButton>
-                    </Upload>
+                    <ImportExcel
+                        service={fieldOfWorkService.importFromExcel}
+                        onSuccess={(response) => {
+                            message.success(`Import thành công: ${response.successCount} bản ghi`);
+                            query.refetch(); // Làm mới danh sách sau khi import thành công
+                        }}
+                        onError={(error) => {
+                            message.error(error.message || "Import thất bại");
+                        }}
+                    />
                 </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>
@@ -562,6 +568,7 @@ export const FieldOfWork = () => {
             <ModalComponent form={modalForm} forceRender width={500} title="Thêm lĩnh vực vụ việc" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
                     <Form
+                        form={modalForm}
                         name="modalForm"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 17 }}
@@ -569,7 +576,6 @@ export const FieldOfWork = () => {
                         initialValues={{ remember: true }}
                         onFinish={onFinish}
                         autoComplete="on"
-                        form={modalForm}
                     >
                         <Form.Item
                             label="Tên lĩnh vực vụ việc"
@@ -628,6 +634,7 @@ export const FieldOfWork = () => {
             <DrawerComponent form={drawerForm} title="Chi tiết lĩnh vực vụ việc" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
+                        form={drawerForm}
                         name="drawerForm"
                         labelCol={{ span: 8 }}
                         wrapperCol={{ span: 15 }}
@@ -635,7 +642,6 @@ export const FieldOfWork = () => {
                         initialValues={{ remember: true }}
                         onFinish={onUpdateLetter}
                         autoComplete="on"
-                        form={drawerForm}
                     >
                         <Form.Item
                             label="Tên lĩnh vực vụ việc"

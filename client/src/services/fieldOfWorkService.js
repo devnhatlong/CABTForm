@@ -124,6 +124,20 @@ const fieldOfWorkService = {
             throw error;
         }
     },
+
+    importFromExcel: async (formData) => {
+        try {
+            const response = await axiosFieldOfWork.post(`${BASE_URL}/import-from-excel`, formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi import file Excel:", error);
+            throw error.response?.data || { message: "Lỗi không xác định" };
+        }
+    },
 };
 
 export default fieldOfWorkService;
