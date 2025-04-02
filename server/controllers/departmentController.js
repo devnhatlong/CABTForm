@@ -5,38 +5,61 @@ const xlsx = require('xlsx');
 
 const importFromExcel = async (req, res) => {
     try {
-        // Check if a file is provided
+        // Kiểm tra xem file có được tải lên không
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Read the Excel file from buffer
+        // Đọc file Excel từ buffer
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = xlsx.utils.sheet_to_json(sheet);
 
-        // Iterate over the data and create department
-        for (const row of data) {
+        const errors = []; // Danh sách lỗi
+        let successCount = 0; // Đếm số bản ghi thành công
+
+        // Lặp qua từng dòng dữ liệu
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
             const { departmentCode, departmentName } = row;
-            // Check if the department already exists
-            const existingDepartment = await Department.findOne({ departmentCode });
-            if (existingDepartment) {
-                continue; // Skip existing department
+
+            // Kiểm tra nếu thiếu thông tin bắt buộc
+            if (!departmentCode || !departmentName) {
+                errors.push({
+                    row: i + 1,
+                    message: "Thiếu mã hoặc tên phòng ban",
+                });
+                continue;
             }
 
-            // Create a new department
+            // Kiểm tra xem phòng ban đã tồn tại chưa
+            const existingDepartment = await Department.findOne({ departmentCode });
+            if (existingDepartment) {
+                errors.push({
+                    row: i + 1,
+                    message: `Phòng ban đã tồn tại (departmentCode: ${departmentCode})`,
+                });
+                continue;
+            }
+
+            // Tạo mới phòng ban
             const newDepartment = new Department({
                 departmentCode,
-                departmentName
+                departmentName,
             });
 
             await newDepartment.save();
+            successCount++; // Tăng số bản ghi thành công
         }
 
-        res.status(200).json({ 
+        // Trả về kết quả
+        res.status(200).json({
             success: true,
-            message: "Department imported successfully"
+            message: "Import hoàn tất",
+            successCount,
+            errorCount: errors.length,
+            errors, // Danh sách lỗi
         });
     } catch (error) {
         console.error('Error importing department:', error);

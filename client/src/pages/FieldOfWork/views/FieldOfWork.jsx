@@ -495,39 +495,15 @@ export const FieldOfWork = () => {
         setIsOpenDrawer(false);
     };
 
-    // const handleUpload = async ({ file, onSuccess, onError }) => {
-    //     const formData = new FormData();
-    //     formData.append('file', file);
-    
-    //     try {
-    //         const response = await fieldOfWorkService.importFromExcel(formData);
-    
-    //         if (response.success) {
-    //             message.success('Import thành công');
-    //             query.refetch(); // Refresh the user list
-    //         } else {
-    //             message.error(response.message || 'Import thất bại');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error importing users:', error);
-    //         message.error('Import thất bại');
-    //         onError(error);
-    //     }
-    // };
-
     return (
         <div>
             <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
-            <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
+            <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
                     <Button 
                         type="primary" 
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
-                        style={{
-                            backgroundColor: "#5eb12b",
-                            borderColor: "#5eb12b",
-                        }}
                     >
                         Thêm lĩnh vực
                     </Button>

@@ -71,7 +71,15 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                 showUploadList={false}
                 customRequest={handleUpload}
             >
-                <Button type="primary" icon={<UploadOutlined />} loading={isImporting}>
+                <Button 
+                    type="primary" 
+                    icon={<UploadOutlined />} 
+                    loading={isImporting}
+                    style={{
+                        backgroundColor: "#5eb12b",
+                        borderColor: "#5eb12b",
+                    }}
+                >
                     Import Excel
                 </Button>
             </Upload>
@@ -104,9 +112,7 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                 visible={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={[
-                    <Button key="close" onClick={handleCloseModal}>
-                        Đóng
-                    </Button>,
+                    <Button key="close" onClick={handleCloseModal}>Đóng</Button>,
                 ]}
             >
                 <Table

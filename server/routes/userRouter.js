@@ -3,7 +3,7 @@ const ctrls = require("../controllers/userController");
 const { upload } = require('../middlewares/multerMiddleware');
 const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
 
-router.post("/import-from-excel", verifyAccessToken, upload.single("file"), ctrls.importUsersFromExcel);
+router.post("/import-from-excel", verifyAccessToken, upload.single("file"), ctrls.importFromExcel);
 router.post("/register", ctrls.register);
 router.post("/login", ctrls.login);
 router.get("/get-user", verifyAccessToken, ctrls.getUser);

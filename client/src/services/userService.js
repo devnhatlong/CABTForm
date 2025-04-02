@@ -180,18 +180,19 @@ const userService = {
             throw error; // Rethrow the error for handling in interceptor
         }
     },
-    importUsersFromExcel: async (formData) => {
+    importFromExcel: async (formData) => {
         try {
-            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/import-from-excel`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/import-from-excel`, formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
             return response.data;
         } catch (error) {
-            console.log(error);
+            console.error("Lỗi khi import file Excel:", error);
+            throw error.response?.data || { message: "Lỗi không xác định" };
         }
-    }
+    },
 };
 
 export default userService;

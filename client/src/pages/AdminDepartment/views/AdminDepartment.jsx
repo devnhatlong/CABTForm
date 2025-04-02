@@ -15,6 +15,7 @@ import * as message from '../../../components/Message/Message';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
 import departmentService from '../../../services/departmentService';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
+import ImportExcel from '../../../components/ImportExcel/ImportExcel';
 
 export const AdminDepartment = () => {
     const [modalForm] = Form.useForm();
@@ -158,7 +159,7 @@ export const AdminDepartment = () => {
     }
 
     useEffect(() => {
-        queryLetter.refetch();
+        query.refetch();
         setIsLoadingResetFilter(false);
     }, [isLoadingResetFilter]);
 
@@ -168,14 +169,14 @@ export const AdminDepartment = () => {
         setFilters("");
     }
 
-    const queryLetter = useQuery({
+    const query = useQuery({
         queryKey: ['departments'],
         queryFn: () => getAllDepartment(pagination.currentPage, pagination.pageSize, filters),
         retry: 3,
         retryDelay: 1000,
     });
 
-    const { isLoading: isLoadingLetter, data: departments } = queryLetter;
+    const { isLoading: isLoadingLetter, data: departments } = query;
 
     useEffect(() => {
         if(isSuccess && data?.success) {
@@ -226,13 +227,13 @@ export const AdminDepartment = () => {
     }, [isSuccessDeletedMultiple, isErrorDeletedMultiple, dataDeletedMultiple]);
 
     useEffect(() => {
-        queryLetter.refetch();
+        query.refetch();
     }, [pagination]);
 
     const onFinish = async () => {
         mutation.mutate(stateDepartment, {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
             }
         });
     }
@@ -245,7 +246,7 @@ export const AdminDepartment = () => {
             }, 
             {
                 onSettled: () => {
-                    queryLetter.refetch();
+                    query.refetch();
                 }
             }
         );
@@ -258,7 +259,7 @@ export const AdminDepartment = () => {
           },
           {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
             }
           }
         )
@@ -271,7 +272,7 @@ export const AdminDepartment = () => {
           },
           {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
                 setResetSelection(prevState => !prevState);
             }
           }
@@ -427,7 +428,7 @@ export const AdminDepartment = () => {
         getAllDepartment(pagination.currentPage, pagination.pageSize, filters)
         .then(response => {
             // Xử lý response...
-            queryLetter.refetch();
+            query.refetch();
         })
         .catch(error => {
             message.error(error);
@@ -466,7 +467,7 @@ export const AdminDepartment = () => {
         getAllDepartment(pagination.currentPage, pagination.pageSize, filters)
             .then(response => {
                 // Xử lý response nếu cần
-                queryLetter.refetch();
+                query.refetch();
             })
             .catch(error => {
                 // Xử lý lỗi nếu có
@@ -493,37 +494,32 @@ export const AdminDepartment = () => {
         setIsOpenDrawer(false);
     };
 
-    const handleUpload = async ({ file, onSuccess, onError }) => {
-        const formData = new FormData();
-        formData.append('file', file);
-    
-        try {
-            const response = await departmentService.importFromExcel(formData);
-    
-            if (response.success) {
-                message.success('Import thành công');
-                queryLetter.refetch(); // Refresh the user list
-            } else {
-                message.error(response.message || 'Import thất bại');
-            }
-        } catch (error) {
-            console.error('Error importing users:', error);
-            message.error('Import thất bại');
-            onError(error);
-        }
-    };
-
     return (
         <div>
             <WrapperHeader>Quản lý đơn vị / phòng ban</WrapperHeader>
-            <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
+            <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
-                    <CreateFormButton onClick={() => setIsModalOpen(true)}>
-                        <WrapperButtonName>Thêm đơn vị</WrapperButtonName>
-                        <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
-                    </CreateFormButton>
+                    <Button 
+                        type="primary" 
+                        icon={<PlusOutlined />} 
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Thêm đơn vị
+                    </Button>
                 </FormListHeader>
                 <FormListHeader>
+                    <ImportExcel
+                        service={departmentService.importFromExcel}
+                        onSuccess={(response) => {
+                            message.success(`Import thành công: ${response.successCount} bản ghi`);
+                            query.refetch(); // Làm mới danh sách sau khi import thành công
+                        }}
+                        onError={(error) => {
+                            message.error(error.message || "Import thất bại");
+                        }}
+                    />
+                </FormListHeader>
+                {/* <FormListHeader>
                     <Upload
                         name="file"
                         accept=".xlsx, .xls"
@@ -535,7 +531,7 @@ export const AdminDepartment = () => {
                             <ImportOutlined style={{ fontSize: "40px", color: "#5eb12b" }} />
                         </CreateFormButton>
                     </Upload>
-                </FormListHeader>
+                </FormListHeader> */}
             </div>
             <div style={{ marginTop: '20px' }}>
                 <TableComponent handleDeleteMultiple={handleDeleteMultipleUsers} columns={columns} data={dataTable} isLoading={isLoadingLetter || isLoadingResetFilter} resetSelection={resetSelection}

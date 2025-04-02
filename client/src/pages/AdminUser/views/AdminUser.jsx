@@ -18,6 +18,7 @@ import * as message from '../../../components/Message/Message';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
 import { WrapperContentPopup } from '../../../components/NavbarLoginComponent/style';
+import ImportExcel from '../../../components/ImportExcel/ImportExcel';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();
@@ -201,7 +202,7 @@ export const AdminUser = () => {
     }
 
     useEffect(() => {
-        queryLetter.refetch();
+        query.refetch();
         setIsLoadingResetFilter(false);
     }, [isLoadingResetFilter]);
 
@@ -211,14 +212,14 @@ export const AdminUser = () => {
         setFilters("");
     }
 
-    const queryLetter = useQuery({
+    const query = useQuery({
         queryKey: ['users'],
         queryFn: () => getAllUser(pagination.currentPage, pagination.pageSize, filters),
         retry: 3,
         retryDelay: 1000,
     });
 
-    const { isLoading: isLoadingLetter, data: users } = queryLetter;
+    const { isLoading: isLoadingLetter, data: users } = query;
 
     useEffect(() => {
         if(isSuccess && data?.success) {
@@ -282,7 +283,7 @@ export const AdminUser = () => {
     }, [isSuccessDeletedMultiple, isErrorDeletedMultiple, dataDeletedMultiple]);
 
     useEffect(() => {
-        queryLetter.refetch();
+        query.refetch();
     }, [pagination]);
 
     const handleChangePasswordByAdmin = async () => {
@@ -293,7 +294,7 @@ export const AdminUser = () => {
             }, 
             {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
             }
         });
     }
@@ -301,7 +302,7 @@ export const AdminUser = () => {
     const onFinish = async () => {
         mutation.mutate(stateUser, {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
             }
         });
     }
@@ -314,7 +315,7 @@ export const AdminUser = () => {
             }, 
             {
                 onSettled: () => {
-                    queryLetter.refetch();
+                    query.refetch();
                 }
             }
         );
@@ -327,7 +328,7 @@ export const AdminUser = () => {
           },
           {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
             }
           }
         )
@@ -340,7 +341,7 @@ export const AdminUser = () => {
           },
           {
             onSettled: () => {
-                queryLetter.refetch();
+                query.refetch();
                 setResetSelection(prevState => !prevState);
             }
           }
@@ -542,7 +543,7 @@ export const AdminUser = () => {
         getAllUser(pagination.currentPage, pagination.pageSize, filters)
         .then(response => {
             // Xử lý response...
-            queryLetter.refetch();
+            query.refetch();
         })
         .catch(error => {
             message.error(error);
@@ -581,7 +582,7 @@ export const AdminUser = () => {
         getAllUser(pagination.currentPage, pagination.pageSize, filters)
             .then(response => {
                 // Xử lý response nếu cần
-                queryLetter.refetch();
+                query.refetch();
             })
             .catch(error => {
                 // Xử lý lỗi nếu có
@@ -613,48 +614,30 @@ export const AdminUser = () => {
         modalChangePasswordForm.resetFields();
     }
 
-    const handleUpload = async ({ file, onSuccess, onError }) => {
-        const formData = new FormData();
-        formData.append('file', file);
-    
-        try {
-            const response = await userService.importUsersFromExcel(formData);
-    
-            if (response.success) {
-                message.success('Import thành công');
-                queryLetter.refetch(); // Refresh the user list
-            } else {
-                message.error(response.message || 'Import thất bại');
-            }
-        } catch (error) {
-            console.error('Error importing users:', error);
-            message.error('Import thất bại');
-            onError(error);
-        }
-    };
-
     return (
         <div>
-            <WrapperHeader>Quản lý người dùng</WrapperHeader>
-            <div style={{display: "flex", gap: "20px", marginTop: "10px" }}>
+            <WrapperHeader>Quản lý tài khoản</WrapperHeader>
+            <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
-                    <CreateFormButton onClick={() => setIsModalOpen(true)}>
-                        <WrapperButtonName>Thêm tài khoản</WrapperButtonName>
-                        <PlusOutlined style={{fontSize: "40px", color: "#1677ff"}} />
-                    </CreateFormButton>
+                    <Button 
+                        type="primary" 
+                        icon={<PlusOutlined />} 
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Thêm tài khoản
+                    </Button>
                 </FormListHeader>
                 <FormListHeader>
-                    <Upload
-                        name="file"
-                        accept=".xlsx, .xls"
-                        showUploadList={false}
-                        customRequest={handleUpload}
-                    >
-                        <CreateFormButton>
-                            <WrapperButtonName>Import Excel</WrapperButtonName>
-                            <ImportOutlined style={{ fontSize: "40px", color: "#5eb12b" }} />
-                        </CreateFormButton>
-                    </Upload>
+                    <ImportExcel
+                        service={userService.importFromExcel}
+                        onSuccess={(response) => {
+                            message.success(`Import thành công: ${response.successCount} bản ghi`);
+                            query.refetch(); // Làm mới danh sách sau khi import thành công
+                        }}
+                        onError={(error) => {
+                            message.error(error.message || "Import thất bại");
+                        }}
+                    />
                 </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>

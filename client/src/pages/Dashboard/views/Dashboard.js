@@ -86,7 +86,7 @@ export const Dashboard = () => {
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Người dùng', 'user', null, null, menuChildrenItemStyle),
+                getItem('Tài khoản', 'user', null, null, menuChildrenItemStyle),
                 getItem('Đơn vị / Phòng ban', 'department', null, null, menuChildrenItemStyle),
             ]
         },
@@ -146,7 +146,7 @@ export const Dashboard = () => {
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <NavbarLoginComponent />
-            <Layout style={{ marginTop: "2%" }}>
+            <Layout style={{ marginTop: "40px" }}>
                 <Sider
                     collapsible
                     collapsed={collapsed}

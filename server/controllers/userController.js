@@ -6,45 +6,72 @@ const User = require("../models/userModel");
 const xlsx = require('xlsx');
 const crypto = require("crypto");
 
-const importUsersFromExcel = async (req, res) => {
+const importFromExcel = async (req, res) => {
     try {
-        // Check if a file is provided
+        // Kiểm tra xem file có được tải lên không
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Read the Excel file from buffer
+        // Đọc file Excel từ buffer
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = xlsx.utils.sheet_to_json(sheet);
 
-        // Iterate over the data and create users
-        for (const row of data) {
+        const errors = []; // Danh sách lỗi
+        let successCount = 0; // Đếm số bản ghi thành công
+
+        // Lặp qua từng dòng dữ liệu
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
             const { userName, departmentCode, departmentName, role } = row;
-            // Check if the user already exists
-            const existingUser = await User.findOne({ userName });
-            if (existingUser) {
-                continue; // Skip existing users
+
+            // Kiểm tra nếu thiếu thông tin bắt buộc
+            if (!userName || !departmentCode || !departmentName) {
+                errors.push({
+                    row: i + 1,
+                    message: "Thiếu thông tin bắt buộc (userName, departmentCode, departmentName)",
+                });
+                continue;
             }
 
+            // Kiểm tra xem người dùng đã tồn tại chưa
+            const existingUser = await User.findOne({ userName });
+            if (existingUser) {
+                errors.push({
+                    row: i + 1,
+                    message: `Người dùng đã tồn tại (userName: ${userName})`,
+                });
+                continue;
+            }
+
+            // Tạo mật khẩu mặc định
             const hashedPassword = process.env.DEFAULT_PASSWORD;
             const hashedSecondaryPassword = process.env.SECONDARY_PASSWORD;
 
-            // Create a new user
+            // Tạo mới người dùng
             const newUser = new User({
                 userName,
                 password: hashedPassword,
                 secondaryPassword: hashedSecondaryPassword,
                 departmentCode,
                 departmentName,
-                role: role || 'user', // Default role to 'user' if not provided
+                role: role || 'user', // Mặc định role là 'user' nếu không có
             });
 
             await newUser.save();
+            successCount++; // Tăng số bản ghi thành công
         }
 
-        res.status(200).json({ message: 'Users imported successfully' });
+        // Trả về kết quả
+        res.status(200).json({
+            success: true,
+            message: "Import hoàn tất",
+            successCount,
+            errorCount: errors.length,
+            errors, // Danh sách lỗi
+        });
     } catch (error) {
         console.error('Error importing users:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -328,7 +355,7 @@ const deleteMultipleUsers = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    importUsersFromExcel,
+    importFromExcel,
     register,
     login,
     getUser,
