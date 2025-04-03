@@ -1,5 +1,6 @@
 require('dotenv').config();
 const CrimeService = require("../services/crimeService");
+const FieldOfWork = require("../models/fieldOfWorkModel");
 const asyncHandler = require("express-async-handler");
 const Crime = require("../models/crimeModel");
 const xlsx = require('xlsx');
@@ -23,23 +24,33 @@ const importFromExcel = async (req, res) => {
         // Iterate over the data and create field of work
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { crimeName, crimeCode, description } = row;
+            const { crimeName, crimeCode, fieldCode, description } = row;
 
-            // Kiểm tra nếu thiếu crimeName hoặc crimeCode
-            if (!crimeName || !crimeCode) {
+            // Kiểm tra nếu thiếu crimeName, crimeCode hoặc fieldCode
+            if (!crimeName || !crimeCode || !fieldCode) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu tên hoặc mã tội danh",
+                    message: "Thiếu tên, mã tội danh hoặc mã lĩnh vực vụ việc",
+                });
+                continue;
+            }
+
+            // Kiểm tra xem fieldCode có tồn tại trong FieldOfWork hay không
+            const existingFieldOfWork = await FieldOfWork.findOne({ fieldCode });
+            if (!existingFieldOfWork) {
+                errors.push({
+                    row: i + 1,
+                    message: `Mã lĩnh vực vụ việc không tồn tại (fieldCode: ${fieldCode})`,
                 });
                 continue;
             }
 
             // Kiểm tra xem crimeName hoặc crimeCode đã tồn tại hay chưa
-            const existingField = await Crime.findOne({
+            const existingCrime = await Crime.findOne({
                 $or: [{ crimeName }, { crimeCode }],
             });
 
-            if (existingField) {
+            if (existingCrime) {
                 errors.push({
                     row: i + 1,
                     message: `Tên hoặc mã tội danh đã tồn tại (crimeName: ${crimeName}, crimeCode: ${crimeCode})`,
@@ -48,14 +59,14 @@ const importFromExcel = async (req, res) => {
             }
 
             // Tạo mới tội danh
-            const newField = new Crime({
+            const newCrime = new Crime({
                 crimeName,
                 crimeCode,
                 fieldCode,
                 description,
             });
 
-            await newField.save();
+            await newCrime.save();
             successCount++; // Tăng số bản ghi thành công
         }
 
@@ -67,7 +78,7 @@ const importFromExcel = async (req, res) => {
             errors, // Trả về danh sách lỗi
         });
     } catch (error) {
-        console.error('Error importing field of work:', error);
+        console.error('Error importing crimes:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -94,9 +105,8 @@ const getCrimes = asyncHandler(async (req, res) => {
     const response = await CrimeService.getCrimes(
         Number(page),
         limit ? Number(limit) : undefined,
-        req.query.crimeName,
-        sort,
-        fields
+        fields,
+        sort
     );
 
     res.status(200).json({

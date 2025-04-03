@@ -1,0 +1,16 @@
+.ant-modal .ant-modal-title,
+.ant-drawer .ant-drawer-title,
+.ant-drawer .ant-drawer-close,
+.ant-modal .ant-modal-close-x {
+    font-size: 24px;
+    color: #012970;
+}
+
+.ant-form-item .ant-form-item-label > label {
+    font-size: 16px;
+    color: #012970;
+}
+
+.ant-breadcrumb a {
+    height: 28px;
+}

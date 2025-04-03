@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { CreateFormButton, FormListHeader, WrapperButtonName, WrapperHeader } from '../styles/style';
-import { Button, Form, Input, Space, Upload } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, UploadOutlined, ImportOutlined } from '@ant-design/icons'
-import ExcelJS from 'exceljs';
+import { FormListHeader, WrapperHeader } from '../styles/style';
+import { Button, Form, Input, Space } from "antd";
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
@@ -16,6 +16,7 @@ import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent
 import fieldOfWorkService from '../../../services/fieldOfWorkService';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
 import ImportExcel from "../../../components/ImportExcel/ImportExcel";
+import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
 export const FieldOfWork = () => {
     const [modalForm] = Form.useForm();
@@ -44,6 +45,12 @@ export const FieldOfWork = () => {
             navigate(`/dashboard`);
         }
     }, [user]);
+
+    const breadcrumbItems = [
+        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Quản lý danh mục' },
+        { label: 'Quản lý lĩnh vực vụ việc' },
+    ];
 
     const [stateField, setStateField] = useState({
         fieldName: "",
@@ -498,6 +505,7 @@ export const FieldOfWork = () => {
     return (
         <div>
             <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
+            <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
                     <Button 

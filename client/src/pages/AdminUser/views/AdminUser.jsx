@@ -19,6 +19,7 @@ import { useMutationHooks } from '../../../hooks/useMutationHook';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
 import { WrapperContentPopup } from '../../../components/NavbarLoginComponent/style';
 import ImportExcel from '../../../components/ImportExcel/ImportExcel';
+import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();
@@ -48,6 +49,12 @@ export const AdminUser = () => {
             navigate(`/dashboard`);
         }
     }, [user]);
+
+    const breadcrumbItems = [
+        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Quản trị' },
+        { label: 'Quản lý tài khoản' },
+    ];
 
     const [passwordChangedByAdmin, setPasswordChangedByAdmin] = useState({
         password: "",
@@ -617,6 +624,7 @@ export const AdminUser = () => {
     return (
         <div>
             <WrapperHeader>Quản lý tài khoản</WrapperHeader>
+            <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
                     <Button 

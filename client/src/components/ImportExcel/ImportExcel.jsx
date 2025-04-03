@@ -38,7 +38,7 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
             setProgress(100); // Đặt progress ở mức 100%
             setTimeout(() => {
                 setShowProgress(false); // Ẩn progress sau 10 giây
-            }, 10000);
+            }, 20000);
         }
     };
 

@@ -20,17 +20,22 @@ const createCrime = async (data) => {
     return await Crime.create(data);
 };
 
-const getCrimes = async (page = 1, limit, crimeName, sort, fields) => {
+const getCrimes = async (page = 1, limit, fields, sort) => {
     try {
         const queries = {};
-        
+
+        // Xử lý các trường trong fields để tạo bộ lọc
+        if (fields) {
+            for (const key in fields) {
+                if (fields[key]) {
+                    // Sử dụng regex để tìm kiếm không phân biệt hoa thường
+                    queries[key] = { $regex: fields[key], $options: "i" };
+                }
+            }
+        }
+
         // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
-
-        // Filtering
-        if (crimeName) {
-            queries.crimeName = { $regex: crimeName, $options: 'i' }; // Tìm kiếm theo tiêu đề (không phân biệt hoa thường)
-        }
 
         // Tạo câu lệnh query
         let queryCommand = Crime.find(queries);
@@ -41,14 +46,6 @@ const getCrimes = async (page = 1, limit, crimeName, sort, fields) => {
             queryCommand = queryCommand.sort(sortBy);
         } else {
             queryCommand = queryCommand.sort('-createdAt'); // Mặc định sắp xếp theo ngày tạo giảm dần
-        }
-
-        // Fields limiting
-        if (fields) {
-            const selectedFields = fields.split(',').join(' ');
-            queryCommand = queryCommand.select(selectedFields);
-        } else {
-            queryCommand = queryCommand.select('-__v'); // Mặc định loại bỏ trường `__v`
         }
 
         // Pagination
@@ -65,8 +62,8 @@ const getCrimes = async (page = 1, limit, crimeName, sort, fields) => {
             total,
         };
     } catch (error) {
-        console.error("Error in getFieldOfWorks:", error);
-        throw new Error("Failed to retrieve field of works");
+        console.error("Error in getCrimes:", error);
+        throw new Error("Failed to retrieve crimes");
     }
 };
 

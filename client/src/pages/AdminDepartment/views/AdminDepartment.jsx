@@ -16,6 +16,7 @@ import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent
 import departmentService from '../../../services/departmentService';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
 import ImportExcel from '../../../components/ImportExcel/ImportExcel';
+import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
 export const AdminDepartment = () => {
     const [modalForm] = Form.useForm();
@@ -34,7 +35,7 @@ export const AdminDepartment = () => {
     const [resetSelection, setResetSelection] = useState(false);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 10 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();
@@ -44,6 +45,12 @@ export const AdminDepartment = () => {
             navigate(`/dashboard`);
         }
     }, [user]);
+
+    const breadcrumbItems = [
+        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Quản trị' },
+        { label: 'Quản lý đơn vị' },
+    ];
 
     const [stateDepartment, setStateDepartment] = useState({
         departmentCode: "",
@@ -497,6 +504,7 @@ export const AdminDepartment = () => {
     return (
         <div>
             <WrapperHeader>Quản lý đơn vị / phòng ban</WrapperHeader>
+            <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
                     <Button 
