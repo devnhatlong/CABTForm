@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
@@ -17,11 +17,17 @@ const { Sider, Content } = Layout;
 
 export const Dashboard = () => {
     const user = useSelector((state) => state.user);
-    const [collapsed, setCollapsed] = useState(true);
-    const [openKeys, setOpenKeys] = useState([]); // State to manage open keys
-
     const navigate = useNavigate();
+    const location = useLocation();
 
+    // State for collapsed and openKeys
+    const [collapsed, setCollapsed] = useState(() => {
+        const savedCollapsed = localStorage.getItem('menuCollapsed');
+        return savedCollapsed === 'true'; // Lấy trạng thái từ localStorage
+    });
+    const [openKeys, setOpenKeys] = useState([]);
+
+    // Menu styles
     const menuItemStyle = {
         whiteSpace: 'normal',
         lineHeight: 'normal',
@@ -35,7 +41,8 @@ export const Dashboard = () => {
         fontSize: "16px",
         fontWeight: "600",
     };
-    
+
+    // Menu items
     const items = [
         {
             key: 'social_order',
@@ -43,107 +50,95 @@ export const Dashboard = () => {
             icon: <IdcardOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Danh sách vụ việc TTXH', 'social-order-list', null, null, menuChildrenItemStyle),
-                getItem('Tra cứu đối tượng', 'criminal-lookup', null, null, menuChildrenItemStyle),
-                getItem('Thống kê số liệu', 'social-order-stats', null, null, menuChildrenItemStyle),
+                getItem('Danh sách vụ việc TTXH', PATHS.SOCIAL_ORDER.LIST, null, null, menuChildrenItemStyle),
+                getItem('Tra cứu đối tượng', PATHS.SOCIAL_ORDER.LOOKUP, null, null, menuChildrenItemStyle),
+                getItem('Thống kê số liệu', PATHS.SOCIAL_ORDER.STATS, null, null, menuChildrenItemStyle),
             ]
         },
-
         {
             key: 'traffic',
             label: 'Giao thông',
             icon: <CarOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Danh sách TNGT', 'traffic-incidents', null, null, menuChildrenItemStyle),
-                getItem('Thống kê vụ TNGT', 'traffic-stats', null, null, menuChildrenItemStyle),
+                getItem('Danh sách TNGT', PATHS.TRAFFIC.INCIDENTS, null, null, menuChildrenItemStyle),
+                getItem('Thống kê vụ TNGT', PATHS.TRAFFIC.STATS, null, null, menuChildrenItemStyle),
             ]
         },
-
         {
             key: 'fire-explosions',
             label: 'Phòng cháy chữa cháy',
             icon: <FireOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Danh sách vụ cháy/nổ', 'fire-explosions-list', null, null, menuChildrenItemStyle),
-                getItem('Thống kê vụ cháy/nổ', 'fire-explosions-stats', null, null, menuChildrenItemStyle),
+                getItem('Danh sách vụ cháy/nổ', PATHS.FIRE_EXPLOSIONS.LIST, null, null, menuChildrenItemStyle),
+                getItem('Thống kê vụ cháy/nổ', PATHS.FIRE_EXPLOSIONS.STATS, null, null, menuChildrenItemStyle),
             ]
         },
-
         {
             key: 'category',
             label: 'Quản lý danh mục',
             icon: <SnippetsOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Lĩnh vực vụ việc', 'field-of-work', null, null, menuChildrenItemStyle),
-                getItem('Tội danh', 'crime', null, null, menuChildrenItemStyle),
+                getItem('Lĩnh vực vụ việc', PATHS.CATEGORY.FIELD_OF_WORK, null, null, menuChildrenItemStyle),
+                getItem('Tội danh', PATHS.CATEGORY.CRIME, null, null, menuChildrenItemStyle),
             ]
         },
-
         user?.role === "admin" && {
             key: 'admin',
             label: 'Quản trị',
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Tài khoản', 'user', null, null, menuChildrenItemStyle),
-                getItem('Đơn vị / Phòng ban', 'department', null, null, menuChildrenItemStyle),
+                getItem('Tài khoản', PATHS.ADMIN.USER, null, null, menuChildrenItemStyle),
+                getItem('Đơn vị / Phòng ban', PATHS.ADMIN.DEPARTMENT, null, null, menuChildrenItemStyle),
             ]
         },
-    ].filter(Boolean);  // Remove null items
+    ].filter(Boolean); // Remove null items
 
+    // Handle menu click
     const handleOnClick = ({ key }) => {
-        switch (key) {
-            case 'user':
-                navigate(PATHS.ADMIN.USER);
-                break;
-            case 'department':
-                navigate(PATHS.ADMIN.DEPARTMENT);
-                break;
-            case 'social-order-list':
-                navigate(PATHS.SOCIAL_ORDER.LIST);
-                break;
-            case 'criminal-lookup':
-                navigate(PATHS.SOCIAL_ORDER.LOOKUP);
-                break;
-            case 'social-order-stats':
-                navigate(PATHS.SOCIAL_ORDER.STATS);
-                break;
-            case 'traffic-incidents':
-                navigate(PATHS.TRAFFIC.INCIDENTS);
-                break;
-            case 'traffic-stats':
-                navigate(PATHS.TRAFFIC.STATS);
-                break;
-            case 'fire-explosions-list':
-                navigate(PATHS.FIRE_EXPLOSIONS.LIST);
-                break;
-            case 'fire-explosions-stats':
-                navigate(PATHS.FIRE_EXPLOSIONS.STATS);
-                break;
-            case 'field-of-work':
-                navigate(PATHS.CATEGORY.FIELD_OF_WORK);
-                break;
-            case 'crime':
-                navigate(PATHS.CATEGORY.CRIME);
-                break;
-            default:
-                break;
-        }
+        navigate(key);
     };
 
+    // Handle open keys
     const onOpenChange = (keys) => {
-        // Only keep the last opened key
         const latestOpenKey = keys.find(key => !openKeys.includes(key));
         setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
     };
 
+    // Handle collapse toggle
     const toggleCollapsed = () => {
-        setCollapsed(!collapsed);
+        const newCollapsed = !collapsed;
+        setCollapsed(newCollapsed);
+        localStorage.setItem('menuCollapsed', newCollapsed); // Save state to localStorage
     };
 
+    // Sync openKeys with URL
+    useEffect(() => {
+        const pathToKeyMap = {
+            [PATHS.SOCIAL_ORDER.LIST]: 'social_order',
+            [PATHS.SOCIAL_ORDER.LOOKUP]: 'social_order',
+            [PATHS.SOCIAL_ORDER.STATS]: 'social_order',
+            [PATHS.TRAFFIC.INCIDENTS]: 'traffic',
+            [PATHS.TRAFFIC.STATS]: 'traffic',
+            [PATHS.FIRE_EXPLOSIONS.LIST]: 'fire-explosions',
+            [PATHS.FIRE_EXPLOSIONS.STATS]: 'fire-explosions',
+            [PATHS.CATEGORY.FIELD_OF_WORK]: 'category',
+            [PATHS.CATEGORY.CRIME]: 'category',
+            [PATHS.ADMIN.USER]: 'admin',
+            [PATHS.ADMIN.DEPARTMENT]: 'admin',
+        };
+
+        const currentPath = location.pathname;
+        const openKey = pathToKeyMap[currentPath];
+        if (!collapsed && openKey) {
+            setOpenKeys([openKey]);
+        }
+    }, [location, collapsed]);
+
+    // Handle responsive behavior
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 768) {
@@ -175,10 +170,10 @@ export const Dashboard = () => {
                     style={{
                         background: '#fff',
                         boxShadow: '2px 0 8px 0 rgba(29, 35, 41, 0.05)',
-                        height: '100vh', // Chiều cao toàn màn hình
-                        position: 'fixed', // Đứng yên so với toàn trang
-                        left: 0, // Đặt ở bên trái
-                        overflowY: 'auto', // Hiển thị thanh cuộn dọc nếu nội dung dài
+                        height: '100vh',
+                        position: 'fixed',
+                        left: 0,
+                        overflowY: 'auto',
                     }}
                 >
                     <Menu
@@ -186,20 +181,21 @@ export const Dashboard = () => {
                         style={{ borderRight: 0 }}
                         items={items}
                         onClick={handleOnClick}
-                        openKeys={openKeys} // Controlled open keys
-                        onOpenChange={onOpenChange} // Handle open/close
-                        defaultSelectedKeys={['1']}
+                        openKeys={openKeys}
+                        onOpenChange={onOpenChange}
+                        selectedKeys={[location.pathname]}
+                        defaultSelectedKeys={[location.pathname]}
                     />
                 </Sider>
                 <Content
                     style={{
-                        marginLeft: collapsed ? 100 : 310, // Đẩy nội dung sang phải tùy thuộc vào trạng thái của Sider
+                        marginLeft: collapsed ? 100 : 310,
                         margin: '0px 12px',
                         padding: 18,
                         background: '#fff',
                         minHeight: '280px',
-                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // Thêm shadow
-                        borderRadius: '8px', // Tùy chọn: Thêm bo góc nếu cần
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                        borderRadius: '8px',
                     }}
                 >
                     <Routes>
