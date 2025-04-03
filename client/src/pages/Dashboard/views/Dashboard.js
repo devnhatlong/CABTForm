@@ -84,7 +84,7 @@ export const Dashboard = () => {
 
         user?.role === "admin" && {
             key: 'admin',
-            label: <span style={menuItemStyle}>Quản trị</span>,
+            label: 'Quản trị',
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [

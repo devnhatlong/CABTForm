@@ -14,3 +14,21 @@
 .ant-breadcrumb a {
     height: 28px;
 }
+
+.ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
+    color: #4154f1;
+}
+
+.ant-menu-light .ant-menu-item-selected, .ant-menu-light>.ant-menu .ant-menu-item-selected {
+    color: #4154f1 !important;
+    font-weight: 600;
+}
+
+.ant-menu-light .ant-menu-item, .ant-menu-light>.ant-menu .ant-menu-item {
+    color: #012970;
+    font-weight: 600;
+}
+
+.ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
+    color: #4154f1;
+}

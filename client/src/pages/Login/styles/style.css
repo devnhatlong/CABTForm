@@ -65,7 +65,7 @@
 
 .login-header h2 {
     margin: 0;
-    color: #4a4a4a;
+    color: #012970;
 }
 
 .login-form {
@@ -136,7 +136,7 @@
     display: flex;
     justify-content: center;
     margin-top: 20px;
-    color: #4a4a4a;
+    color: #012970;
 }
 
 @keyframes rotateBackground {

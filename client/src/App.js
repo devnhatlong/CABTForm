@@ -12,36 +12,38 @@ import Loading from './components/LoadingComponent/Loading';
 
 function App() {
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Mặc định là `true` để chờ tải dữ liệu
 
   const handleGetDetailsUser = async () => {
-    setIsLoading(true);
     const { accessToken, decoded } = handleDecoded();
 
     if (decoded?._id) {
       const response = await userService.getUser(accessToken);
       dispatch(setUser(response.result));
     }
-    setIsLoading(false);
+    setIsLoading(false); // Kết thúc trạng thái tải
   };
 
   useEffect(() => {
     handleGetDetailsUser();
   }, []);
 
+  // Hiển thị trạng thái tải trước khi render các route
+  if (isLoading) {
+    return <Loading isLoading={true} />;
+  }
+
   return (
-    <Loading isLoading={isLoading}>
-      <Router>
-        <div className="App" id="wrapper">
-          <Routes>
-            <Route element={<PrivateRoute />}>
-              <Route path="/*" element={<Dashboard />} />
-            </Route>
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </div>
-      </Router>
-    </Loading>
+    <Router>
+      <div className="App" id="wrapper">
+        <Routes>
+          <Route element={<PrivateRoute />}>
+            <Route path="/*" element={<Dashboard />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

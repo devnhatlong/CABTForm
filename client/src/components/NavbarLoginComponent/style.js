@@ -3,9 +3,10 @@ import { styled } from "styled-components";
 export const WrapperContentPopup = styled .p `
     cursor: pointer;
     padding: 8px;
+    color: #012970;
 
     &:hover {
-        color: #1677ff;
+        color: #4154f1;
     }
 
     margin: 5px;
