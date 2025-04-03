@@ -102,6 +102,16 @@ const fieldOfWorkService = {
         }
     },
 
+    updateFieldDepartment: async (id, data) => {
+        try {
+            const response = await axiosFieldOfWork.put(`${BASE_URL}/update-field-department/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi cập nhật lĩnh vực công việc:", error);
+            throw error;
+        }
+    },
+
     // Xóa lĩnh vực công việc (chỉ admin)
     deleteFieldOfWork: async (id) => {
         try {

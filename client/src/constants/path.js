@@ -4,6 +4,7 @@ const ROOTS_CATEGORY= '/category';
 const ROOTS_SOCIAL_ORDER= '/social-order';
 const ROOTS_TRAFFIC= '/traffic';
 const ROOTS_FIRE_EXPLOSIONS= '/fire-explosion';
+const ROOTS_SETTING = '/setting';
 
 export const PATHS = {
     ROOT: ROOTS_DASHBOARD,
@@ -27,5 +28,9 @@ export const PATHS = {
     FIRE_EXPLOSIONS: {
         LIST: `${ROOTS_FIRE_EXPLOSIONS}/list`,
         STATS: `${ROOTS_FIRE_EXPLOSIONS}/stats`,
+    },
+    SETTING: {
+        PERMISSION_FUNCTION: `${ROOTS_SETTING}/permission-function`,
+        PERMISSION_FIELD: `${ROOTS_SETTING}/permission-field`,
     },
 };

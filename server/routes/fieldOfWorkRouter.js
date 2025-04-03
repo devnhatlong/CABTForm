@@ -8,6 +8,7 @@ router.post("/", verifyAccessToken , ctrls.createFieldOfWork);
 router.get("/", ctrls.getFieldOfWorks);
 router.get("/:id", ctrls.getFieldOfWorkById);
 router.put("/:id", verifyAccessToken, ctrls.updateFieldOfWork);
+router.put("/update-field-department/:id", verifyAccessToken, ctrls.updateFieldDepartment);
 router.delete("/delete-multiple", verifyAccessToken, ctrls.deleteMultipleFieldOfWorks);
 router.delete("/:id", verifyAccessToken, ctrls.deleteFieldOfWork);
 

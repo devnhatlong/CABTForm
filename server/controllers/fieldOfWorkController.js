@@ -136,6 +136,38 @@ const updateFieldOfWork = asyncHandler(async (req, res) => {
     });
 });
 
+const updateFieldDepartment = asyncHandler(async (req, res) => {
+    const { id } = req.params; // Lấy ID của lĩnh vực từ URL
+    const { departmentId } = req.body; // Lấy departmentId từ body của request
+
+    // Kiểm tra nếu không có departmentId
+    if (!departmentId) {
+        return res.status(400).json({
+            success: false,
+            message: "Thiếu thông tin đơn vị phụ trách (departmentId)",
+        });
+    }
+
+    try {
+        // Gọi service để cập nhật departmentId
+        const response = await FieldOfWorkService.updateFieldDepartment(id, departmentId);
+
+        res.status(response ? 200 : 400).json({
+            success: !!response,
+            data: response || null,
+            message: response
+                ? "Cập nhật đơn vị phụ trách thành công"
+                : "Không thể cập nhật đơn vị phụ trách",
+        });
+    } catch (error) {
+        console.error("Error updating department for field of work:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi khi cập nhật đơn vị phụ trách",
+        });
+    }
+});
+
 const deleteFieldOfWork = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const response = await FieldOfWorkService.deleteFieldOfWork(id);
@@ -170,6 +202,7 @@ module.exports = {
     getFieldOfWorks,
     getFieldOfWorkById,
     updateFieldOfWork,
+    updateFieldDepartment,
     deleteFieldOfWork,
     deleteMultipleFieldOfWorks
 };

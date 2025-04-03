@@ -94,6 +94,20 @@ const updateFieldOfWork = async (id, data) => {
     return await FieldOfWork.findByIdAndUpdate(id, data, { new: true });
 };
 
+const updateFieldDepartment = async (id, departmentId) => {
+    // Tìm lĩnh vực theo id
+    const fieldOfWork = await FieldOfWork.findById(id);
+    if (!fieldOfWork) {
+        throw new Error("Không tìm thấy lĩnh vực vụ việc");
+    }
+
+    // Cập nhật đơn vị phụ trách
+    fieldOfWork.departmentId = departmentId;
+
+    // Lưu thay đổi
+    return await fieldOfWork.save();
+};
+
 const deleteFieldOfWork = async (id) => {
     return await FieldOfWork.findByIdAndDelete(id);
 };
@@ -109,6 +123,7 @@ const deleteMultipleFieldOfWorks = async (ids) => {
 module.exports = {
     createFieldOfWork,
     updateFieldOfWork,
+    updateFieldDepartment,
     getFieldOfWorks,
     getFieldOfWorkById,
     deleteFieldOfWork,

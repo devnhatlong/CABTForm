@@ -22,13 +22,23 @@ const importFromExcel = async (req, res) => {
         // Lặp qua từng dòng dữ liệu
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { departmentCode, departmentName } = row;
+            const { departmentCode, departmentName, departmentType } = row;
 
             // Kiểm tra nếu thiếu thông tin bắt buộc
-            if (!departmentCode || !departmentName) {
+            if (!departmentCode || !departmentName || !departmentType) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu mã hoặc tên phòng ban",
+                    message: "Thiếu mã, tên hoặc loại phòng ban",
+                });
+                continue;
+            }
+
+            // Kiểm tra giá trị hợp lệ cho departmentType
+            const validTypes = ["Phòng ban", "Xã, phường, thị trấn"];
+            if (!validTypes.includes(departmentType)) {
+                errors.push({
+                    row: i + 1,
+                    message: `Loại đơn vị không hợp lệ (departmentType: ${departmentType})`,
                 });
                 continue;
             }
@@ -47,6 +57,7 @@ const importFromExcel = async (req, res) => {
             const newDepartment = new Department({
                 departmentCode,
                 departmentName,
+                departmentType,
             });
 
             await newDepartment.save();
@@ -67,17 +78,20 @@ const importFromExcel = async (req, res) => {
     }
 };
 
-const createDepartment = asyncHandler(async(req, res) => { 
-    const { departmentCode, departmentName } = req.body;
+const createDepartment = asyncHandler(async (req, res) => {
+    const { departmentCode, departmentName, departmentType } = req.body;
 
-    if (!departmentCode || !departmentName) {
+    // Kiểm tra nếu thiếu thông tin bắt buộc
+    if (!departmentCode || !departmentName || !departmentType) {
         return res.status(400).json({
             success: false,
-            message: "Please provide all required information"
+            message: "Please provide all required information (departmentCode, departmentName, departmentType)"
         });
     }
 
+    // Gọi service để tạo phòng ban
     const response = await DepartmentService.createDepartment(req.body);
+
     return res.status(200).json({
         success: response ? true : false,
         message: response ? "Create is successfully" : "Something went wrong"
@@ -85,20 +99,21 @@ const createDepartment = asyncHandler(async(req, res) => {
 });
 
 const getAllDepartment = asyncHandler(async (req, res) => {
-    let { departmentCode, departmentName } = req.query.filters || {};
+    let { departmentCode, departmentName, departmentType } = req.query.filters || {};
     const { currentPage, pageSize } = req.query;
 
     // Xây dựng các điều kiện tìm kiếm dựa trên các tham số được cung cấp
     const searchConditions = {};
     if (departmentCode) searchConditions.departmentCode = { $regex: departmentCode.trim(), $options: 'i' };
     if (departmentName) searchConditions.departmentName = { $regex: departmentName.trim(), $options: 'i' };
+    if (departmentType) searchConditions.departmentType = { $regex: departmentType.trim(), $options: 'i' };
 
+    // Gọi service để lấy danh sách phòng ban
     const response = await DepartmentService.getAllDepartment(currentPage, pageSize, searchConditions);
 
-    // Trả về danh sách các đơn thư phù hợp với yêu cầu tìm kiếm
     return res.status(200).json({
         success: response ? true : false,
-        departments: response ? response.departments : "Không có user nào được tìm thấy",
+        departments: response ? response.departments : "Không có phòng ban nào được tìm thấy",
         totalRecord: response ? response.totalRecords : 0
     });
 });

@@ -9,6 +9,10 @@ var DepartmentSchema = new mongoose.Schema({
     departmentName: {
         type:String,
         // unique: true
+    },
+    departmentType: {
+        type:String,
+        // unique: true
     }
 }, {
     timestamps: true

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined } from '@ant-design/icons';
+import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined, SettingOutlined } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
 
@@ -12,6 +12,8 @@ import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
 import { FieldOfWork } from "../../Category/FieldOfWork/views/FieldOfWork";
 import { Crime } from "../../Category/Crime/views/Crime";
 import { PATHS } from '../../../constants/path';
+import { PermissionFunction } from "../../Setting/PermissionFunction/views/PermissionFunction";
+import { PermissionField } from "../../Setting/PermissionField/views/PermissionField";
 
 const { Sider, Content } = Layout;
 
@@ -33,6 +35,7 @@ export const Dashboard = () => {
         lineHeight: 'normal',
         fontSize: "16px",
         fontWeight: "600",
+        margin: "14px 0",
     };
 
     const menuChildrenItemStyle = {
@@ -85,6 +88,16 @@ export const Dashboard = () => {
                 getItem('Tội danh', PATHS.CATEGORY.CRIME, null, null, menuChildrenItemStyle),
             ]
         },
+        {
+            key: 'setting',
+            label: 'Cấu hình',
+            icon: <SettingOutlined />,
+            style: menuItemStyle,
+            children: [
+                getItem('Phân quyền chức năng', PATHS.SETTING.PERMISSION_FUNCTION, null, null, menuChildrenItemStyle),
+                getItem('Phân quyền lĩnh vực vụ việc', PATHS.SETTING.PERMISSION_FIELD, null, null, menuChildrenItemStyle),
+            ]
+        },
         user?.role === "admin" && {
             key: 'admin',
             label: 'Quản trị',
@@ -127,6 +140,10 @@ export const Dashboard = () => {
             [PATHS.FIRE_EXPLOSIONS.STATS]: 'fire-explosions',
             [PATHS.CATEGORY.FIELD_OF_WORK]: 'category',
             [PATHS.CATEGORY.CRIME]: 'category',
+            [PATHS.SETTING.PERMISSION_FUNCTION]: 'setting',
+            [PATHS.SETTING.PERMISSION_FIELD]: 'setting',
+
+
             [PATHS.ADMIN.USER]: 'admin',
             [PATHS.ADMIN.DEPARTMENT]: 'admin',
         };
@@ -201,6 +218,8 @@ export const Dashboard = () => {
                     <Routes>
                         <Route path={PATHS.CATEGORY.FIELD_OF_WORK} element={<FieldOfWork />} />
                         <Route path={PATHS.CATEGORY.CRIME} element={<Crime />} />
+                        <Route path={PATHS.SETTING.PERMISSION_FUNCTION} element={<PermissionFunction />} />
+                        <Route path={PATHS.SETTING.PERMISSION_FIELD} element={<PermissionField />} />
                         <Route path={PATHS.ADMIN.USER} element={<AdminUser />} />
                         <Route path={PATHS.ADMIN.DEPARTMENT} element={<AdminDepartment />} />
                         <Route
