@@ -4,13 +4,13 @@ import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlin
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
 
+import '../styles/style.css';
 import { NavbarLoginComponent } from "../../../components/NavbarLoginComponent/NavbarLoginComponent";
 import { getItem } from "../../../utils/utils";
 import { AdminUser } from "../../AdminUser/views/AdminUser";
 import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
-import { FieldOfWork } from "../../FieldOfWork/views/FieldOfWork";
-import '../styles/style.css';
-import { Crime } from "../../Crime/views/Crime";
+import { FieldOfWork } from "../../Category/FieldOfWork/views/FieldOfWork";
+import { Crime } from "../../Category/Crime/views/Crime";
 import { PATHS } from '../../../constants/path';
 
 const { Sider, Content } = Layout;
