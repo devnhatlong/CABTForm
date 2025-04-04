@@ -7,7 +7,7 @@
 }
 
 .ant-form-item .ant-form-item-label > label {
-    font-size: 16px;
+    font-size: 18px;
     color: #012970;
 }
 
@@ -35,4 +35,17 @@
 
 .ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
     color: #4154f1;
+}
+
+.ant-select-single .ant-select-selector {
+    font-size: 18px;
+    height: 36px !important;
+}
+
+.ant-select-item .ant-select-item-option-content {
+    font-size: 18px;
+}
+
+textarea.ant-input {
+    font-size: 18px;
 }
