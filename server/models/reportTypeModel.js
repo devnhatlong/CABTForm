@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 // Declare the Schema of the Mongo model
-var TopicSchema = new mongoose.Schema({
-    topicName: {
+var ReportTypeSchema = new mongoose.Schema({
+    reportTypeName: {
         type: String,
         required: true,
         trim: true,
@@ -17,4 +17,4 @@ var TopicSchema = new mongoose.Schema({
 });
 
 // Export the model
-module.exports = mongoose.model('Topic', TopicSchema);
+module.exports = mongoose.model('ReportType', ReportTypeSchema);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { FormListHeader, WrapperHeader } from '../styles/style';
-import { Button, Form, Input, Space } from "antd";
+import { Button, Form, Input, Select, Space } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 
 import { useNavigate } from 'react-router';
@@ -13,7 +13,7 @@ import ModalComponent from '../../../../components/ModalComponent/ModalComponent
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
-import fieldOfWorkService from '../../../../services/fieldOfWorkService';
+import reportTypeService from '../../../../services/reportTypeService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
@@ -49,25 +49,23 @@ export const ReportType = () => {
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
         { label: 'Quản lý danh mục' },
-        { label: 'Quản lý lĩnh vực vụ việc' },
+        { label: 'Quản lý chuyên đề' },
     ];
 
-    const [stateField, setStateField] = useState({
-        fieldName: "",
-        fieldCode : "",
+    const [stateReportType, setStateReportType] = useState({
+        reportTypeName: "",
         description  : ""
     });
 
-    const [stateFieldDetail, setStateFieldDetail] = useState({
-        fieldName: "",
-        fieldCode : "",
+    const [stateReportTypeDetail, setStateReportTypeDetail] = useState({
+        reportTypeName: "",
         description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { fieldName, fieldCode, description } = data;
-            const response = fieldOfWorkService.createFieldOfWork({ fieldName, fieldCode, description });
+            const { reportTypeName, description } = data;
+            const response = reportTypeService.createReportType({ reportTypeName, description });
             return response;
         }
     )
@@ -75,7 +73,7 @@ export const ReportType = () => {
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = fieldOfWorkService.updateFieldOfWork(id, { ...rests });
+            const response = reportTypeService.updateReportType(id, { ...rests });
             return response;
         }
     );
@@ -83,7 +81,7 @@ export const ReportType = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = fieldOfWorkService.deleteFieldOfWork(id);
+            const response = reportTypeService.deleteReportType(id);
             return response;
         }
     );
@@ -91,7 +89,7 @@ export const ReportType = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = fieldOfWorkService.deleteMultipleRecords(ids);
+          const response = reportTypeService.deleteMultipleRecords(ids);
     
           return response;
         }
@@ -99,10 +97,9 @@ export const ReportType = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateField({
-            fieldName: "",
-            fieldCode: "",
-            description: ""
+        setStateReportType({
+            reportTypeName: "",
+            description  : ""
         });
 
         modalForm.resetFields();
@@ -114,17 +111,16 @@ export const ReportType = () => {
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await fieldOfWorkService.getFieldOfWorks(currentPage, pageSize, filters);
+        const response = await reportTypeService.getReportTypes(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await fieldOfWorkService.getFieldOfWorkById(rowSelected);
+        const response = await reportTypeService.getReportTypeById(rowSelected);
 
         if (response?.data) {
-            setStateFieldDetail({
-                fieldName: response?.data?.fieldName,
-                fieldCode: response?.data?.fieldCode,
+            setStateReportTypeDetail({
+                reportTypeName: response?.data?.reportTypeName,
                 description: response?.data?.description
             })
         }
@@ -145,8 +141,8 @@ export const ReportType = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateFieldDetail)
-    }, [stateFieldDetail, drawerForm])
+        drawerForm.setFieldsValue(stateReportTypeDetail)
+    }, [stateReportTypeDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -233,7 +229,7 @@ export const ReportType = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateField, {
+        mutation.mutate(stateReportType, {
             onSettled: () => {
                 query.refetch();
             }
@@ -244,7 +240,7 @@ export const ReportType = () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateFieldDetail
+                ...stateReportTypeDetail
             }, 
             {
                 onSettled: () => {
@@ -300,15 +296,15 @@ export const ReportType = () => {
     };
 
     const handleOnChange = (name, value) => {
-        setStateField({
-            ...stateField,
+        setStateReportType({
+            ...stateReportType,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateFieldDetail({
-            ...stateFieldDetail,
+        setStateReportTypeDetail({
+            ...stateReportTypeDetail,
             [name]: value
         });
     };
@@ -395,19 +391,12 @@ export const ReportType = () => {
 
     const columns = [
         {
-            title: 'Tên lĩnh vực',
-            dataIndex: 'fieldName',
-            key: 'fieldName',
+            title: 'Tên chuyên đề',
+            dataIndex: 'reportTypeName',
+            key: 'reportTypeName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('fieldName', 'tên lĩnh vực')
-        },
-        {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
+            ...getColumnSearchProps('reportTypeName', 'tên chuyên đề')
         },
         {
             title: 'Mô tả',
@@ -504,7 +493,7 @@ export const ReportType = () => {
 
     return (
         <div>
-            <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
+            <WrapperHeader>Danh sách chuyên đề</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
@@ -519,12 +508,12 @@ export const ReportType = () => {
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
                     >
-                        Thêm lĩnh vực
+                        Thêm chuyên đề
                     </Button>
                 </FormListHeader>
                 <FormListHeader>
                     <ImportExcel
-                        service={fieldOfWorkService.importFromExcel}
+                        service={reportTypeService.importFromExcel}
                         onSuccess={(response) => {
                             message.success(`Import thành công: ${response.successCount} bản ghi`);
                             query.refetch(); // Làm mới danh sách sau khi import thành công
@@ -555,7 +544,7 @@ export const ReportType = () => {
                     }}
                 />
             </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Thêm lĩnh vực vụ việc" open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <ModalComponent form={modalForm} forceRender width={500} title="Thêm chuyên đề" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
                     <Form
                         form={modalForm}
@@ -568,37 +557,21 @@ export const ReportType = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên lĩnh vực vụ việc"
-                            name="fieldName"
+                            label="Tên chuyên đề"
+                            name="reportTypeName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên chuyên đề!' }]}
                         >
                             <InputComponent 
-                                name="fieldName" 
-                                value={stateField.fieldName} 
-                                placeholder="Nhập tên lĩnh vực" 
-                                onChange={(e) => handleOnChange('fieldName', e.target.value)} 
+                                name="reportTypeName" 
+                                value={stateReportType.reportTypeName} 
+                                placeholder="Nhập tên chuyên đề" 
+                                onChange={(e) => handleOnChange('reportTypeName', e.target.value)} 
                             />
                         </Form.Item>
-
-                        <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateField.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChange('fieldCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
+                        
                         <Form.Item
                             label="Mô tả"
                             name="description"
@@ -608,7 +581,7 @@ export const ReportType = () => {
                         >
                             <Input.TextArea 
                                 name="description" 
-                                value={stateField.description} 
+                                value={stateReportType.description} 
                                 onChange={(e) => handleOnChange('description', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
@@ -621,7 +594,7 @@ export const ReportType = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết lĩnh vực vụ việc" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+            <DrawerComponent form={drawerForm} title="Chi tiết chuyên đề" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
                         form={drawerForm}
@@ -634,34 +607,18 @@ export const ReportType = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên lĩnh vực vụ việc"
-                            name="fieldName"
+                            label="Tên chuyên đề"
+                            name="reportTypeName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên chuyên đề!' }]}
                         >
                             <InputComponent 
-                                name="fieldName" 
-                                value={stateFieldDetail.fieldName} 
-                                placeholder="Nhập tên lĩnh vực" 
-                                onChange={(e) => handleOnChangeDetail('fieldName', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateFieldDetail.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChangeDetail('fieldCode', e.target.value)} 
+                                name="reportTypeName" 
+                                value={stateReportTypeDetail.reportTypeName} 
+                                placeholder="Nhập tên chuyên đề" 
+                                onChange={(e) => handleOnChangeDetail('reportTypeName', e.target.value)} 
                             />
                         </Form.Item>
 
@@ -674,7 +631,7 @@ export const ReportType = () => {
                         >
                             <Input.TextArea 
                                 name="description" 
-                                value={stateFieldDetail.description} 
+                                value={stateReportTypeDetail.description} 
                                 onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
@@ -689,14 +646,14 @@ export const ReportType = () => {
             </DrawerComponent>
             <ModalComponent 
                 width={400} 
-                title="Xóa lĩnh vực vụ việc" 
+                title="Xóa chuyên đề" 
                 open={isModalOpenDelete} 
                 onCancel={handleCancelDelete} 
                 onOk={handleDeleteLetter}
                 centered 
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa lĩnh vực vụ việc này không?</div>
+                    <div>Bạn có muốn xóa chuyên đề này không?</div>
                 </Loading>
             </ModalComponent>
         </div>

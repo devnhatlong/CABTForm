@@ -13,8 +13,7 @@ import ModalComponent from '../../../../components/ModalComponent/ModalComponent
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
-import crimeService from '../../../../services/crimeService';
-import fieldOfWorkService from '../../../../services/fieldOfWorkService';
+import topicService from '../../../../services/topicService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
@@ -34,7 +33,6 @@ export const Topic = () => {
     const [dataTable, setDataTable] = useState([]);
     const [filters, setFilters] = useState({});
     const [resetSelection, setResetSelection] = useState(false);
-    const [fieldOfWorks, setFieldOfWorks] = useState([]);
     const [pagination, setPagination] = useState({
         currentPage: 1,
         pageSize: 5 // Số lượng mục trên mỗi trang
@@ -54,39 +52,20 @@ export const Topic = () => {
         { label: 'Quản lý chuyên đề' },
     ];
 
-    useEffect(() => {
-        const fetchFieldOfWorks = async () => {
-            try {
-                const response = await fieldOfWorkService.getFieldOfWorks(1, 100); // Lấy tối đa 100 bản ghi
-                if (response?.data) {
-                    setFieldOfWorks(response.data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
-            }
-        };
-    
-        fetchFieldOfWorks();
-    }, []);
-
-    const [stateCrime, setStateCrime] = useState({
-        crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
+    const [stateTopic, setStateTopic] = useState({
+        topicName: "",
         description  : ""
     });
 
-    const [stateCrimeDetail, setStateCrimeDetail] = useState({
-        crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
+    const [stateTopicDetail, setStateTopicDetail] = useState({
+        topicName: "",
         description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { crimeName, crimeCode, fieldCode, description } = data;
-            const response = crimeService.createCrime({ crimeName, crimeCode, fieldCode, description });
+            const { topicName, description } = data;
+            const response = topicService.createTopic({ topicName, description });
             return response;
         }
     )
@@ -94,7 +73,7 @@ export const Topic = () => {
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = crimeService.updateCrime(id, { ...rests });
+            const response = topicService.updateTopic(id, { ...rests });
             return response;
         }
     );
@@ -102,7 +81,7 @@ export const Topic = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = crimeService.deleteCrime(id);
+            const response = topicService.deleteTopic(id);
             return response;
         }
     );
@@ -110,7 +89,7 @@ export const Topic = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = crimeService.deleteMultipleRecords(ids);
+          const response = topicService.deleteMultipleRecords(ids);
     
           return response;
         }
@@ -118,10 +97,8 @@ export const Topic = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateCrime({
-            crimeName: "",
-            crimeCode: "",
-            fieldCode: "",
+        setStateTopic({
+            topicName: "",
             description  : ""
         });
 
@@ -134,18 +111,16 @@ export const Topic = () => {
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await crimeService.getCrimes(currentPage, pageSize, filters);
+        const response = await topicService.getTopics(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await crimeService.getCrimeById(rowSelected);
+        const response = await topicService.getTopicById(rowSelected);
 
         if (response?.data) {
-            setStateCrimeDetail({
-                crimeName: response?.data?.crimeName,
-                crimeCode: response?.data?.crimeCode,
-                fieldCode: response?.data?.fieldCode,
+            setStateTopicDetail({
+                topicName: response?.data?.topicName,
                 description: response?.data?.description
             })
         }
@@ -166,8 +141,8 @@ export const Topic = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateCrimeDetail)
-    }, [stateCrimeDetail, drawerForm])
+        drawerForm.setFieldsValue(stateTopicDetail)
+    }, [stateTopicDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -254,7 +229,7 @@ export const Topic = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateCrime, {
+        mutation.mutate(stateTopic, {
             onSettled: () => {
                 query.refetch();
             }
@@ -265,7 +240,7 @@ export const Topic = () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateCrimeDetail
+                ...stateTopicDetail
             }, 
             {
                 onSettled: () => {
@@ -321,15 +296,15 @@ export const Topic = () => {
     };
 
     const handleOnChange = (name, value) => {
-        setStateCrime({
-            ...stateCrime,
+        setStateTopic({
+            ...stateTopic,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateCrimeDetail({
-            ...stateCrimeDetail,
+        setStateTopicDetail({
+            ...stateTopicDetail,
             [name]: value
         });
     };
@@ -417,27 +392,11 @@ export const Topic = () => {
     const columns = [
         {
             title: 'Tên chuyên đề',
-            dataIndex: 'crimeName',
-            key: 'crimeName',
+            dataIndex: 'topicName',
+            key: 'topicName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('crimeName', 'tên chuyên đề')
-        },
-        {
-            title: 'Mã chuyên đề',
-            dataIndex: 'crimeCode',
-            key: 'crimeCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
-            // ...getColumnSearchProps('crimeCode', 'mã chuyên đề')
-        },
-        {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('fieldCode', 'mã chuyên đề')
+            ...getColumnSearchProps('topicName', 'tên chuyên đề')
         },
         {
             title: 'Mô tả',
@@ -554,7 +513,7 @@ export const Topic = () => {
                 </FormListHeader>
                 <FormListHeader>
                     <ImportExcel
-                        service={crimeService.importFromExcel}
+                        service={topicService.importFromExcel}
                         onSuccess={(response) => {
                             message.success(`Import thành công: ${response.successCount} bản ghi`);
                             query.refetch(); // Làm mới danh sách sau khi import thành công
@@ -599,59 +558,18 @@ export const Topic = () => {
                     >
                         <Form.Item
                             label="Tên chuyên đề"
-                            name="crimeName"
+                            name="topicName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng nhập tên chuyên đề!' }]}
                         >
                             <InputComponent 
-                                name="crimeName" 
-                                value={stateCrime.crimeName} 
+                                name="topicName" 
+                                value={stateTopic.topicName} 
                                 placeholder="Nhập tên chuyên đề" 
-                                onChange={(e) => handleOnChange('crimeName', e.target.value)} 
+                                onChange={(e) => handleOnChange('topicName', e.target.value)} 
                             />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mã chuyên đề"
-                            name="crimeCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã chuyên đề!' }]}
-                        >
-                            <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrime.crimeCode} 
-                                placeholder="Nhập mã chuyên đề" 
-                                onChange={(e) => handleOnChange('crimeCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực vụ việc!' }]}
-                        >
-                            <Select
-                                showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrime.fieldCode}
-                                onChange={(value) => handleOnChange('fieldCode', value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên lĩnh vực
-                            >
-                                {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
-                                        {field.fieldName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
                         </Form.Item>
                         
                         <Form.Item
@@ -663,7 +581,7 @@ export const Topic = () => {
                         >
                             <Input.TextArea 
                                 name="description" 
-                                value={stateCrime.description} 
+                                value={stateTopic.description} 
                                 onChange={(e) => handleOnChange('description', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
@@ -690,59 +608,18 @@ export const Topic = () => {
                     >
                         <Form.Item
                             label="Tên chuyên đề"
-                            name="crimeName"
+                            name="topicName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng nhập tên chuyên đề!' }]}
                         >
                             <InputComponent 
-                                name="crimeName" 
-                                value={stateCrimeDetail.crimeName} 
+                                name="topicName" 
+                                value={stateTopicDetail.topicName} 
                                 placeholder="Nhập tên chuyên đề" 
-                                onChange={(e) => handleOnChangeDetail('crimeName', e.target.value)} 
+                                onChange={(e) => handleOnChangeDetail('topicName', e.target.value)} 
                             />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mã chuyên đề"
-                            name="crimeCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã chuyên đề!' }]}
-                        >
-                            <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrimeDetail.crimeCode} 
-                                placeholder="Nhập mã chuyên đề" 
-                                onChange={(e) => handleOnChangeDetail('crimeCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực vụ việc!' }]}
-                        >
-                            <Select
-                                showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrimeDetail.fieldCode}
-                                onChange={(value) => handleOnChangeDetail('fieldCode', value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên lĩnh vực
-                            >
-                                {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
-                                        {field.fieldName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
                         </Form.Item>
 
                         <Form.Item
@@ -754,7 +631,7 @@ export const Topic = () => {
                         >
                             <Input.TextArea 
                                 name="description" 
-                                value={stateCrimeDetail.description} 
+                                value={stateTopicDetail.description} 
                                 onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
