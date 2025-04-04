@@ -59,10 +59,12 @@ const redirectToLogin = () => {
     window.location.href = "/login";
 };
 
+const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
+
 const userService = {
     login: async (values) => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_SERVER_URL}/user/login`, values);
+            const response = await axios.post(`${BASE_URL}/login`, values);
 
             return response.data;
         } 
@@ -72,7 +74,7 @@ const userService = {
     },
     logout: async (refreshToken) => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_SERVER_URL}/user/logout`, { refreshToken });
+            const response = await axios.post(`${BASE_URL}/logout`, { refreshToken });
 
             return response.data;
         } catch (error) {
@@ -81,7 +83,7 @@ const userService = {
     },
     getUser: async (refreshToken) => {
         try {
-            const response = await axiosJWT.get(`${process.env.REACT_APP_SERVER_URL}/user/get-user`,  {
+            const response = await axiosJWT.get(`${BASE_URL}/get-user`,  {
                 headers: {
                     authorization: `Bearer ${refreshToken}`,
                 }
@@ -93,25 +95,20 @@ const userService = {
             console.log(error);
         }
     },
-    getAllUser: async (currentPage, pageSize, filters = {}) => {
+    getUsers: async (page, limit, fields, sort) => {
         try {
-            const response = await axiosJWT.get(`${process.env.REACT_APP_SERVER_URL}/user/get-all-user`, {
-                params: {
-                    filters,
-                    currentPage,
-                    pageSize
-                }
+            const response = await axiosJWT.get(`${BASE_URL}/get-all-user`, {
+                params: { page, limit, fields, sort }
             });
-
             return response.data;
-        } 
-        catch (error) {
-            console.log(error);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách tài khoản:", error);
+            throw error;
         }
     },
     getDetailUser: async (id) => {
         try {
-            const response = await axiosJWT.get(`${process.env.REACT_APP_SERVER_URL}/user/get-detail-user/${id}`);
+            const response = await axiosJWT.get(`${BASE_URL}/get-detail-user/${id}`);
             return response.data;
         } 
         catch (error) {
@@ -120,7 +117,7 @@ const userService = {
     },
     register: async (data) => {
         try {
-            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/register`, data);
+            const response = await axiosJWT.post(`${BASE_URL}/register`, data);
             return response.data;
         } 
         catch (error) {
@@ -129,7 +126,7 @@ const userService = {
     },
     updateUserByAdmin: async (id, data) => {
         try {
-            const response = await axiosJWT.put(`${process.env.REACT_APP_SERVER_URL}/user/${id}`, data);
+            const response = await axiosJWT.put(`${BASE_URL}/${id}`, data);
             return response.data;
         } 
         catch (error) {
@@ -138,7 +135,7 @@ const userService = {
     },
     passwordChangedByAdmin: async (id, data) => {
         try {
-            const response = await axiosJWT.put(`${process.env.REACT_APP_SERVER_URL}/user/change-password-by-admin/${id}`, data);
+            const response = await axiosJWT.put(`${BASE_URL}/change-password-by-admin/${id}`, data);
             return response.data;
         } 
         catch (error) {
@@ -147,7 +144,7 @@ const userService = {
     },
     passwordChangedByUser: async (data) => {
         try {
-            const response = await axiosJWT.put(`${process.env.REACT_APP_SERVER_URL}/user/change-password-by-user/`, data);
+            const response = await axiosJWT.put(`${BASE_URL}/change-password-by-user/`, data);
             return response.data;
         } 
         catch (error) {
@@ -156,7 +153,7 @@ const userService = {
     },
     deleteUser: async (id) => {
         try {
-            const response = await axiosJWT.delete(`${process.env.REACT_APP_SERVER_URL}/user/delete-user/${id}`);
+            const response = await axiosJWT.delete(`${BASE_URL}/delete-user/${id}`);
             return response.data;
         } 
         catch (error) {
@@ -165,7 +162,7 @@ const userService = {
     },
     deleteMultipleUsers: async (ids) => {
         try {
-            const response = await axiosJWT.delete(`${process.env.REACT_APP_SERVER_URL}/user/delete-multiple-users`, { data: { ids } });
+            const response = await axiosJWT.delete(`${BASE_URL}/delete-multiple-users`, { data: { ids } });
             return response.data;
         } catch (error) {
             console.log(error);
@@ -173,7 +170,7 @@ const userService = {
     },
     getRefreshToken: async (refreshToken) => {
         try {
-            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/refreshtoken`, { refreshToken });
+            const response = await axiosJWT.post(`${BASE_URL}/refreshtoken`, { refreshToken });
 
             return response.data;
         } catch (error) {
@@ -182,7 +179,7 @@ const userService = {
     },
     importFromExcel: async (formData) => {
         try {
-            const response = await axiosJWT.post(`${process.env.REACT_APP_SERVER_URL}/user/import-from-excel`, formData,
+            const response = await axiosJWT.post(`${BASE_URL}/import-from-excel`, formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
                 }

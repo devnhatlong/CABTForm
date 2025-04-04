@@ -71,7 +71,7 @@ const getDepartmentById = async (id) => {
 };
 
 const updateDepartment = async (id, data) => {
-    const { departmentName, departmentType } = data;
+    const { departmentName } = data;
 
     // Kiểm tra xem departmentName đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
     if (departmentName) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import "./styles/sb-admin-2.min.css";
 import { Login } from './pages/Login/views/Login';
@@ -14,19 +14,25 @@ function App() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true); // Mặc định là `true` để chờ tải dữ liệu
 
-  const handleGetDetailsUser = async () => {
+  // Sử dụng useCallback để ghi nhớ hàm handleGetDetailsUser
+  const handleGetDetailsUser = useCallback(async () => {
     const { accessToken, decoded } = handleDecoded();
 
     if (decoded?._id) {
-      const response = await userService.getUser(accessToken);
-      dispatch(setUser(response.result));
+      try {
+        const response = await userService.getUser(accessToken);
+        dispatch(setUser(response.result));
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
     }
     setIsLoading(false); // Kết thúc trạng thái tải
-  };
+  }, [dispatch]); // Đưa dispatch vào mảng phụ thuộc
 
+  // Gọi handleGetDetailsUser khi component được mount
   useEffect(() => {
     handleGetDetailsUser();
-  }, []);
+  }, [handleGetDetailsUser]); // Đưa handleGetDetailsUser vào mảng phụ thuộc
 
   // Hiển thị trạng thái tải trước khi render các route
   if (isLoading) {

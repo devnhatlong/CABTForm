@@ -17,13 +17,9 @@ var userSchema = new mongoose.Schema({
         type: String,
         default: "master117",
     },
-    departmentCode: {
-        type:String,
-        // unique: true
-    },
-    departmentName: {
-        type:String,
-        // unique: true
+    departmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Department',
     },
     role: {
         type:String,

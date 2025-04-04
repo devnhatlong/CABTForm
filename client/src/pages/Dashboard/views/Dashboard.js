@@ -226,8 +226,10 @@ export const Dashboard = () => {
                 </Sider>
                 <Content
                     style={{
-                        marginLeft: collapsed ? 100 : 310,
-                        margin: '0px 12px',
+                        marginTop: 0,
+                        marginRight: 12,
+                        marginBottom: 0,
+                        marginLeft: collapsed ? 100 : 310, // Tách riêng marginLeft
                         padding: 18,
                         background: '#fff',
                         minHeight: '280px',

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const asyncHandler = require("express-async-handler");
 const UserService = require("../services/userService");
+const Department = require("../models/departmentModel");
 const jwt = require("jsonwebtoken");
 const { generateAccessToken } = require("../middlewares/jwt");
 const User = require("../models/userModel");
@@ -9,30 +10,40 @@ const crypto = require("crypto");
 
 const importFromExcel = async (req, res) => {
     try {
-        // Kiểm tra xem file có được tải lên không
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Đọc file Excel từ buffer
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = xlsx.utils.sheet_to_json(sheet);
 
-        const errors = []; // Danh sách lỗi
-        let successCount = 0; // Đếm số bản ghi thành công
+        const errors = [];
+        let successCount = 0;
 
-        // Lặp qua từng dòng dữ liệu
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { userName, departmentCode, departmentName, role } = row;
+            const { userName, departmentName, role } = row;
 
             // Kiểm tra nếu thiếu thông tin bắt buộc
-            if (!userName || !departmentCode || !departmentName) {
+            if (!userName || !departmentName) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu thông tin bắt buộc (userName, departmentCode, departmentName)",
+                    message: "Thiếu thông tin bắt buộc (userName, departmentName)",
+                });
+                continue;
+            }
+
+            // Trim departmentName để loại bỏ khoảng trắng thừa
+            const trimmedDepartmentName = departmentName.trim();
+
+            // Kiểm tra xem departmentName có tồn tại trong departmentModel hay không
+            const department = await Department.findOne({ departmentName: trimmedDepartmentName });
+            if (!department) {
+                errors.push({
+                    row: i + 1,
+                    message: `Đơn vị không tồn tại (departmentName: ${trimmedDepartmentName})`,
                 });
                 continue;
             }
@@ -56,22 +67,20 @@ const importFromExcel = async (req, res) => {
                 userName,
                 password: hashedPassword,
                 secondaryPassword: hashedSecondaryPassword,
-                departmentCode,
-                departmentName,
+                departmentId: department._id, // Sử dụng departmentId từ departmentModel
                 role: role || 'user', // Mặc định role là 'user' nếu không có
             });
 
             await newUser.save();
-            successCount++; // Tăng số bản ghi thành công
+            successCount++;
         }
 
-        // Trả về kết quả
         res.status(200).json({
             success: true,
             message: "Import hoàn tất",
             successCount,
             errorCount: errors.length,
-            errors, // Danh sách lỗi
+            errors,
         });
     } catch (error) {
         console.error('Error importing users:', error);
@@ -79,20 +88,21 @@ const importFromExcel = async (req, res) => {
     }
 };
 
-const register = asyncHandler(async(req, res) => { 
-    const { userName, password, departmentCode, departmentName, role } = req.body;
+const createUser = asyncHandler(async (req, res) => {
+    const { userName, password, departmentId, role } = req.body;
 
-    if (!userName || !password || !departmentCode || !departmentName || !role) {
-        return res.status(400).json({
-            success: false,
-            message: "Please provide all required information"
-        });
+    if (!userName || !password || !departmentId || !role) {
+        throw new Error("Thiếu thông tin");
     }
 
-    const response = await UserService.register(req.body);
-    return res.status(200).json({
-        success: response ? true : false,
-        message: response ? "Register is successfully" : "Something went wrong"
+    const response = await UserService.createUser(req.body);
+
+    res.status(201).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Tạo người dùng thành công"
+            : "Không thể tạo người dùng",
     });
 });
 
@@ -124,24 +134,21 @@ const login = asyncHandler(async(req, res) => {
     });
 });
 
-const getAllUser = asyncHandler(async (req, res) => {
-    let { userName, departmentCode, departmentName, role } = req.query.filters || {};
-    const { currentPage, pageSize } = req.query;
+const getUsers = asyncHandler(async (req, res) => {
+    const { page = 1, limit, sort, fields } = req.query;
 
-    // Xây dựng các điều kiện tìm kiếm dựa trên các tham số được cung cấp
-    const searchConditions = {};
-    if (userName) searchConditions.userName = { $regex: userName.trim(), $options: 'i' };
-    if (departmentCode) searchConditions.departmentCode = { $regex: departmentCode.trim(), $options: 'i' };
-    if (departmentName) searchConditions.departmentName = { $regex: departmentName.trim(), $options: 'i' };
-    if (role) searchConditions.role = { $regex: role.trim(), $options: 'i' };
+    const response = await UserService.getUsers(
+        Number(page),
+        limit ? Number(limit) : undefined,
+        fields,
+        sort
+    );
 
-    const response = await UserService.getAllUser(currentPage, pageSize, searchConditions);
-
-    // Trả về danh sách các đơn thư phù hợp với yêu cầu tìm kiếm
-    return res.status(200).json({
-        success: response ? true : false,
-        users: response ? response.users : "Không có user nào được tìm thấy",
-        totalRecord: response ? response.totalRecords : 0
+    res.status(200).json({
+        success: true,
+        data: response.forms,
+        total: response.total, // Tổng số bản ghi
+        message: "Lấy danh sách người dùng thành công",
     });
 });
 
@@ -155,13 +162,17 @@ const getUser = asyncHandler(async(req, res) => {
     });
 });
 
-const getDetailUser = asyncHandler(async (req, res) => {
+const getUserById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const response = await UserService.getDetailUser(id);
-    return res.status(200).json({
-        success: response ? true : false,
-        user: response ? response : "Không tìm thấy người dùng"
+    const response = await UserService.getUserById(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Lấy thông tin người dùng thành công"
+            : "Không tìm thấy người dùng",
     });
 });
 
@@ -270,12 +281,32 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
-const getUsers = asyncHandler(async (req, res) => { 
-    const response = await User.find().select("-password -refreshToken -role -passwordChangedAt -passwordResetExpires -passwordResetToken");;
+// const getUsers = asyncHandler(async (req, res) => { 
+//     const response = await User.find().select("-password -refreshToken -role -passwordChangedAt -passwordResetExpires -passwordResetToken");;
 
-    return res.status(200).json({
-        success: response ? true : false,
-        users: response
+//     return res.status(200).json({
+//         success: response ? true : false,
+//         users: response
+//     });
+// });
+
+const updateUser = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { userName, departmentId, role } = req.body;
+
+    // Kiểm tra nếu thiếu thông tin bắt buộc
+    if (!userName || !departmentId || !role) {
+        throw new Error("Thiếu thông tin bắt buộc (userName, departmentId, role)");
+    }
+
+    const response = await UserService.updateUser(_id, req.body);
+
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Cập nhật người dùng thành công"
+            : "Không thể cập nhật người dùng",
     });
 });
 
@@ -289,19 +320,6 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(200).json({
         success: response ? true : false,
         deletedUser: response ? response : `No user delete`
-    });
-});
-
-const updateUser = asyncHandler(async (req, res) => { 
-    const { _id } = req.user;
-
-    if (!_id || Object.keys(req.body).length === 0) throw new Error("Missing id");
-
-    const response = await UserService.updateUser(_id, req.body);
-
-    return res.status(200).json({
-        success: response ? true : false,
-        updatedUser: response ? response : `Some thing went wrong`
     });
 });
 
@@ -357,7 +375,7 @@ const deleteMultipleUsers = asyncHandler(async (req, res) => {
 
 module.exports = {
     importFromExcel,
-    register,
+    createUser,
     login,
     getUser,
     refreshAccessToken,
@@ -365,11 +383,10 @@ module.exports = {
     forgotPassword,
     resetPassword,
     getUsers,
-    getDetailUser,
+    getUserById,
     deleteUser,
     updateUser,
     updateUserByAdmin,
-    getAllUser,
     deleteMultipleUsers,
     changePasswordByAdmin,
     changePasswordByUser

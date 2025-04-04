@@ -117,7 +117,7 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
 
             <Modal
                 title="Danh sách lỗi"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={[
                     <Button key="close" onClick={handleCloseModal}>Đóng</Button>,

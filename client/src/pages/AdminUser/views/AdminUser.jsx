@@ -13,6 +13,7 @@ import TableComponent from '../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../components/InputComponent/InputComponent';
 import ModalComponent from '../../../components/ModalComponent/ModalComponent';
 import userService from '../../../services/userService';
+import departmentService from '../../../services/departmentService';
 import Loading from '../../../components/LoadingComponent/Loading';
 import * as message from '../../../components/Message/Message';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
@@ -38,6 +39,7 @@ export const AdminUser = () => {
     const [dataTable, setDataTable] = useState([]);
     const [filters, setFilters] = useState({});
     const [resetSelection, setResetSelection] = useState(false);
+    const [departments, setDepartments] = useState([]);
     const [pagination, setPagination] = useState({
         currentPage: 1,
         pageSize: 5 // Số lượng mục trên mỗi trang
@@ -56,6 +58,21 @@ export const AdminUser = () => {
         { label: 'Quản lý tài khoản' },
     ];
 
+    useEffect(() => {
+        const fetchDepartments = async () => {
+            try {
+                const response = await departmentService.getDepartments(1, 1000); // Lấy tối đa 100 bản ghi
+                if (response?.data) {
+                    setDepartments(response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách đơn vị:", error);
+            }
+        };
+    
+        fetchDepartments();
+    }, []);
+
     const [passwordChangedByAdmin, setPasswordChangedByAdmin] = useState({
         password: "",
     });
@@ -63,16 +80,14 @@ export const AdminUser = () => {
     const [stateUser, setStateUser] = useState({
         userName: "",
         password: "",
-        departmentCode: "",
-        departmentName: "",
+        departmentId: "",
         role: ""
     });
 
     const [stateUserDetail, setStateUserDetail] = useState({
         userName: "",
         password: "",
-        departmentCode: "",
-        departmentName: "",
+        departmentId: "",
         role: ""
     });
 
@@ -90,16 +105,14 @@ export const AdminUser = () => {
             const { 
                 userName,
                 password,
-                departmentCode,
-                departmentName,
+                departmentId,
                 role
             } = data;
 
             const response = userService.register({
                 userName,
                 password,
-                departmentCode,
-                departmentName,
+                departmentId,
                 role
             });
 
@@ -139,8 +152,7 @@ export const AdminUser = () => {
         setStateUser({
             userName: "",
             password: "",
-            departmentCode: "",
-            departmentName: "",
+            departmentId: "",
             role: ""
         });
 
@@ -153,21 +165,20 @@ export const AdminUser = () => {
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isLoadingDeleted } = mutationDeleted;
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
-    const getAllUser = async (currentPage, pageSize, filters) => {
-        const response = await userService.getAllUser(currentPage, pageSize, filters);
+    const getUsers = async (currentPage, pageSize, filters) => {
+        const response = await userService.getUsers(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailUser = async (rowSelected) => {
         const response = await userService.getDetailUser(rowSelected);
 
-        if (response?.user) {
+        if (response?.data) {
 
             setStateUserDetail({
-                userName: response?.user?.userName,
-                departmentCode: response?.user?.departmentCode,
-                departmentName: response?.user?.departmentName,
-                role: response?.user?.role
+                userName: response?.data?.userName,
+                departmentId: response?.data?.departmentId,
+                role: response?.data?.role
             })
         }
         setIsLoadingUpdate(false);
@@ -220,17 +231,17 @@ export const AdminUser = () => {
     }
 
     const query = useQuery({
-        queryKey: ['users'],
-        queryFn: () => getAllUser(pagination.currentPage, pagination.pageSize, filters),
+        queryKey: ['allRecords'],
+        queryFn: () => getUsers(pagination.currentPage, pagination.pageSize, filters),
         retry: 3,
         retryDelay: 1000,
     });
 
-    const { isLoading: isLoadingLetter, data: users } = query;
+    const { isLoading: isLoadingAllRecords, data: allRecords } = query;
 
     useEffect(() => {
         if(isSuccess && data?.success) {
-            message.success("Tạo người dùng thành công");
+            message.success(data.message);
             handleCancel();
         }
         else if (isError) {
@@ -341,7 +352,7 @@ export const AdminUser = () => {
         )
     }
 
-    const handleDeleteMultipleUsers = (ids) => {
+    const handleDeleteMultipleRecords = (ids) => {
         mutationDeletedMultiple.mutate(
           {
             ids: ids,
@@ -356,17 +367,18 @@ export const AdminUser = () => {
     }
 
     useEffect(() => {
-        if (users?.users) {
-            const updatedDataTable = fetchDataForDataTable(users);
+        if (allRecords?.data) {
+            const updatedDataTable = fetchDataForDataTable(allRecords);
             setDataTable(updatedDataTable);
         }
-    }, [users]);
+    }, [allRecords]);
 
-    const fetchDataForDataTable = (usersData) => {
-        return usersData?.users?.map((user) => {
+    const fetchDataForDataTable = (allRecords) => {
+        return allRecords?.data?.map((user) => {
             return {
                 ...user, 
                 key: user._id,
+                departmentName: user?.departmentId?.departmentName,
                 passwordChangedAt: user.passwordChangedAt ? moment(parseInt(user.passwordChangedAt)).format('DD/MM/YYYY HH:MM') : "",
                 createdAt: <Moment format="DD/MM/YYYY HH:MM">{user.createdAt}</Moment>,
                 updatedAt: <Moment format="DD/MM/YYYY HH:MM">{user.createdAt}</Moment>,
@@ -470,7 +482,7 @@ export const AdminUser = () => {
             <div style={{display: "flex", justifyContent: "center", gap: "10px"}}>
                 <EditOutlined style={{color: 'orange', fontSize: '18px', cursor: 'pointer'}} onClick={handleDetailLetter}/>
                 <DeleteOutlined style={{color: 'red', fontSize: '18px', cursor: 'pointer'}} onClick={() => setIsModalOpenDelete(true)}/>
-                <Popover placement="bottom" content={content}><MenuOutlined style={{color: '#1677ff', fontSize: '18px', cursor: 'pointer'}}/></Popover>
+                <Popover placement="bottom" overlayInnerStyle={{ padding: 0 }} content={content}><MenuOutlined style={{color: '#1677ff', fontSize: '18px', cursor: 'pointer'}}/></Popover>
             </div>
         )
     }
@@ -485,20 +497,12 @@ export const AdminUser = () => {
             ...getColumnSearchProps('userName', 'tên đăng nhập')
         },
         {
-            title: 'Mã phòng',
-            dataIndex: 'departmentCode',
-            key: 'departmentCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentCode', 'mã phòng')
-        },
-        {
             title: 'Tên đơn vị',
             dataIndex: 'departmentName',
             key: 'departmentName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentName', 'tên đơn vị')
+            // ...getColumnSearchProps('departmentName', 'tên đơn vị')
         },
         {
             title: 'Vai trò',
@@ -512,15 +516,19 @@ export const AdminUser = () => {
             dataIndex: 'loginInfo',
             key: 'loginInfo',
             render: loginInfo => (
-                <ul>
-                  {loginInfo.slice(-5).map((info, index) => (
-                    <li key={index}>
-                      IP: {info.ip} <br />
-                      Browser: {info.browser} <br />
-                      Thời gian: <Moment format="DD/MM/YYYY HH:mm" tz="Asia/Ho_Chi_Minh">{info.timestamp}</Moment>
-                    </li>
-                  ))}
-                </ul>
+                Array.isArray(loginInfo) && loginInfo.length > 0 ? (
+                  <ul>
+                    {loginInfo.slice(-3).map((info, index) => (
+                      <li key={index}>
+                        IP: {info.ip} <br />
+                        Browser: {info.browser} <br />
+                        Thời gian: <Moment format="DD/MM/YYYY HH:mm" tz="Asia/Ho_Chi_Minh">{info.timestamp}</Moment>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span>Không có dữ liệu</span>
+                )
             )
         },
         {
@@ -546,8 +554,8 @@ export const AdminUser = () => {
             return updatedFilters;
         });
 
-        // Tiếp tục với cuộc gọi hàm getAllUser và truyền filters vào đó.
-        getAllUser(pagination.currentPage, pagination.pageSize, filters)
+        // Tiếp tục với cuộc gọi hàm getUsers và truyền filters vào đó.
+        getUsers(pagination.currentPage, pagination.pageSize, filters)
         .then(response => {
             // Xử lý response...
             query.refetch();
@@ -585,8 +593,8 @@ export const AdminUser = () => {
             });
         }
 
-        // Tiếp tục với cuộc gọi hàm getAllUser và truyền filters vào đó để xóa filter cụ thể trên server.
-        getAllUser(pagination.currentPage, pagination.pageSize, filters)
+        // Tiếp tục với cuộc gọi hàm getUsers và truyền filters vào đó để xóa filter cụ thể trên server.
+        getUsers(pagination.currentPage, pagination.pageSize, filters)
             .then(response => {
                 // Xử lý response nếu cần
                 query.refetch();
@@ -655,11 +663,11 @@ export const AdminUser = () => {
                 </FormListHeader>
             </div>
             <div style={{ marginTop: '20px' }}>
-                <TableComponent handleDeleteMultiple={handleDeleteMultipleUsers} columns={columns} data={dataTable} isLoading={isLoadingLetter || isLoadingResetFilter} resetSelection={resetSelection}
+                <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
                     pagination={{
                         current: pagination.currentPage,
                         pageSize: pagination.pageSize,
-                        total: users?.totalRecord,
+                        total: allRecords?.total,
                         onChange: handlePageChange,
                         showSizeChanger: false
                     }}
@@ -674,9 +682,10 @@ export const AdminUser = () => {
                     }}
                 />
             </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Tạo người dùng" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <Loading isLoading = {isPending}>
+            <ModalComponent form={modalForm} forceRender width={500} title="Tạo tài khoản" open={isModalOpen} onCancel={handleCancel} footer={null}>
+                <Loading isLoading={isPending}>
                     <Form
+                        form={modalForm}
                         name="modalForm"
                         labelCol={{ span: 6 }}
                         wrapperCol={{ span: 17 }}
@@ -684,58 +693,85 @@ export const AdminUser = () => {
                         initialValues={{ remember: true }}
                         onFinish={onFinish}
                         autoComplete="on"
-                        form={modalForm}
                     >
                         <Form.Item
                             label="Tên tài khoản"
                             name="userName"
-                            rules={[{ required: true, message: 'Vui lòng nhập userName!' }]}
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản!' }]}
                         >
-                            <InputComponent name="userName" autoComplete="userName" value={stateUser.userName} onChange={(e) => handleOnChange('userName', e.target.value)} />
+                            <InputComponent 
+                                name="userName" 
+                                value={stateUser.userName} 
+                                placeholder="Nhập tên tài khoản" 
+                                onChange={(e) => handleOnChange('userName', e.target.value)} 
+                            />
                         </Form.Item>
 
                         <Form.Item
                             label="Mật khẩu"
                             name="password"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                         >
-                            <InputComponent type="password" autoComplete="current-password" name="password" value={stateUser.password} onChange={(e) => handleOnChange('password', e.target.value)} />
+                            <InputComponent 
+                                type="password" 
+                                autoComplete="current-password" 
+                                name="password" 
+                                value={stateUser.password} 
+                                onChange={(e) => handleOnChange('password', e.target.value)} 
+                            />
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã phòng"
-                            name="departmentCode"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã phòng!' }]}
+                            label="Đơn vị"
+                            name="departmentId"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn đơn vị!' }]}
                         >
-                            <InputComponent name="departmentCode" value={stateUser.departmentCode} onChange={(e) => handleOnChange('departmentCode', e.target.value)} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Tên phòng"
-                            name="departmentName"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên phòng!' }]}
-                        >
-                            <InputComponent name="departmentName" value={stateUser.departmentName} onChange={(e) => handleOnChange('departmentName', e.target.value)} />
+                            <Select
+                                showSearch // Bật tính năng tìm kiếm
+                                placeholder="Chọn đơn vị"
+                                value={stateUser.departmentId}
+                                onChange={(value) => handleOnChange('departmentId', value)}
+                                filterOption={(input, option) =>
+                                    option?.children?.toLowerCase().includes(input.toLowerCase())
+                                } // Tìm kiếm theo tên lĩnh vực
+                            >
+                                {departments.map((field) => (
+                                    <Select.Option key={field._id} value={field._id}>
+                                        {field.departmentName}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
 
                         <Form.Item
                             label="Vai trò"
                             name="role"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
                         >
-                            <Select 
-                                value={stateUser.role} 
-                                onChange={(value) => handleOnChange('role', value)} 
-                                onTouchStart={(e) => e.stopPropagation()} 
-                                onTouchMove={(e) => e.stopPropagation()}
+                            <Select
+                                placeholder="Chọn vai trò"
+                                value={stateUser.role}
+                                onChange={(value) => handleOnChange('role', value)}
                             >
                                 <Select.Option value="admin">Admin</Select.Option>
                                 <Select.Option value="user">User</Select.Option>
                             </Select>
                         </Form.Item>
 
-                        <Form.Item wrapperCol={{ offset: 16, span: 24 }}>
-                            <Button type="primary" htmlType="submit">Tạo người dùng</Button>
+                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                            <Button type="primary" htmlType="submit">Tạo tài khoản</Button>
                         </Form.Item>
                     </Form>
                 </Loading>
@@ -774,59 +810,79 @@ export const AdminUser = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết người dùng" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
-                <Loading isLoading = {isLoadingUpdate}>
+            <DrawerComponent form={drawerForm} title="Chi tiết tài khoản" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+                <Loading isLoading={isLoadingUpdate}>
                     <Form
+                        form={drawerForm}
                         name="drawerForm"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 15 }}
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 17 }}
                         style={{ maxWidth: 1000 }}
                         initialValues={{ remember: true }}
-                        onFinish={onUpdateLetter}
+                        onFinish={onUpdateLetter} // Hàm xử lý cập nhật tài khoản
                         autoComplete="on"
-                        form={drawerForm}
                     >
                         <Form.Item
                             label="Tên tài khoản"
                             name="userName"
-                            rules={[{ required: true, message: 'Vui lòng nhập userName!' }]}
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản!' }]}
                         >
-                            <InputComponent name="userName" autoComplete="userName" value={stateUserDetail.userName} onChange={(e) => handleOnChangeDetail('userName', e.target.value)} />
+                            <InputComponent
+                                name="userName"
+                                value={stateUserDetail.userName}
+                                placeholder="Nhập tên tài khoản"
+                                onChange={(e) => handleOnChangeDetail('userName', e.target.value)}
+                            />
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã phòng"
-                            name="departmentCode"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã phòng!' }]}
+                            label="Đơn vị"
+                            name="departmentId"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn đơn vị!' }]}
                         >
-                            <InputComponent name="departmentCode" value={stateUserDetail.departmentCode} onChange={(e) => handleOnChangeDetail('departmentCode', e.target.value)} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Tên phòng"
-                            name="departmentName"
-                            rules={[{ required: true, message: 'Vui lòng nhập tên phòng!' }]}
-                        >
-                            <InputComponent name="departmentName" value={stateUserDetail.departmentName} onChange={(e) => handleOnChangeDetail('departmentName', e.target.value)} />
+                            <Select
+                                showSearch
+                                placeholder="Chọn đơn vị"
+                                value={stateUserDetail.departmentId}
+                                onChange={(value) => handleOnChangeDetail('departmentId', value)}
+                                filterOption={(input, option) =>
+                                    option?.children?.toLowerCase().includes(input.toLowerCase())
+                                }
+                            >
+                                {departments.map((field) => (
+                                    <Select.Option key={field._id} value={field._id}>
+                                        {field.departmentName}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
 
                         <Form.Item
                             label="Vai trò"
                             name="role"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
                         >
-                            <Select 
-                                value={stateUserDetail.role} 
+                            <Select
+                                placeholder="Chọn vai trò"
+                                value={stateUserDetail.role}
                                 onChange={(value) => handleOnChangeDetail('role', value)}
-                                onTouchStart={(e) => e.stopPropagation()} 
-                                onTouchMove={(e) => e.stopPropagation()}
                             >
                                 <Select.Option value="admin">Admin</Select.Option>
                                 <Select.Option value="user">User</Select.Option>
                             </Select>
                         </Form.Item>
-                        <Form.Item wrapperCol={{ offset: 16, span: 24 }}>
-                            <Button type="primary" htmlType="submit">Cập nhật người dùng</Button>
+
+                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                            <Button type="primary" htmlType="submit">Cập nhật tài khoản</Button>
                         </Form.Item>
                     </Form>
                 </Loading>

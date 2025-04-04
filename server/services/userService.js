@@ -2,24 +2,28 @@ const User = require("../models/userModel");
 const { generateAccessToken, generateRefreshToken } = require("../middlewares/jwt");
 require("dotenv").config();
 
-const register = async (userData) => {
-    const { userName } = userData;
+const createUser = async (data) => {
+    const { userName, password, departmentId, role } = data;
 
-    // Kiểm tra xem người dùng đã tồn tại hay chưa
+    // Kiểm tra nếu người dùng đã tồn tại
     const existingUser = await User.findOne({ userName });
     if (existingUser) {
-        throw new Error("User already exists!");
+        throw new Error("Người dùng đã tồn tại");
     }
 
-    // Đặt mật khẩu phụ mặc định
+    // Tạo mật khẩu phụ mặc định nếu chưa có
     const secondaryPassword = process.env.SECONDARY_PASSWORD;
 
-    userData.departmentCode = userData.departmentCode.toLowerCase();
-    userData.secondaryPassword = secondaryPassword;
+    // Tạo mới người dùng
+    const newUser = new User({
+        userName,
+        password,
+        secondaryPassword,
+        departmentId,
+        role: role || "user", // Mặc định role là "user" nếu không có
+    });
 
-    // Tạo người dùng mới
-    const newUser = await User.create(userData);
-    return newUser;
+    return await newUser.save();
 };
 
 const login = async (user) => {
@@ -49,43 +53,53 @@ const login = async (user) => {
     }
 };
 
-const getAllUser = async (currentPage, pageSize, searchConditions) => {
+const getUsers = async (page = 1, limit, fields, sort) => {
     try {
-        let totalRecords = 0;
-        let users;
-        
-        if (currentPage === 0 && pageSize === 0) {
-            // Trường hợp lấy tất cả dữ liệu
-            if (searchConditions) {
-                totalRecords = await User.countDocuments({ ...searchConditions });
-                users = await User.find({ ...searchConditions }).select("-password -refreshToken").exec();
-            } else {
-                totalRecords = await User.countDocuments();
-                users = await User.find().select("-password -refreshToken").exec();
-            }
-        } else {
-            // Trường hợp áp dụng phân trang
-            if (searchConditions) {
-                totalRecords = await User.countDocuments({ ...searchConditions });
-                users = await User.find({ ...searchConditions })
-                    .select("-password -refreshToken")
-                    .skip((currentPage - 1) * pageSize)
-                    .limit(pageSize)
-                    .exec();
-            } else {
-                totalRecords = await User.countDocuments();
-                users = await User.find()
-                    .select("-password -refreshToken")
-                    .skip((currentPage - 1) * pageSize)
-                    .limit(pageSize)
-                    .exec();
+        const queries = {};
+
+        // Xử lý các trường trong fields để tạo bộ lọc
+        if (fields) {
+            for (const key in fields) {
+                if (fields[key]) {
+                    // Sử dụng regex để tìm kiếm không phân biệt hoa thường
+                    queries[key] = { $regex: fields[key], $options: "i" };
+                }
             }
         }
-        
-        return { users, totalRecords };
+
+        // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
+        limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
+
+        // Tạo câu lệnh query
+        let queryCommand = User.find(queries).populate({
+            path: "departmentId", // Tên trường tham chiếu trong userModel
+            select: "departmentName departmentType", // Chỉ lấy các trường cần thiết từ department
+        });
+
+        // Sorting
+        if (sort) {
+            const sortBy = sort.split(',').join(' ');
+            queryCommand = queryCommand.sort(sortBy);
+        } else {
+            queryCommand = queryCommand.sort('-createdAt'); // Mặc định sắp xếp theo ngày tạo giảm dần
+        }
+
+        // Pagination
+        const skip = (page - 1) * limit;
+        queryCommand = queryCommand.skip(skip).limit(limit);
+
+        // Execute query
+        const data = await queryCommand;
+        const total = await User.countDocuments(queries);
+
+        return {
+            success: true,
+            forms: data,
+            total,
+        };
     } catch (error) {
-        console.error("Lỗi khi tìm user:", error);
-        return null;
+        console.error("Error in getUsers:", error);
+        throw new Error("Failed to retrieve users");
     }
 };
 
@@ -94,14 +108,8 @@ const getUser = async (userId) => {
     return user;
 };
 
-const getDetailUser = async (id) => {
-    try {
-        const user = await User.findById({ _id: id }).select("-password -refreshToken");
-        return user;
-    } catch (error) {
-        console.error("Lỗi khi lấy user:", error);
-        return null;
-    }
+const getUserById = async (id) => {
+    return await User.findById(id);
 };
 
 const deleteUser = async (userId) => {
@@ -110,8 +118,23 @@ const deleteUser = async (userId) => {
 };
 
 const updateUser = async (userId, dataUpdate) => {
-    const user = await User.findByIdAndUpdate(userId, dataUpdate, { new: true }).select("-password -refreshToken -role");
-    return user;
+    const { userName } = dataUpdate;
+
+    // Kiểm tra xem userName đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
+    if (userName) {
+        const existingUser = await User.findOne({ userName, _id: { $ne: userId } });
+        if (existingUser) {
+            throw new Error("Tên người dùng đã tồn tại");
+        }
+    }
+
+    // Nếu không có lỗi, tiến hành cập nhật
+    const updatedUser = await User.findByIdAndUpdate(userId, dataUpdate, { new: true }).select("-password -refreshToken -role");
+    if (!updatedUser) {
+        throw new Error("Không tìm thấy người dùng để cập nhật");
+    }
+
+    return updatedUser;
 };
 
 const updateUserByAdmin = async (userId, dataUpdate) => {
@@ -178,11 +201,11 @@ const deleteMultipleUsers = async (ids) => {
 };
 
 module.exports = {
-    register,
+    createUser,
     login,
     getUser,
-    getAllUser,
-    getDetailUser,
+    getUsers,
+    getUserById,
     deleteUser,
     updateUser,
     updateUserByAdmin,
