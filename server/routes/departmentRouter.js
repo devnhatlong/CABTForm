@@ -4,12 +4,12 @@ const { upload } = require('../middlewares/multerMiddleware');
 const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
 
 router.post("/import-from-excel", verifyAccessToken, upload.single("file"), ctrls.importFromExcel);
-router.post("/create-department", ctrls.createDepartment);
-router.get("/get-all-department", [verifyAccessToken, isAdmin], ctrls.getAllDepartment);
-router.get("/get-detail-department/:id", [verifyAccessToken, isAdmin], ctrls.getDetailDepartment);
-router.delete("/delete-department/:id", [verifyAccessToken, isAdmin], ctrls.deleteDepartment);
-router.delete("/delete-multiple-departments", [verifyAccessToken, isAdmin], ctrls.deleteMultipleDepartments);
-router.put("/update-department/:id", [verifyAccessToken, isAdmin], ctrls.updateDepartment);
+router.post("/", verifyAccessToken , ctrls.createDepartment);
+router.get("/", verifyAccessToken, ctrls.getDepartments);
+router.get("/:id", verifyAccessToken, ctrls.getDepartmentById);
+router.put("/:id", verifyAccessToken, ctrls.updateDepartment);
+router.delete("/delete-multiple", verifyAccessToken, ctrls.deleteMultipleDepartments);
+router.delete("/:id", verifyAccessToken, ctrls.deleteDepartment);
 
 module.exports = router;
 

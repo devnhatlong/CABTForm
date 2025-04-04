@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined, SettingOutlined } from '@ant-design/icons';
+import { UserOutlined, IdcardOutlined, CarOutlined, FireOutlined, SnippetsOutlined, SettingOutlined, ContainerOutlined } from '@ant-design/icons';
 import { Menu, Layout } from 'antd';
 import { useSelector } from 'react-redux';
 
@@ -14,6 +14,10 @@ import { Crime } from "../../Category/Crime/views/Crime";
 import { PATHS } from '../../../constants/path';
 import { PermissionFunction } from "../../Setting/PermissionFunction/views/PermissionFunction";
 import { PermissionField } from "../../Setting/PermissionField/views/PermissionField";
+import { ReportSend } from "../../REPORT/ReportSend/views/ReportSend";
+import { ReportSummary } from "../../REPORT/ReportSummary/views/ReportSummary";
+import { Topic } from "../../Category/Topic/views/Topic";
+import { ReportType } from "../../Category/ReportType/views/ReportType";
 
 const { Sider, Content } = Layout;
 
@@ -79,6 +83,16 @@ export const Dashboard = () => {
             ]
         },
         {
+            key: 'report',
+            label: 'Báo cáo - tổng hợp',
+            icon: <ContainerOutlined />,
+            style: menuItemStyle,
+            children: [
+                getItem('Gửi báo cáo', PATHS.REPORT.SEND, null, null, menuChildrenItemStyle),
+                getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
+            ]
+        },
+        {
             key: 'category',
             label: 'Quản lý danh mục',
             icon: <SnippetsOutlined />,
@@ -86,6 +100,8 @@ export const Dashboard = () => {
             children: [
                 getItem('Lĩnh vực vụ việc', PATHS.CATEGORY.FIELD_OF_WORK, null, null, menuChildrenItemStyle),
                 getItem('Tội danh', PATHS.CATEGORY.CRIME, null, null, menuChildrenItemStyle),
+                getItem('Chuyên đề', PATHS.CATEGORY.TOPIC, null, null, menuChildrenItemStyle),
+                getItem('Loại báo cáo', PATHS.CATEGORY.REPORT_TYPE, null, null, menuChildrenItemStyle),
             ]
         },
         {
@@ -138,8 +154,12 @@ export const Dashboard = () => {
             [PATHS.TRAFFIC.STATS]: 'traffic',
             [PATHS.FIRE_EXPLOSIONS.LIST]: 'fire-explosions',
             [PATHS.FIRE_EXPLOSIONS.STATS]: 'fire-explosions',
+            [PATHS.REPORT.SEND]: 'report',
+            [PATHS.REPORT.SUMMARY]: 'report',
             [PATHS.CATEGORY.FIELD_OF_WORK]: 'category',
             [PATHS.CATEGORY.CRIME]: 'category',
+            [PATHS.CATEGORY.TOPIC]: 'category',
+            [PATHS.CATEGORY.REPORT_TYPE]: 'category',
             [PATHS.SETTING.PERMISSION_FUNCTION]: 'setting',
             [PATHS.SETTING.PERMISSION_FIELD]: 'setting',
 
@@ -216,8 +236,12 @@ export const Dashboard = () => {
                     }}
                 >
                     <Routes>
+                        <Route path={PATHS.REPORT.SEND} element={<ReportSend />} />
+                        <Route path={PATHS.REPORT.SUMMARY} element={<ReportSummary />} />
                         <Route path={PATHS.CATEGORY.FIELD_OF_WORK} element={<FieldOfWork />} />
                         <Route path={PATHS.CATEGORY.CRIME} element={<Crime />} />
+                        <Route path={PATHS.CATEGORY.TOPIC} element={<Topic />} />
+                        <Route path={PATHS.CATEGORY.REPORT_TYPE} element={<ReportType />} />
                         <Route path={PATHS.SETTING.PERMISSION_FUNCTION} element={<PermissionFunction />} />
                         <Route path={PATHS.SETTING.PERMISSION_FIELD} element={<PermissionField />} />
                         <Route path={PATHS.ADMIN.USER} element={<AdminUser />} />

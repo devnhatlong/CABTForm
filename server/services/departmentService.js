@@ -1,92 +1,112 @@
+require('dotenv').config();
 const Department = require("../models/departmentModel");
 
-const createDepartment = async (departmentData) => {
-    const { departmentCode } = departmentData;
+const createDepartment = async (data) => {
+    const { departmentName, departmentType } = data;
 
-    // Kiểm tra xem Department đã tồn tại hay chưa
-    const existingDepartment = await Department.findOne({ departmentCode });
+    // Kiểm tra nếu đơn vị đã tồn tại
+    const existingDepartment = await Department.findOne({ departmentName });
     if (existingDepartment) {
-        throw new Error("Department already exists!");
+        throw new Error("Phòng ban đã tồn tại");
     }
 
-    // Tạo Department mới
-    const newDepartment = await Department.create(departmentData);
-    return newDepartment;
+    // Tạo mới đơn vị
+    const newDepartment = new Department({
+        departmentName,
+        departmentType,
+    });
+
+    return await newDepartment.save();
 };
 
-const getAllDepartment = async (currentPage, pageSize, searchConditions) => {
+const getDepartments = async (page = 1, limit, fields, sort) => {
     try {
-        let totalRecords = 0;
-        let departments;
-        
-        if (currentPage === 0 && pageSize === 0) {
-            // Trường hợp lấy tất cả dữ liệu
-            if (searchConditions) {
-                totalRecords = await Department.countDocuments({ ...searchConditions });
-                departments = await Department.find({ ...searchConditions }).exec();
-            } else {
-                totalRecords = await Department.countDocuments();
-                departments = await Department.find().exec();
-            }
-        } else {
-            // Trường hợp áp dụng phân trang
-            if (searchConditions) {
-                totalRecords = await Department.countDocuments({ ...searchConditions });
-                departments = await Department.find({ ...searchConditions })
-                    .skip((currentPage - 1) * pageSize)
-                    .limit(pageSize)
-                    .exec();
-            } else {
-                totalRecords = await Department.countDocuments();
-                departments = await Department.find()
-                    .skip((currentPage - 1) * pageSize)
-                    .limit(pageSize)
-                    .exec();
+        const queries = {};
+
+        // Xử lý các trường trong fields để tạo bộ lọc
+        if (fields) {
+            for (const key in fields) {
+                if (fields[key]) {
+                    // Sử dụng regex để tìm kiếm không phân biệt hoa thường
+                    queries[key] = { $regex: fields[key], $options: "i" };
+                }
             }
         }
-        
-        return { departments, totalRecords };
+
+        // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
+        limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
+
+        // Tạo câu lệnh query
+        let queryCommand = Department.find(queries);
+
+        // Sorting
+        if (sort) {
+            const sortBy = sort.split(',').join(' ');
+            queryCommand = queryCommand.sort(sortBy);
+        } else {
+            queryCommand = queryCommand.sort('-createdAt'); // Mặc định sắp xếp theo ngày tạo giảm dần
+        }
+
+        // Pagination
+        const skip = (page - 1) * limit;
+        queryCommand = queryCommand.skip(skip).limit(limit);
+
+        // Execute query
+        const data = await queryCommand;
+        const total = await Department.countDocuments(queries);
+
+        return {
+            success: true,
+            forms: data,
+            total,
+        };
     } catch (error) {
-        console.error("Lỗi khi tìm department:", error);
-        return null;
+        console.error("Error in getDepartments:", error);
+        throw new Error("Failed to retrieve departments");
     }
 };
 
-const getDetailDepartment = async (id) => {
-    try {
-        const department = await Department.findById({ _id: id });
-        return department;
-    } catch (error) {
-        console.error("Lỗi khi lấy department:", error);
-        return null;
+const getDepartmentById = async (id) => {
+    return await Department.findById(id);
+};
+
+const updateDepartment = async (id, data) => {
+    const { departmentName, departmentType } = data;
+
+    // Kiểm tra xem departmentName đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
+    if (departmentName) {
+        const existingDepartment = await Department.findOne({ departmentName, _id: { $ne: id } });
+        if (existingDepartment) {
+            throw new Error("Tên đơn vị đã tồn tại");
+        }
     }
+
+    // Nếu không có lỗi, tiến hành cập nhật
+    const updatedDepartment = await Department.findByIdAndUpdate(id, data, { new: true });
+    if (!updatedDepartment) {
+        throw new Error("Không tìm thấy đơn vị để cập nhật");
+    }
+
+    return updatedDepartment;
 };
 
-const deleteDepartment = async (departmentId) => {
-    const department = await Department.findByIdAndDelete(departmentId);
-    return department;
-};
-
-const updateDepartment = async (departmentId, dataUpdate) => {
-    const department = await Department.findByIdAndUpdate(departmentId, dataUpdate, { new: true });
-    return department;
+const deleteDepartment = async (id) => {
+    return await Department.findByIdAndDelete(id);
 };
 
 const deleteMultipleDepartments = async (ids) => {
-    try {
-        const deletedDepartment = await Department.deleteMany({ _id: { $in: ids }});
-        return deletedDepartment;
-    } catch (error) {
-        console.error("Lỗi khi xóa người dùng:", error);
-        return null;
-    }
+    const response = await Department.deleteMany({ _id: { $in: ids } });
+    return {
+        success: response.deletedCount > 0,
+        deletedCount: response.deletedCount,
+    };
 };
 
 module.exports = {
     createDepartment,
-    getAllDepartment,
-    getDetailDepartment,
-    deleteDepartment,
+    getDepartments,
+    getDepartmentById,
     updateDepartment,
+    deleteDepartment,
     deleteMultipleDepartments
 };

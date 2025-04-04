@@ -33,18 +33,13 @@ axiosDepartment.interceptors.response.use(
 
                 return axiosDepartment(originalRequest);
             } catch (refreshError) {
-                // Handle refresh token error
                 console.error(refreshError);
-                // You may want to redirect to login page or handle this in your application accordingly
-                // Redirect to login page or handle accordingly
                 redirectToLogin();
                 return Promise.reject(error);
             }
         }
 
-        // If error is 401 and no refresh token, assume user needs to logout
         if (error.response.status === 401 && !refreshToken) {
-            // Redirect to login page and clear tokens
             redirectToLogin();
         }
 
@@ -53,77 +48,86 @@ axiosDepartment.interceptors.response.use(
 );
 
 const redirectToLogin = () => {
-    // Clear tokens from cookie
     document.cookie = "accessToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "refreshToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    // Redirect to login page
     window.location.href = "/login";
 };
 
-const departmentService = {
-    getAllDepartment: async (currentPage, pageSize, filters = {}) => {
-        try {
-            const response = await axiosDepartment.get(`${process.env.REACT_APP_SERVER_URL}/department/get-all-department`, {
-                params: {
-                    filters,
-                    currentPage,
-                    pageSize
-                }
-            });
+const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/department`;
 
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
-        }
-    },
-    getDetailDepartment: async (id) => {
-        try {
-            const response = await axiosDepartment.get(`${process.env.REACT_APP_SERVER_URL}/department/get-detail-department/${id}`);
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
-        }
-    },
+const DepartmentService = {
+    // Tạo tội danh mới
     createDepartment: async (data) => {
         try {
-            const response = await axiosDepartment.post(`${process.env.REACT_APP_SERVER_URL}/department/create-department`, data);
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
-        }
-    },
-    updateDepartment: async (id, data) => {
-        try {
-            const response = await axiosDepartment.put(`${process.env.REACT_APP_SERVER_URL}/department/update-department/${id}`, data);
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
-        }
-    },
-    deleteDepartment: async (id) => {
-        try {
-            const response = await axiosDepartment.delete(`${process.env.REACT_APP_SERVER_URL}/department/delete-department/${id}`);
-            return response.data;
-        } 
-        catch (error) {
-            console.log(error);
-        }
-    },
-    deleteMultipleDepartments: async (ids) => {
-        try {
-            const response = await axiosDepartment.delete(`${process.env.REACT_APP_SERVER_URL}/department/delete-multiple-departments`, { data: { ids } });
+            const response = await axiosDepartment.post(`${BASE_URL}/`, data);
             return response.data;
         } catch (error) {
-            console.log(error);
+            console.error("Lỗi khi tạo tội danh:", error);
+            throw error;
         }
     },
+
+    // Lấy danh sách tội danh với phân trang và lọc
+    getDepartments: async (page, limit, fields, sort) => {
+        try {
+            const response = await axiosDepartment.get(`${BASE_URL}/`, {
+                params: { page, limit, fields, sort }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách tội danh:", error);
+            throw error;
+        }
+    },
+
+    // Lấy chi tiết tội danh theo ID
+    getDepartmentById: async (id) => {
+        try {
+            const response = await axiosDepartment.get(`${BASE_URL}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết tội danh:", error);
+            throw error;
+        }
+    },
+
+    // Cập nhật tội danh (chỉ admin)
+    updateDepartment: async (id, data) => {
+        try {
+            const response = await axiosDepartment.put(`${BASE_URL}/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi cập nhật tội danh:", error);
+            throw error;
+        }
+    },
+
+    // Xóa tội danh (chỉ admin)
+    deleteDepartment: async (id) => {
+        try {
+            const response = await axiosDepartment.delete(`${BASE_URL}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi xóa tội danh:", error);
+            throw error;
+        }
+    },
+
+    deleteMultipleRecords: async (ids) => {
+        try {
+            const response = await axiosDepartment.delete(`${BASE_URL}/delete-multiple`, {
+                data: { ids }, // Đảm bảo gửi đúng định dạng
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi xóa nhiều tội danh:", error);
+            throw error;
+        }
+    },
+
     importFromExcel: async (formData) => {
         try {
-            const response = await axiosDepartment.post(`${process.env.REACT_APP_SERVER_URL}/department/import-from-excel`, formData,
+            const response = await axiosDepartment.post(`${BASE_URL}/import-from-excel`, formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
                 }
@@ -136,4 +140,4 @@ const departmentService = {
     },
 };
 
-export default departmentService;
+export default DepartmentService;

@@ -1,24 +1,24 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { FormListHeader, WrapperHeader } from '../styles/style';
-import { Button, Form, Input, Select, Space } from "antd";
+import { Button, Form, Input, Space } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
-import TableComponent from '../../../components/TableComponent/TableComponent';
-import InputComponent from '../../../components/InputComponent/InputComponent';
-import ModalComponent from '../../../components/ModalComponent/ModalComponent';
-import Loading from '../../../components/LoadingComponent/Loading';
-import * as message from '../../../components/Message/Message';
-import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
-import departmentService from '../../../services/departmentService';
-import { useMutationHooks } from '../../../hooks/useMutationHook';
-import ImportExcel from "../../../components/ImportExcel/ImportExcel";
-import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import TableComponent from '../../../../components/TableComponent/TableComponent';
+import InputComponent from '../../../../components/InputComponent/InputComponent';
+import ModalComponent from '../../../../components/ModalComponent/ModalComponent';
+import Loading from '../../../../components/LoadingComponent/Loading';
+import * as message from '../../../../components/Message/Message';
+import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
+import fieldOfWorkService from '../../../../services/fieldOfWorkService';
+import { useMutationHooks } from '../../../../hooks/useMutationHook';
+import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
+import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
-export const AdminDepartment = () => {
+export const ReportSummary = () => {
     const [modalForm] = Form.useForm();
     const [drawerForm] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,24 +48,26 @@ export const AdminDepartment = () => {
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
-        { label: 'Quản trị' },
-        { label: 'Quản lý đơn vị' },
+        { label: 'Quản lý danh mục' },
+        { label: 'Quản lý lĩnh vực vụ việc' },
     ];
 
-    const [stateDepartment, setStateDepartment] = useState({
-        departmentName: "",
-        departmentType : "",
+    const [stateField, setStateField] = useState({
+        fieldName: "",
+        fieldCode : "",
+        description  : ""
     });
 
-    const [stateDepartmentDetail, setStateDepartmentDetail] = useState({
-        departmentName: "",
-        departmentType : "",
+    const [stateFieldDetail, setStateFieldDetail] = useState({
+        fieldName: "",
+        fieldCode : "",
+        description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { departmentName, departmentType } = data;
-            const response = departmentService.createDepartment({ departmentName, departmentType });
+            const { fieldName, fieldCode, description } = data;
+            const response = fieldOfWorkService.createFieldOfWork({ fieldName, fieldCode, description });
             return response;
         }
     )
@@ -73,7 +75,7 @@ export const AdminDepartment = () => {
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = departmentService.updateDepartment(id, { ...rests });
+            const response = fieldOfWorkService.updateFieldOfWork(id, { ...rests });
             return response;
         }
     );
@@ -81,7 +83,7 @@ export const AdminDepartment = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = departmentService.deleteDepartment(id);
+            const response = fieldOfWorkService.deleteFieldOfWork(id);
             return response;
         }
     );
@@ -89,7 +91,7 @@ export const AdminDepartment = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = departmentService.deleteMultipleRecords(ids);
+          const response = fieldOfWorkService.deleteMultipleRecords(ids);
     
           return response;
         }
@@ -97,9 +99,10 @@ export const AdminDepartment = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateDepartment({
-            departmentName: "",
-            departmentType: "",
+        setStateField({
+            fieldName: "",
+            fieldCode: "",
+            description: ""
         });
 
         modalForm.resetFields();
@@ -111,17 +114,18 @@ export const AdminDepartment = () => {
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await departmentService.getDepartments(currentPage, pageSize, filters);
+        const response = await fieldOfWorkService.getFieldOfWorks(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await departmentService.getDepartmentById(rowSelected);
+        const response = await fieldOfWorkService.getFieldOfWorkById(rowSelected);
 
         if (response?.data) {
-            setStateDepartmentDetail({
-                departmentName: response?.data?.departmentName,
-                departmentType: response?.data?.departmentType,
+            setStateFieldDetail({
+                fieldName: response?.data?.fieldName,
+                fieldCode: response?.data?.fieldCode,
+                description: response?.data?.description
             })
         }
         setIsLoadingUpdate(false);
@@ -141,8 +145,8 @@ export const AdminDepartment = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateDepartmentDetail)
-    }, [stateDepartmentDetail, drawerForm])
+        drawerForm.setFieldsValue(stateFieldDetail)
+    }, [stateFieldDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -229,7 +233,7 @@ export const AdminDepartment = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateDepartment, {
+        mutation.mutate(stateField, {
             onSettled: () => {
                 query.refetch();
             }
@@ -240,7 +244,7 @@ export const AdminDepartment = () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateDepartmentDetail
+                ...stateFieldDetail
             }, 
             {
                 onSettled: () => {
@@ -296,15 +300,15 @@ export const AdminDepartment = () => {
     };
 
     const handleOnChange = (name, value) => {
-        setStateDepartment({
-            ...stateDepartment,
+        setStateField({
+            ...stateField,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateDepartmentDetail({
-            ...stateDepartmentDetail,
+        setStateFieldDetail({
+            ...stateFieldDetail,
             [name]: value
         });
     };
@@ -391,20 +395,26 @@ export const AdminDepartment = () => {
 
     const columns = [
         {
-            title: 'Tên đơn vị',
-            dataIndex: 'departmentName',
-            key: 'departmentName',
+            title: 'Tên lĩnh vực',
+            dataIndex: 'fieldName',
+            key: 'fieldName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentName', 'tên đơn vị')
+            ...getColumnSearchProps('fieldName', 'tên lĩnh vực')
         },
         {
-            title: 'Loại đơn vị',
-            dataIndex: 'departmentType',
-            key: 'departmentType',
+            title: 'Mã lĩnh vực',
+            dataIndex: 'fieldCode',
+            key: 'fieldCode',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentType', 'loại đơn vị')
+        },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            key: 'description',
+            filteredValue: null, // Loại bỏ filter mặc định
+            onFilter: null, // Loại bỏ filter mặc định
         },
         {
           title: buttonReloadTable,
@@ -494,7 +504,7 @@ export const AdminDepartment = () => {
 
     return (
         <div>
-            <WrapperHeader>Danh sách đơn vị</WrapperHeader>
+            <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
@@ -509,12 +519,12 @@ export const AdminDepartment = () => {
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
                     >
-                        Thêm đơn vị
+                        Thêm lĩnh vực
                     </Button>
                 </FormListHeader>
                 <FormListHeader>
                     <ImportExcel
-                        service={departmentService.importFromExcel}
+                        service={fieldOfWorkService.importFromExcel}
                         onSuccess={(response) => {
                             message.success(`Import thành công: ${response.successCount} bản ghi`);
                             query.refetch(); // Làm mới danh sách sau khi import thành công
@@ -545,7 +555,7 @@ export const AdminDepartment = () => {
                     }}
                 />
             </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Thêm đơn vị" open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <ModalComponent form={modalForm} forceRender width={500} title="Thêm lĩnh vực vụ việc" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
                     <Form
                         form={modalForm}
@@ -558,37 +568,51 @@ export const AdminDepartment = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên đơn vị"
-                            name="departmentName"
+                            label="Tên lĩnh vực vụ việc"
+                            name="fieldName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
                         >
                             <InputComponent 
-                                name="departmentName" 
-                                value={stateDepartment.departmentName} 
-                                placeholder="Nhập tên đơn vị" 
-                                onChange={(e) => handleOnChange('departmentName', e.target.value)} 
+                                name="fieldName" 
+                                value={stateField.fieldName} 
+                                placeholder="Nhập tên lĩnh vực" 
+                                onChange={(e) => handleOnChange('fieldName', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="Loại đơn vị"
-                            name="departmentType"
+                            label="Mã lĩnh vực vụ việc"
+                            name="fieldCode"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn loại đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
                         >
-                            <Select
-                                placeholder="Chọn loại đơn vị"
-                                value={stateDepartment.departmentType}
-                                onChange={(value) => handleOnChange('departmentType', value)}
-                            >
-                                <Select.Option value="Phòng ban">Phòng ban</Select.Option>
-                                <Select.Option value="Xã, phường, thị trấn">Xã, phường, thị trấn</Select.Option>
-                            </Select>
+                            <InputComponent 
+                                name="fieldCode" 
+                                value={stateField.fieldCode} 
+                                placeholder="Nhập mã lĩnh vực" 
+                                onChange={(e) => handleOnChange('fieldCode', e.target.value)} 
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Input.TextArea 
+                                name="description" 
+                                value={stateField.description} 
+                                onChange={(e) => handleOnChange('description', e.target.value)} 
+                                rows={4} // Số dòng hiển thị mặc định
+                                placeholder="Nhập mô tả..." 
+                            />
                         </Form.Item>
 
                         <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
@@ -597,7 +621,7 @@ export const AdminDepartment = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết đơn vị" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+            <DrawerComponent form={drawerForm} title="Chi tiết lĩnh vực vụ việc" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
                         form={drawerForm}
@@ -610,37 +634,51 @@ export const AdminDepartment = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên đơn vị"
-                            name="departmentName"
+                            label="Tên lĩnh vực vụ việc"
+                            name="fieldName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
                         >
                             <InputComponent 
-                                name="departmentName" 
-                                value={stateDepartmentDetail.departmentName} 
-                                placeholder="Nhập tên đơn vị" 
-                                onChange={(e) => handleOnChangeDetail('departmentName', e.target.value)} 
+                                name="fieldName" 
+                                value={stateFieldDetail.fieldName} 
+                                placeholder="Nhập tên lĩnh vực" 
+                                onChange={(e) => handleOnChangeDetail('fieldName', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="Loại đơn vị"
-                            name="departmentType"
+                            label="Mã lĩnh vực vụ việc"
+                            name="fieldCode"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn loại đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
                         >
-                            <Select
-                                placeholder="Chọn loại đơn vị"
-                                value={stateDepartmentDetail.departmentType}
-                                onChange={(value) => handleOnChangeDetail('departmentType', value)}
-                            >
-                                <Select.Option value="Phòng ban">Phòng ban</Select.Option>
-                                <Select.Option value="Xã, phường, thị trấn">Xã, phường, thị trấn</Select.Option>
-                            </Select>
+                            <InputComponent 
+                                name="fieldCode" 
+                                value={stateFieldDetail.fieldCode} 
+                                placeholder="Nhập mã lĩnh vực" 
+                                onChange={(e) => handleOnChangeDetail('fieldCode', e.target.value)} 
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Mô tả"
+                            name="description"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Input.TextArea 
+                                name="description" 
+                                value={stateFieldDetail.description} 
+                                onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
+                                rows={4} // Số dòng hiển thị mặc định
+                                placeholder="Nhập mô tả..." 
+                            />
                         </Form.Item>
 
                         <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
@@ -651,14 +689,14 @@ export const AdminDepartment = () => {
             </DrawerComponent>
             <ModalComponent 
                 width={400} 
-                title="Xóa đơn vị" 
+                title="Xóa lĩnh vực vụ việc" 
                 open={isModalOpenDelete} 
                 onCancel={handleCancelDelete} 
                 onOk={handleDeleteLetter}
                 centered 
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa đơn vị này không?</div>
+                    <div>Bạn có muốn xóa lĩnh vực vụ việc này không?</div>
                 </Loading>
             </ModalComponent>
         </div>

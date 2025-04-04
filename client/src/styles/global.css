@@ -29,6 +29,10 @@
     font-weight: 600;
 }
 
+.ant-menu-light .ant-menu-submenu-title:hover {
+    color: #4154f1;
+}
+
 .ant-menu-light>.ant-menu .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
     color: #4154f1;
 }

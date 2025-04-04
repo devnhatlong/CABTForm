@@ -5,35 +5,30 @@ const xlsx = require('xlsx');
 
 const importFromExcel = async (req, res) => {
     try {
-        // Kiểm tra xem file có được tải lên không
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Đọc file Excel từ buffer
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = xlsx.utils.sheet_to_json(sheet);
 
-        const errors = []; // Danh sách lỗi
-        let successCount = 0; // Đếm số bản ghi thành công
+        const errors = [];
+        let successCount = 0;
 
-        // Lặp qua từng dòng dữ liệu
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { departmentCode, departmentName, departmentType } = row;
+            const { departmentName, departmentType } = row;
 
-            // Kiểm tra nếu thiếu thông tin bắt buộc
-            if (!departmentCode || !departmentName || !departmentType) {
+            if (!departmentName || !departmentType) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu mã, tên hoặc loại phòng ban",
+                    message: "Thiếu tên hoặc loại đơn vị",
                 });
                 continue;
             }
 
-            // Kiểm tra giá trị hợp lệ cho departmentType
             const validTypes = ["Phòng ban", "Xã, phường, thị trấn"];
             if (!validTypes.includes(departmentType)) {
                 errors.push({
@@ -43,114 +38,103 @@ const importFromExcel = async (req, res) => {
                 continue;
             }
 
-            // Kiểm tra xem phòng ban đã tồn tại chưa
-            const existingDepartment = await Department.findOne({ departmentCode });
-            if (existingDepartment) {
-                errors.push({
-                    row: i + 1,
-                    message: `Phòng ban đã tồn tại (departmentCode: ${departmentCode})`,
-                });
-                continue;
-            }
-
-            // Tạo mới phòng ban
             const newDepartment = new Department({
-                departmentCode,
                 departmentName,
                 departmentType,
             });
 
             await newDepartment.save();
-            successCount++; // Tăng số bản ghi thành công
+            successCount++;
         }
 
-        // Trả về kết quả
         res.status(200).json({
             success: true,
             message: "Import hoàn tất",
             successCount,
             errorCount: errors.length,
-            errors, // Danh sách lỗi
+            errors,
         });
     } catch (error) {
-        console.error('Error importing department:', error);
+        console.error('Error importing departments:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
 const createDepartment = asyncHandler(async (req, res) => {
-    const { departmentCode, departmentName, departmentType } = req.body;
+    const { departmentName, departmentType } = req.body;
 
-    // Kiểm tra nếu thiếu thông tin bắt buộc
-    if (!departmentCode || !departmentName || !departmentType) {
-        return res.status(400).json({
-            success: false,
-            message: "Please provide all required information (departmentCode, departmentName, departmentType)"
-        });
+    if (!departmentName || !departmentType) {
+        throw new Error("Thiếu tên hoặc loại đơn vị");
     }
 
-    // Gọi service để tạo phòng ban
     const response = await DepartmentService.createDepartment(req.body);
 
-    return res.status(200).json({
-        success: response ? true : false,
-        message: response ? "Create is successfully" : "Something went wrong"
+    res.status(201).json({
+        success: true,
+        data: response,
+        message: "Tạo đơn vị thành công",
     });
 });
 
-const getAllDepartment = asyncHandler(async (req, res) => {
-    let { departmentCode, departmentName, departmentType } = req.query.filters || {};
-    const { currentPage, pageSize } = req.query;
+const getDepartments = asyncHandler(async (req, res) => {
+    const { page = 1, limit, sort, fields } = req.query;
 
-    // Xây dựng các điều kiện tìm kiếm dựa trên các tham số được cung cấp
-    const searchConditions = {};
-    if (departmentCode) searchConditions.departmentCode = { $regex: departmentCode.trim(), $options: 'i' };
-    if (departmentName) searchConditions.departmentName = { $regex: departmentName.trim(), $options: 'i' };
-    if (departmentType) searchConditions.departmentType = { $regex: departmentType.trim(), $options: 'i' };
+    const response = await DepartmentService.getDepartments(
+        Number(page),
+        limit ? Number(limit) : undefined,
+        fields,
+        sort
+    );
 
-    // Gọi service để lấy danh sách phòng ban
-    const response = await DepartmentService.getAllDepartment(currentPage, pageSize, searchConditions);
-
-    return res.status(200).json({
-        success: response ? true : false,
-        departments: response ? response.departments : "Không có phòng ban nào được tìm thấy",
-        totalRecord: response ? response.totalRecords : 0
+    res.status(200).json({
+        success: true,
+        data: response.forms,
+        total: response.total,
+        message: "Lấy danh sách đơn vị thành công",
     });
 });
 
-const getDetailDepartment = asyncHandler(async (req, res) => {
+const getDepartmentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const response = await DepartmentService.getDepartmentById(id);
 
-    const response = await DepartmentService.getDetailDepartment(id);
-    return res.status(200).json({
-        success: response ? true : false,
-        department: response ? response : "Không tìm thấy người dùng"
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Lấy thông tin đơn vị thành công"
+            : "Không tìm thấy đơn vị",
     });
 });
 
-const deleteDepartment = asyncHandler(async (req, res) => { 
+const updateDepartment = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const { departmentName, departmentType } = req.body;
 
-    if (!id) throw new Error("Missing id");
-
-    const response = await DepartmentService.deleteDepartment(id);
-
-    return res.status(200).json({
-        success: response ? true : false,
-        deletedUser: response ? response : `No user delete`
-    });
-});
-
-const updateDepartment = asyncHandler(async (req, res) => { 
-    const { id } = req.params;
-
-    if (!id || Object.keys(req.body).length === 0) throw new Error("Missing id");
+    if (!departmentName || !departmentType) {
+        throw new Error("Thiếu tên hoặc loại đơn vị");
+    }
 
     const response = await DepartmentService.updateDepartment(id, req.body);
 
-    return res.status(200).json({
-        success: response ? true : false,
-        updatedUser: response ? response : `Some thing went wrong`
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Cập nhật đơn vị thành công"
+            : "Không thể cập nhật đơn vị",
+    });
+});
+
+const deleteDepartment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await DepartmentService.deleteDepartment(id);
+
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        message: response
+            ? "Xóa đơn vị thành công"
+            : "Không thể xóa đơn vị",
     });
 });
 
@@ -161,18 +145,21 @@ const deleteMultipleDepartments = asyncHandler(async (req, res) => {
 
     const response = await DepartmentService.deleteMultipleDepartments(ids);
 
-    return res.status(200).json({
-        success: response ? true : false,
-        deletedLetter: response ? response : "Không có người dùng nào được xóa"
+    res.status(response.success ? 200 : 400).json({
+        success: response.success,
+        message: response.success
+            ? "Xóa đơn vị thành công"
+            : "Không thể xóa đơn vị",
+        deletedCount: response.deletedCount,
     });
 });
 
 module.exports = {
     importFromExcel,
     createDepartment,
-    getAllDepartment,
+    getDepartments,
     updateDepartment,
-    getDetailDepartment,
+    getDepartmentById,
     deleteDepartment,
     deleteMultipleDepartments
 }

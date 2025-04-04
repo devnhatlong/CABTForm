@@ -5,8 +5,8 @@ const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
 
 router.post("/import-from-excel", verifyAccessToken, upload.single("file"), ctrls.importFromExcel);
 router.post("/", verifyAccessToken , ctrls.createFieldOfWork);
-router.get("/", ctrls.getFieldOfWorks);
-router.get("/:id", ctrls.getFieldOfWorkById);
+router.get("/", verifyAccessToken, ctrls.getFieldOfWorks);
+router.get("/:id", verifyAccessToken, ctrls.getFieldOfWorkById);
 router.put("/:id", verifyAccessToken, ctrls.updateFieldOfWork);
 router.put("/update-field-department/:id", verifyAccessToken, ctrls.updateFieldDepartment);
 router.delete("/delete-multiple", verifyAccessToken, ctrls.deleteMultipleFieldOfWorks);
