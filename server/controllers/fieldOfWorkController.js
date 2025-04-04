@@ -22,26 +22,24 @@ const importFromExcel = async (req, res) => {
         // Iterate over the data and create field of work
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { fieldName, fieldCode, description } = row;
+            const { fieldName, description } = row;
 
-            // Kiểm tra nếu thiếu fieldName hoặc fieldCode
-            if (!fieldName || !fieldCode) {
+            // Kiểm tra nếu thiếu fieldName
+            if (!fieldName) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu tên hoặc mã lĩnh vực",
+                    message: "Thiếu tên lĩnh vực",
                 });
                 continue;
             }
 
-            // Kiểm tra xem fieldName hoặc fieldCode đã tồn tại hay chưa
-            const existingField = await FieldOfWork.findOne({
-                $or: [{ fieldName }, { fieldCode }],
-            });
+            // Kiểm tra xem fieldName đã tồn tại hay chưa
+            const existingField = await FieldOfWork.findOne({ fieldName });
 
             if (existingField) {
                 errors.push({
                     row: i + 1,
-                    message: `Tên hoặc mã lĩnh vực đã tồn tại (fieldName: ${fieldName}, fieldCode: ${fieldCode})`,
+                    message: `Tên lĩnh vực đã tồn tại (fieldName: ${fieldName})`,
                 });
                 continue;
             }
@@ -49,7 +47,6 @@ const importFromExcel = async (req, res) => {
             // Tạo mới lĩnh vực
             const newField = new FieldOfWork({
                 fieldName,
-                fieldCode,
                 description,
             });
 
@@ -71,10 +68,10 @@ const importFromExcel = async (req, res) => {
 };
 
 const createFieldOfWork = asyncHandler(async (req, res) => {
-    const { fieldName, fieldCode } = req.body;
+    const { fieldName } = req.body;
 
-    if (!fieldName || !fieldCode) {
-        throw new Error("Thiếu tên hoặc mã lĩnh vực vụ việc");
+    if (!fieldName) {
+        throw new Error("Thiếu tên lĩnh vực vụ việc");
     }
 
     const response = await FieldOfWorkService.createFieldOfWork(req.body);
@@ -119,10 +116,10 @@ const getFieldOfWorkById = asyncHandler(async (req, res) => {
 
 const updateFieldOfWork = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { fieldName, fieldCode } = req.body;
+    const { fieldName } = req.body;
 
-    if (!fieldName || !fieldCode) {
-        throw new Error("Thiếu tên hoặc mã lĩnh vực vụ việc");
+    if (!fieldName) {
+        throw new Error("Thiếu tên lĩnh vực vụ việc");
     }
 
     const response = await FieldOfWorkService.updateFieldOfWork(id, req.body);

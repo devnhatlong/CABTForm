@@ -7,11 +7,6 @@ var FieldOfWorkSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    fieldCode: {
-        type: String,
-        required: true,
-        trim: true
-    },
     departmentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Department',

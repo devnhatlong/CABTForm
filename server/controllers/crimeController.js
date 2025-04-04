@@ -21,39 +21,36 @@ const importFromExcel = async (req, res) => {
         const errors = []; // Lưu danh sách lỗi
         let successCount = 0; // Đếm số bản ghi thành công
 
-        // Iterate over the data and create field of work
+        // Iterate over the data and create crimes
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { crimeName, crimeCode, fieldCode, description } = row;
+            const { crimeName, fieldName, description } = row;
 
-            // Kiểm tra nếu thiếu crimeName, crimeCode hoặc fieldCode
-            if (!crimeName || !crimeCode || !fieldCode) {
+            // Kiểm tra nếu thiếu crimeName hoặc fieldName
+            if (!crimeName || !fieldName) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu tên, mã tội danh hoặc mã lĩnh vực vụ việc",
+                    message: "Thiếu tên tội danh hoặc tên lĩnh vực vụ việc",
                 });
                 continue;
             }
 
-            // Kiểm tra xem fieldCode có tồn tại trong FieldOfWork hay không
-            const existingFieldOfWork = await FieldOfWork.findOne({ fieldCode });
+            // Kiểm tra xem fieldName có tồn tại trong FieldOfWork hay không
+            const existingFieldOfWork = await FieldOfWork.findOne({ fieldName });
             if (!existingFieldOfWork) {
                 errors.push({
                     row: i + 1,
-                    message: `Mã lĩnh vực vụ việc không tồn tại (fieldCode: ${fieldCode})`,
+                    message: `Tên lĩnh vực vụ việc không tồn tại (fieldName: ${fieldName})`,
                 });
                 continue;
             }
 
-            // Kiểm tra xem crimeName hoặc crimeCode đã tồn tại hay chưa
-            const existingCrime = await Crime.findOne({
-                $or: [{ crimeName }, { crimeCode }],
-            });
-
+            // Kiểm tra xem crimeName đã tồn tại hay chưa
+            const existingCrime = await Crime.findOne({ crimeName });
             if (existingCrime) {
                 errors.push({
                     row: i + 1,
-                    message: `Tên hoặc mã tội danh đã tồn tại (crimeName: ${crimeName}, crimeCode: ${crimeCode})`,
+                    message: `Tên tội danh đã tồn tại (crimeName: ${crimeName})`,
                 });
                 continue;
             }
@@ -61,8 +58,7 @@ const importFromExcel = async (req, res) => {
             // Tạo mới tội danh
             const newCrime = new Crime({
                 crimeName,
-                crimeCode,
-                fieldCode,
+                fieldId: existingFieldOfWork._id, // Sử dụng fieldId từ FieldOfWork
                 description,
             });
 
@@ -84,10 +80,10 @@ const importFromExcel = async (req, res) => {
 };
 
 const createCrime = asyncHandler(async (req, res) => {
-    const { crimeName, crimeCode, fieldCode } = req.body;
+    const { crimeName, fieldId } = req.body;
 
-    if (!crimeName || !crimeCode || !fieldCode) {
-        throw new Error("Thiếu tên, mã tội danh, hoặc mã lĩnh vực công việc");
+    if (!crimeName || !fieldId) {
+        throw new Error("Thiếu tên tội danh hoặc mã lĩnh vực công việc");
     }
 
     const response = await CrimeService.createCrime(req.body);
@@ -132,10 +128,10 @@ const getCrimeById = asyncHandler(async (req, res) => {
 
 const updateCrime = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { crimeName, crimeCode, fieldCode } = req.body;
+    const { crimeName, fieldId } = req.body;
 
-    if (!crimeName || !crimeCode || !fieldCode) {
-        throw new Error("Thiếu tên, mã tội danh, hoặc mã lĩnh vực công việc");
+    if (!crimeName || !fieldId) {
+        throw new Error("Thiếu tên tội danh hoặc mã lĩnh vực công việc");
     }
 
     const response = await CrimeService.updateCrime(id, req.body);

@@ -7,15 +7,8 @@ var CrimeSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    crimeCode: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    fieldCode: {
-        type: String,
-        required: true,
-        trim: true,
+    fieldId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'FieldOfWork',
     },
     description: {

@@ -54,20 +54,18 @@ export const FieldOfWork = () => {
 
     const [stateField, setStateField] = useState({
         fieldName: "",
-        fieldCode : "",
         description  : ""
     });
 
     const [stateFieldDetail, setStateFieldDetail] = useState({
         fieldName: "",
-        fieldCode : "",
         description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { fieldName, fieldCode, description } = data;
-            const response = fieldOfWorkService.createFieldOfWork({ fieldName, fieldCode, description });
+            const { fieldName, description } = data;
+            const response = fieldOfWorkService.createFieldOfWork({ fieldName, description });
             return response;
         }
     )
@@ -101,7 +99,6 @@ export const FieldOfWork = () => {
         setIsModalOpen(false);
         setStateField({
             fieldName: "",
-            fieldCode: "",
             description: ""
         });
 
@@ -124,7 +121,6 @@ export const FieldOfWork = () => {
         if (response?.data) {
             setStateFieldDetail({
                 fieldName: response?.data?.fieldName,
-                fieldCode: response?.data?.fieldCode,
                 description: response?.data?.description
             })
         }
@@ -403,13 +399,6 @@ export const FieldOfWork = () => {
             ...getColumnSearchProps('fieldName', 'tên lĩnh vực')
         },
         {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
-        },
-        {
             title: 'Mô tả',
             dataIndex: 'description',
             key: 'description',
@@ -584,22 +573,6 @@ export const FieldOfWork = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateField.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChange('fieldCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
                             label="Mô tả"
                             name="description"
                             labelCol={{ span: 24 }}
@@ -646,22 +619,6 @@ export const FieldOfWork = () => {
                                 value={stateFieldDetail.fieldName} 
                                 placeholder="Nhập tên lĩnh vực" 
                                 onChange={(e) => handleOnChangeDetail('fieldName', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateFieldDetail.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChangeDetail('fieldCode', e.target.value)} 
                             />
                         </Form.Item>
 

@@ -1,33 +1,63 @@
 require('dotenv').config();
 const Crime = require("../models/crimeModel");
+const FieldOfWork = require("../models/fieldOfWorkModel");
 
 const createCrime = async (data) => {
-    const { crimeName, crimeCode } = data;
+    const { crimeName, fieldId, description } = data;
 
-    // Kiểm tra xem crimeName đã tồn tại hay chưa
-    const existingCrimeName = await Crime.findOne({ crimeName });
-    if (existingCrimeName) {
+    // Kiểm tra nếu crimeName đã tồn tại
+    const existingCrime = await Crime.findOne({ crimeName });
+    if (existingCrime) {
         throw new Error("Tên tội danh đã tồn tại");
     }
 
-    // Kiểm tra xem crimeCode đã tồn tại hay chưa
-    const existingCrimeCode = await Crime.findOne({ crimeCode });
-    if (existingCrimeCode) {
-        throw new Error("Mã tội danh đã tồn tại");
+    // Kiểm tra nếu fieldId tồn tại
+    const existingField = await FieldOfWork.findById(fieldId);
+    if (!existingField) {
+        throw new Error("Mã lĩnh vực không tồn tại");
     }
 
-    // Nếu không tồn tại, tạo mới
-    return await Crime.create(data);
+    // Tạo mới tội danh
+    const newCrime = new Crime({
+        crimeName,
+        fieldId,
+        description,
+    });
+
+    return await newCrime.save();
 };
 
 const getCrimes = async (page = 1, limit, fields, sort) => {
     try {
         const queries = {};
 
-        // Xử lý các trường trong fields để tạo bộ lọc
+        // Kiểm tra nếu fields chứa fieldName
+        if (fields?.fieldName) {
+            // Tìm các fieldId tương ứng với fieldName
+            const fieldOfWorks = await FieldOfWork.find({
+                fieldName: { $regex: fields.fieldName, $options: "i" }, // Tìm kiếm không phân biệt hoa thường
+            });
+
+            // Lấy danh sách fieldId từ kết quả
+            const fieldIds = fieldOfWorks.map((field) => field._id);
+
+            // Nếu không tìm thấy fieldId nào, trả về kết quả rỗng
+            if (fieldIds.length === 0) {
+                return {
+                    success: true,
+                    forms: [],
+                    total: 0,
+                };
+            }
+
+            // Thêm điều kiện lọc theo fieldId vào queries
+            queries.fieldId = { $in: fieldIds };
+        }
+
+        // Xử lý các trường khác trong fields để tạo bộ lọc
         if (fields) {
             for (const key in fields) {
-                if (fields[key]) {
+                if (key !== "fieldName" && fields[key]) {
                     // Sử dụng regex để tìm kiếm không phân biệt hoa thường
                     queries[key] = { $regex: fields[key], $options: "i" };
                 }
@@ -38,7 +68,10 @@ const getCrimes = async (page = 1, limit, fields, sort) => {
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
 
         // Tạo câu lệnh query
-        let queryCommand = Crime.find(queries);
+        let queryCommand = Crime.find(queries).populate({
+            path: "fieldId", // Tên trường tham chiếu trong crimeModel
+            select: "fieldName", // Chỉ lấy các trường cần thiết từ FieldOfWork
+        });
 
         // Sorting
         if (sort) {
@@ -72,26 +105,32 @@ const getCrimeById = async (id) => {
 };
 
 const updateCrime = async (id, data) => {
-    const { crimeName, crimeCode } = data;
+    const { crimeName, fieldId, description } = data;
 
-    // Kiểm tra xem crimeName đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
-    if (crimeName) {
-        const existingFieldName = await Crime.findOne({ crimeName, _id: { $ne: id } });
-        if (existingFieldName) {
-            throw new Error("Tên tội danh đã tồn tại");
-        }
+    // Kiểm tra nếu crimeName đã tồn tại (ngoại trừ bản ghi hiện tại)
+    const existingCrime = await Crime.findOne({
+        crimeName,
+        _id: { $ne: id },
+    });
+
+    if (existingCrime) {
+        throw new Error("Tên tội danh đã tồn tại");
     }
 
-    // Kiểm tra xem crimeCode đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
-    if (crimeCode) {
-        const existingFieldCode = await Crime.findOne({ crimeCode, _id: { $ne: id } });
-        if (existingFieldCode) {
-            throw new Error("Mã tội danh đã tồn tại");
-        }
+    // Kiểm tra nếu fieldId tồn tại
+    const existingField = await FieldOfWork.findById(fieldId);
+    if (!existingField) {
+        throw new Error("Mã lĩnh vực không tồn tại");
     }
 
-    // Nếu không có lỗi, tiến hành cập nhật
-    return await Crime.findByIdAndUpdate(id, data, { new: true });
+    // Cập nhật tội danh
+    const updatedCrime = await Crime.findByIdAndUpdate(
+        id,
+        { crimeName, fieldId, description },
+        { new: true }
+    );
+
+    return updatedCrime;
 };
 
 const deleteCrime = async (id) => {

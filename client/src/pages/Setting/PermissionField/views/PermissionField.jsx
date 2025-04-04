@@ -56,9 +56,9 @@ export const PermissionField = () => {
     useEffect(() => {
         const fetchDepartment = async () => {
             try {
-                const response = await departmentService.getAllDepartment(1, 100, {departmentType: "phòng ban"}); // Lấy tối đa 100 bản ghi
-                if (response?.departments) {
-                    setDepartment(response.departments);
+                const response = await departmentService.getDepartments(1, 100, {departmentType: "phòng ban"}); // Lấy tối đa 100 bản ghi
+                if (response?.data) {
+                    setDepartment(response.data);
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy danh sách phòng ban:", error);
@@ -67,7 +67,7 @@ export const PermissionField = () => {
     
         fetchDepartment();
     }, []);
-    console.log("department", department);
+
     const [stateField, setStateField] = useState({
         fieldName: "",
         fieldCode : "",

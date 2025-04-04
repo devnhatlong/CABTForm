@@ -71,22 +71,20 @@ export const Crime = () => {
 
     const [stateCrime, setStateCrime] = useState({
         crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
+        fieldId : "",
         description  : ""
     });
 
     const [stateCrimeDetail, setStateCrimeDetail] = useState({
         crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
+        fieldId : "",
         description  : ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { crimeName, crimeCode, fieldCode, description } = data;
-            const response = crimeService.createCrime({ crimeName, crimeCode, fieldCode, description });
+            const { crimeName, fieldId, description } = data;
+            const response = crimeService.createCrime({ crimeName, fieldId, description });
             return response;
         }
     )
@@ -120,8 +118,7 @@ export const Crime = () => {
         setIsModalOpen(false);
         setStateCrime({
             crimeName: "",
-            crimeCode: "",
-            fieldCode: "",
+            fieldId: "",
             description  : ""
         });
 
@@ -144,8 +141,7 @@ export const Crime = () => {
         if (response?.data) {
             setStateCrimeDetail({
                 crimeName: response?.data?.crimeName,
-                crimeCode: response?.data?.crimeCode,
-                fieldCode: response?.data?.fieldCode,
+                fieldId: response?.data?.fieldId,
                 description: response?.data?.description
             })
         }
@@ -314,6 +310,7 @@ export const Crime = () => {
             return {
                 ...record, 
                 key: record._id,
+                fieldName: record?.fieldId?.fieldName,
                 createdAt: new Date(record.createdAt),
                 updatedAt: new Date(record.updatedAt),
             };
@@ -424,20 +421,12 @@ export const Crime = () => {
             ...getColumnSearchProps('crimeName', 'tên tội danh')
         },
         {
-            title: 'Mã tội danh',
-            dataIndex: 'crimeCode',
-            key: 'crimeCode',
+            title: 'Lĩnh vực',
+            dataIndex: 'fieldName',
+            key: 'fieldName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            // ...getColumnSearchProps('crimeCode', 'mã tội danh')
-        },
-        {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
-            filteredValue: null, // Loại bỏ filter mặc định
-            onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('fieldCode', 'mã tội danh')
+            ...getColumnSearchProps('fieldName', 'lĩnh vực')
         },
         {
             title: 'Mô tả',
@@ -614,24 +603,8 @@ export const Crime = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã tội danh"
-                            name="crimeCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
-                        >
-                            <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrime.crimeCode} 
-                                placeholder="Nhập mã tội danh" 
-                                onChange={(e) => handleOnChange('crimeCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
                             label="Lĩnh vực vụ việc"
-                            name="fieldCode"
+                            name="fieldId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
@@ -640,14 +613,14 @@ export const Crime = () => {
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
                                 placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrime.fieldCode}
-                                onChange={(value) => handleOnChange('fieldCode', value)}
+                                value={stateCrime.fieldId}
+                                onChange={(value) => handleOnChange('fieldId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 } // Tìm kiếm theo tên lĩnh vực
                             >
                                 {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
+                                    <Select.Option key={field._id} value={field._id}>
                                         {field.fieldName}
                                     </Select.Option>
                                 ))}
@@ -705,24 +678,8 @@ export const Crime = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã tội danh"
-                            name="crimeCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
-                        >
-                            <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrimeDetail.crimeCode} 
-                                placeholder="Nhập mã tội danh" 
-                                onChange={(e) => handleOnChangeDetail('crimeCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
                             label="Lĩnh vực vụ việc"
-                            name="fieldCode"
+                            name="fieldId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
@@ -731,14 +688,14 @@ export const Crime = () => {
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
                                 placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrimeDetail.fieldCode}
-                                onChange={(value) => handleOnChangeDetail('fieldCode', value)}
+                                value={stateCrimeDetail.fieldId}
+                                onChange={(value) => handleOnChangeDetail('fieldId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 } // Tìm kiếm theo tên lĩnh vực
                             >
                                 {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
+                                    <Select.Option key={field._id} value={field._id}>
                                         {field.fieldName}
                                     </Select.Option>
                                 ))}

@@ -2,22 +2,21 @@ require('dotenv').config();
 const FieldOfWork = require("../models/fieldOfWorkModel");
 
 const createFieldOfWork = async (data) => {
-    const { fieldName, fieldCode } = data;
+    const { fieldName, description } = data;
 
-    // Kiểm tra xem fieldName đã tồn tại hay chưa
-    const existingFieldName = await FieldOfWork.findOne({ fieldName });
-    if (existingFieldName) {
-        throw new Error("Tên lĩnh vực công việc đã tồn tại");
+    // Kiểm tra nếu fieldName đã tồn tại
+    const existingField = await FieldOfWork.findOne({ fieldName });
+    if (existingField) {
+        throw new Error("Tên lĩnh vực đã tồn tại");
     }
 
-    // Kiểm tra xem fieldCode đã tồn tại hay chưa
-    const existingFieldCode = await FieldOfWork.findOne({ fieldCode });
-    if (existingFieldCode) {
-        throw new Error("Mã lĩnh vực công việc đã tồn tại");
-    }
+    // Tạo mới lĩnh vực
+    const newField = new FieldOfWork({
+        fieldName,
+        description,
+    });
 
-    // Nếu không tồn tại, tạo mới
-    return await FieldOfWork.create(data);
+    return await newField.save();
 };
 
 const getFieldOfWorks = async (page = 1, limit, fields, sort) => {
@@ -72,26 +71,26 @@ const getFieldOfWorkById = async (id) => {
 };
 
 const updateFieldOfWork = async (id, data) => {
-    const { fieldName, fieldCode } = data;
+    const { fieldName, description } = data;
 
-    // Kiểm tra xem fieldName đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
-    if (fieldName) {
-        const existingFieldName = await FieldOfWork.findOne({ fieldName, _id: { $ne: id } });
-        if (existingFieldName) {
-            throw new Error("Tên lĩnh vực công việc đã tồn tại");
-        }
+    // Kiểm tra nếu fieldName đã tồn tại (ngoại trừ bản ghi hiện tại)
+    const existingField = await FieldOfWork.findOne({
+        fieldName,
+        _id: { $ne: id },
+    });
+
+    if (existingField) {
+        throw new Error("Tên lĩnh vực đã tồn tại");
     }
 
-    // Kiểm tra xem fieldCode đã tồn tại hay chưa (ngoại trừ bản ghi hiện tại)
-    if (fieldCode) {
-        const existingFieldCode = await FieldOfWork.findOne({ fieldCode, _id: { $ne: id } });
-        if (existingFieldCode) {
-            throw new Error("Mã lĩnh vực công việc đã tồn tại");
-        }
-    }
+    // Cập nhật lĩnh vực
+    const updatedField = await FieldOfWork.findByIdAndUpdate(
+        id,
+        { fieldName, description },
+        { new: true }
+    );
 
-    // Nếu không có lỗi, tiến hành cập nhật
-    return await FieldOfWork.findByIdAndUpdate(id, data, { new: true });
+    return updatedField;
 };
 
 const updateFieldDepartment = async (id, departmentId) => {
