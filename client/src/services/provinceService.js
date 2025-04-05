@@ -2,10 +2,10 @@ import axios from 'axios';
 import { getTokenFromCookie } from '../utils/utils';
 import userService from './userService';
 
-export const axiosDepartment = axios.create();
+export const axiosProvince = axios.create();
 
 // Add a request interceptor to add the JWT token to the authorization header
-axiosDepartment.interceptors.request.use(
+axiosProvince.interceptors.request.use(
     (config) => {
         const accessToken = getTokenFromCookie("accessToken_SLCB");
 
@@ -19,7 +19,7 @@ axiosDepartment.interceptors.request.use(
 );
 
 // Add a response interceptor to refresh the JWT token if it's expired
-axiosDepartment.interceptors.response.use(
+axiosProvince.interceptors.response.use(
     async (response) => response,
     async (error) => {
         const originalRequest = error.config;
@@ -31,7 +31,7 @@ axiosDepartment.interceptors.response.use(
                 document.cookie = `accessToken_SLCB=${newAccessToken}; path=/`;
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-                return axiosDepartment(originalRequest);
+                return axiosProvince(originalRequest);
             } catch (refreshError) {
                 console.error(refreshError);
                 redirectToLogin();
@@ -53,81 +53,81 @@ const redirectToLogin = () => {
     window.location.href = "/login";
 };
 
-const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/department`;
+const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/province`;
 
-const DepartmentService = {
-    // Tạo đơn vị mới
-    createDepartment: async (data) => {
+const provinceService = {
+    // Tạo tỉnh/thành phố mới
+    createProvince: async (data) => {
         try {
-            const response = await axiosDepartment.post(`${BASE_URL}/`, data);
+            const response = await axiosProvince.post(`${BASE_URL}/`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi tạo đơn vị:", error);
+            console.error("Lỗi khi tạo tỉnh/thành phố:", error);
             throw error;
         }
     },
 
-    // Lấy danh sách đơn vị với phân trang và lọc
-    getDepartments: async (page, limit, fields, sort) => {
+    // Lấy danh sách tỉnh/thành phố với phân trang và lọc
+    getProvinces: async (page, limit, fields, sort ) => {
         try {
-            const response = await axiosDepartment.get(`${BASE_URL}/`, {
+            const response = await axiosProvince.get(`${BASE_URL}/`, {
                 params: { page, limit, fields, sort }
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách đơn vị:", error);
+            console.error("Lỗi khi lấy danh sách tỉnh/thành phố:", error);
             throw error;
         }
     },
 
-    // Lấy chi tiết đơn vị theo ID
-    getDepartmentById: async (id) => {
+    // Lấy chi tiết tỉnh/thành phố theo ID
+    getProvinceById: async (id) => {
         try {
-            const response = await axiosDepartment.get(`${BASE_URL}/${id}`);
+            const response = await axiosProvince.get(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết đơn vị:", error);
+            console.error("Lỗi khi lấy chi tiết tỉnh/thành phố:", error);
             throw error;
         }
     },
 
-    // Cập nhật đơn vị (chỉ admin)
-    updateDepartment: async (id, data) => {
+    // Cập nhật tỉnh/thành phố (chỉ admin)
+    updateProvince: async (id, data) => {
         try {
-            const response = await axiosDepartment.put(`${BASE_URL}/${id}`, data);
+            const response = await axiosProvince.put(`${BASE_URL}/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật đơn vị:", error);
+            console.error("Lỗi khi cập nhật tỉnh/thành phố:", error);
             throw error;
         }
     },
 
-    // Xóa đơn vị (chỉ admin)
-    deleteDepartment: async (id) => {
+    // Xóa tỉnh/thành phố (chỉ admin)
+    deleteProvince: async (id) => {
         try {
-            const response = await axiosDepartment.delete(`${BASE_URL}/${id}`);
+            const response = await axiosProvince.delete(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa đơn vị:", error);
+            console.error("Lỗi khi xóa tỉnh/thành phố:", error);
             throw error;
         }
     },
 
     deleteMultipleRecords: async (ids) => {
         try {
-            const response = await axiosDepartment.delete(`${BASE_URL}/delete-multiple`, {
+            const response = await axiosProvince.delete(`${BASE_URL}/delete-multiple`, {
                 data: { ids }, // Đảm bảo gửi đúng định dạng
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa nhiều đơn vị:", error);
+            console.error("Lỗi khi xóa nhiều tỉnh/thành phố:", error);
             throw error;
         }
     },
 
     importFromExcel: async (formData) => {
         try {
-            const response = await axiosDepartment.post(`${BASE_URL}/import-from-excel`, formData,
+            const response = await axiosProvince.post(`${BASE_URL}/import-from-excel`, formData,
                 {
                     headers: { "Content-Type": "multipart/form-data" },
                 }
@@ -140,4 +140,4 @@ const DepartmentService = {
     },
 };
 
-export default DepartmentService;
+export default provinceService;

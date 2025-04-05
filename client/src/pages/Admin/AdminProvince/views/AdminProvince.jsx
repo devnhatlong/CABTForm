@@ -7,18 +7,18 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 
-import TableComponent from '../../../components/TableComponent/TableComponent';
-import InputComponent from '../../../components/InputComponent/InputComponent';
-import ModalComponent from '../../../components/ModalComponent/ModalComponent';
-import Loading from '../../../components/LoadingComponent/Loading';
-import * as message from '../../../components/Message/Message';
-import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
-import departmentService from '../../../services/departmentService';
-import { useMutationHooks } from '../../../hooks/useMutationHook';
-import ImportExcel from "../../../components/ImportExcel/ImportExcel";
-import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import TableComponent from '../../../../components/TableComponent/TableComponent';
+import InputComponent from '../../../../components/InputComponent/InputComponent';
+import ModalComponent from '../../../../components/ModalComponent/ModalComponent';
+import Loading from '../../../../components/LoadingComponent/Loading';
+import * as message from '../../../../components/Message/Message';
+import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
+import provinceService from '../../../../services/provinceService';
+import { useMutationHooks } from '../../../../hooks/useMutationHook';
+import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
+import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
-export const AdminDepartment = () => {
+export const AdminProvince = () => {
     const [modalForm] = Form.useForm();
     const [drawerForm] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,23 +49,23 @@ export const AdminDepartment = () => {
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
         { label: 'Quản trị' },
-        { label: 'Quản lý đơn vị' },
+        { label: 'Quản lý tỉnh/thành phố' },
     ];
 
-    const [stateDepartment, setStateDepartment] = useState({
-        departmentName: "",
-        departmentType : "",
+    const [stateProvince, setStateProvince] = useState({
+        provinceName: "",
+        provinceCode: ""
     });
 
-    const [stateDepartmentDetail, setStateDepartmentDetail] = useState({
-        departmentName: "",
-        departmentType : "",
+    const [stateProvinceDetail, setStateProvinceDetail] = useState({
+        provinceName: "",
+        provinceCode: ""
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { departmentName, departmentType } = data;
-            const response = departmentService.createDepartment({ departmentName, departmentType });
+            const { provinceName, provinceCode } = data;
+            const response = provinceService.createProvince({ provinceName, provinceCode });
             return response;
         }
     )
@@ -73,7 +73,7 @@ export const AdminDepartment = () => {
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = departmentService.updateDepartment(id, { ...rests });
+            const response = provinceService.updateProvince(id, { ...rests });
             return response;
         }
     );
@@ -81,7 +81,7 @@ export const AdminDepartment = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = departmentService.deleteDepartment(id);
+            const response = provinceService.deleteProvince(id);
             return response;
         }
     );
@@ -89,7 +89,7 @@ export const AdminDepartment = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = departmentService.deleteMultipleRecords(ids);
+          const response = provinceService.deleteMultipleRecords(ids);
     
           return response;
         }
@@ -97,9 +97,9 @@ export const AdminDepartment = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateDepartment({
-            departmentName: "",
-            departmentType: "",
+        setStateProvince({
+            provinceName: "",
+            provinceCode: ""
         });
 
         modalForm.resetFields();
@@ -111,17 +111,17 @@ export const AdminDepartment = () => {
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await departmentService.getDepartments(currentPage, pageSize, filters);
+        const response = await provinceService.getProvinces(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await departmentService.getDepartmentById(rowSelected);
+        const response = await provinceService.getProvinceById(rowSelected);
 
         if (response?.data) {
-            setStateDepartmentDetail({
-                departmentName: response?.data?.departmentName,
-                departmentType: response?.data?.departmentType,
+            setStateProvinceDetail({
+                provinceName: response?.data?.provinceName,
+                provinceCode: response?.data?.provinceCode
             })
         }
         setIsLoadingUpdate(false);
@@ -141,8 +141,8 @@ export const AdminDepartment = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateDepartmentDetail)
-    }, [stateDepartmentDetail, drawerForm])
+        drawerForm.setFieldsValue(stateProvinceDetail)
+    }, [stateProvinceDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -229,7 +229,7 @@ export const AdminDepartment = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateDepartment, {
+        mutation.mutate(stateProvince, {
             onSettled: () => {
                 query.refetch();
             }
@@ -240,7 +240,7 @@ export const AdminDepartment = () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateDepartmentDetail
+                ...stateProvinceDetail
             }, 
             {
                 onSettled: () => {
@@ -296,15 +296,15 @@ export const AdminDepartment = () => {
     };
 
     const handleOnChange = (name, value) => {
-        setStateDepartment({
-            ...stateDepartment,
+        setStateProvince({
+            ...stateProvince,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateDepartmentDetail({
-            ...stateDepartmentDetail,
+        setStateProvinceDetail({
+            ...stateProvinceDetail,
             [name]: value
         });
     };
@@ -391,20 +391,19 @@ export const AdminDepartment = () => {
 
     const columns = [
         {
-            title: 'Tên đơn vị',
-            dataIndex: 'departmentName',
-            key: 'departmentName',
+            title: 'Tên tỉnh/thành phố',
+            dataIndex: 'provinceName',
+            key: 'provinceName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentName', 'tên đơn vị')
+            ...getColumnSearchProps('provinceName', 'tên tỉnh/thành phố')
         },
         {
-            title: 'Loại đơn vị',
-            dataIndex: 'departmentType',
-            key: 'departmentType',
+            title: 'Mã định danh',
+            dataIndex: 'provinceCode',
+            key: 'provinceCode',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('departmentType', 'loại đơn vị')
         },
         {
           title: buttonReloadTable,
@@ -494,7 +493,7 @@ export const AdminDepartment = () => {
 
     return (
         <div>
-            <WrapperHeader>Danh sách đơn vị</WrapperHeader>
+            <WrapperHeader>Danh sách tỉnh/thành phố</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
             <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
                 <FormListHeader>
@@ -509,12 +508,12 @@ export const AdminDepartment = () => {
                         icon={<PlusOutlined />} 
                         onClick={() => setIsModalOpen(true)}
                     >
-                        Thêm đơn vị
+                        Thêm tỉnh/thành phố
                     </Button>
                 </FormListHeader>
                 <FormListHeader>
                     <ImportExcel
-                        service={departmentService.importFromExcel}
+                        service={provinceService.importFromExcel}
                         onSuccess={(response) => {
                             message.success(`Import thành công: ${response.successCount} bản ghi`);
                             query.refetch(); // Làm mới danh sách sau khi import thành công
@@ -545,7 +544,7 @@ export const AdminDepartment = () => {
                     }}
                 />
             </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Thêm đơn vị" open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <ModalComponent form={modalForm} forceRender width={500} title="Thêm tỉnh/thành phố" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
                     <Form
                         form={modalForm}
@@ -558,37 +557,34 @@ export const AdminDepartment = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên đơn vị"
-                            name="departmentName"
+                            label="Tên tỉnh/thành phố"
+                            name="provinceName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tỉnh/thành phố!' }]}
                         >
                             <InputComponent 
-                                name="departmentName" 
-                                value={stateDepartment.departmentName} 
-                                placeholder="Nhập tên đơn vị" 
-                                onChange={(e) => handleOnChange('departmentName', e.target.value)} 
+                                name="provinceName" 
+                                value={stateProvince.provinceName} 
+                                placeholder="Nhập tên tỉnh/thành phố" 
+                                onChange={(e) => handleOnChange('provinceName', e.target.value)} 
                             />
                         </Form.Item>
-
+                        
                         <Form.Item
-                            label="Loại đơn vị"
-                            name="departmentType"
+                            label="Mã định danh"
+                            name="provinceCode"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn loại đơn vị!' }]}
                         >
-                            <Select
-                                placeholder="Chọn loại đơn vị"
-                                value={stateDepartment.departmentType}
-                                onChange={(value) => handleOnChange('departmentType', value)}
-                            >
-                                <Select.Option value="Phòng ban">Phòng ban</Select.Option>
-                                <Select.Option value="Xã, phường, thị trấn">Xã, phường, thị trấn</Select.Option>
-                            </Select>
+                            <InputComponent
+                                name="provinceCode" 
+                                value={stateProvince.provinceCode} 
+                                onChange={(e) => handleOnChange('provinceCode', e.target.value)} 
+                                placeholder="Nhập mã định danh..." 
+                            />
                         </Form.Item>
 
                         <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
@@ -597,7 +593,7 @@ export const AdminDepartment = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết đơn vị" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+            <DrawerComponent form={drawerForm} title="Chi tiết tỉnh/thành phố" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
                         form={drawerForm}
@@ -610,37 +606,34 @@ export const AdminDepartment = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên đơn vị"
-                            name="departmentName"
+                            label="Tên tỉnh/thành phố"
+                            name="provinceName"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên đơn vị!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên tỉnh/thành phố!' }]}
                         >
                             <InputComponent 
-                                name="departmentName" 
-                                value={stateDepartmentDetail.departmentName} 
-                                placeholder="Nhập tên đơn vị" 
-                                onChange={(e) => handleOnChangeDetail('departmentName', e.target.value)} 
+                                name="provinceName" 
+                                value={stateProvinceDetail.provinceName} 
+                                placeholder="Nhập tên tỉnh/thành phố" 
+                                onChange={(e) => handleOnChangeDetail('provinceName', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="Loại đơn vị"
-                            name="departmentType"
+                            label="Mã định danh"
+                            name="provinceCode"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn loại đơn vị!' }]}
                         >
-                            <Select
-                                placeholder="Chọn loại đơn vị"
-                                value={stateDepartmentDetail.departmentType}
-                                onChange={(value) => handleOnChangeDetail('departmentType', value)}
-                            >
-                                <Select.Option value="Phòng ban">Phòng ban</Select.Option>
-                                <Select.Option value="Xã, phường, thị trấn">Xã, phường, thị trấn</Select.Option>
-                            </Select>
+                            <InputComponent
+                                name="provinceCode" 
+                                value={stateProvinceDetail.provinceCode} 
+                                onChange={(e) => handleOnChangeDetail('provinceCode', e.target.value)} 
+                                placeholder="Nhập mã định danh..." 
+                            />
                         </Form.Item>
 
                         <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
@@ -651,14 +644,14 @@ export const AdminDepartment = () => {
             </DrawerComponent>
             <ModalComponent 
                 width={400} 
-                title="Xóa đơn vị" 
+                title="Xóa tỉnh/thành phố" 
                 open={isModalOpenDelete} 
                 onCancel={handleCancelDelete} 
                 onOk={handleDeleteLetter}
                 centered 
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa đơn vị này không?</div>
+                    <div>Bạn có muốn xóa tỉnh/thành phố này không?</div>
                 </Loading>
             </ModalComponent>
         </div>

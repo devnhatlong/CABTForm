@@ -38,10 +38,19 @@ const login = async (user) => {
         const newRefreshToken = generateRefreshToken(response._id);
 
         // Thêm thông tin đăng nhập mới vào mảng loginInfo
-        await User.findByIdAndUpdate(response._id, {
-            $push: { loginInfo: { ip, browser } },
-            refreshToken: newRefreshToken
-        }, { new: true });
+        await User.findByIdAndUpdate(
+            response._id,
+            {
+                $push: {
+                    loginInfo: {
+                        $each: [{ ip, browser }], // Thêm bản ghi mới
+                        $slice: -10, // Giữ tối đa 10 bản ghi, lấy từ cuối mảng
+                    },
+                },
+                refreshToken: newRefreshToken,
+            },
+            { new: true }
+        );
         
         // Thêm role vào userData
         userData.role = role;

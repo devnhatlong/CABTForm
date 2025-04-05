@@ -39,5 +39,8 @@ export const PATHS = {
     ADMIN: {
         USER: `${ROOTS_ADMIN}/user`,
         DEPARTMENT: `${ROOTS_ADMIN}/department`,
+        PROVINCE: '/admin/province',
+        DISTRICT: '/admin/district',
+        COMMUNE: '/admin/commune',
     },
 };

@@ -7,8 +7,8 @@ import { useSelector } from 'react-redux';
 import '../styles/style.css';
 import { NavbarLoginComponent } from "../../../components/NavbarLoginComponent/NavbarLoginComponent";
 import { getItem } from "../../../utils/utils";
-import { AdminUser } from "../../AdminUser/views/AdminUser";
-import { AdminDepartment } from "../../AdminDepartment/views/AdminDepartment";
+import { AdminUser } from "../../Admin/AdminUser/views/AdminUser";
+import { AdminDepartment } from "../../Admin/AdminDepartment/views/AdminDepartment";
 import { FieldOfWork } from "../../Category/FieldOfWork/views/FieldOfWork";
 import { Crime } from "../../Category/Crime/views/Crime";
 import { PATHS } from '../../../constants/path';
@@ -18,6 +18,9 @@ import { ReportSend } from "../../REPORT/ReportSend/views/ReportSend";
 import { ReportSummary } from "../../REPORT/ReportSummary/views/ReportSummary";
 import { Topic } from "../../Category/Topic/views/Topic";
 import { ReportType } from "../../Category/ReportType/views/ReportType";
+import { AdminProvince } from "../../Admin/AdminProvince/views/AdminProvince";
+import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
+import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
 
 const { Sider, Content } = Layout;
 
@@ -122,6 +125,9 @@ export const Dashboard = () => {
             children: [
                 getItem('Tài khoản', PATHS.ADMIN.USER, null, null, menuChildrenItemStyle),
                 getItem('Đơn vị / Phòng ban', PATHS.ADMIN.DEPARTMENT, null, null, menuChildrenItemStyle),
+                getItem('Tỉnh / thành phố', PATHS.ADMIN.PROVINCE, null, null, menuChildrenItemStyle),
+                getItem('Quận / huyện', PATHS.ADMIN.DISTRICT, null, null, menuChildrenItemStyle),
+                getItem('Xã, phường, thị trấn', PATHS.ADMIN.COMMUNE, null, null, menuChildrenItemStyle),
             ]
         },
     ].filter(Boolean); // Remove null items
@@ -166,6 +172,9 @@ export const Dashboard = () => {
 
             [PATHS.ADMIN.USER]: 'admin',
             [PATHS.ADMIN.DEPARTMENT]: 'admin',
+            [PATHS.ADMIN.PROVINCE]: 'admin',
+            [PATHS.ADMIN.DISTRICT]: 'admin',
+            [PATHS.ADMIN.COMMUNE]: 'admin',
         };
 
         const currentPath = location.pathname;
@@ -229,7 +238,7 @@ export const Dashboard = () => {
                         marginTop: 0,
                         marginRight: 12,
                         marginBottom: 0,
-                        marginLeft: collapsed ? 100 : 310, // Tách riêng marginLeft
+                        marginLeft: collapsed ? 90 : 310, // Tách riêng marginLeft
                         padding: 18,
                         background: '#fff',
                         minHeight: '280px',
@@ -244,10 +253,13 @@ export const Dashboard = () => {
                         <Route path={PATHS.CATEGORY.CRIME} element={<Crime />} />
                         <Route path={PATHS.CATEGORY.TOPIC} element={<Topic />} />
                         <Route path={PATHS.CATEGORY.REPORT_TYPE} element={<ReportType />} />
-                        <Route path={PATHS.SETTING.PERMISSION_FUNCTION} element={<PermissionFunction />} />
+                        {/* <Route path={PATHS.SETTING.PERMISSION_FUNCTION} element={<PermissionFunction />} /> */}
                         <Route path={PATHS.SETTING.PERMISSION_FIELD} element={<PermissionField />} />
                         <Route path={PATHS.ADMIN.USER} element={<AdminUser />} />
                         <Route path={PATHS.ADMIN.DEPARTMENT} element={<AdminDepartment />} />
+                        <Route path={PATHS.ADMIN.PROVINCE} element={<AdminProvince />} />
+                        <Route path={PATHS.ADMIN.DISTRICT} element={<AdminDistrict />} />
+                        <Route path={PATHS.ADMIN.COMMUNE} element={<AdminCommune />} />
                         <Route
                             path="*"
                             element={(

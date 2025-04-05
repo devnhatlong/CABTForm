@@ -56,18 +56,18 @@ const redirectToLogin = () => {
 const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/topic`;
 
 const topicService = {
-    // Tạo lĩnh vực công việc mới
+    // Tạo chuyên đề mới
     createTopic: async (data) => {
         try {
             const response = await axiosTopic.post(`${BASE_URL}/`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi tạo lĩnh vực công việc:", error);
+            console.error("Lỗi khi tạo chuyên đề:", error);
             throw error;
         }
     },
 
-    // Lấy danh sách lĩnh vực công việc với phân trang và lọc
+    // Lấy danh sách chuyên đề với phân trang và lọc
     getTopics: async (page, limit, fields, sort ) => {
         try {
             const response = await axiosTopic.get(`${BASE_URL}/`, {
@@ -75,40 +75,40 @@ const topicService = {
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách lĩnh vực công việc:", error);
+            console.error("Lỗi khi lấy danh sách chuyên đề:", error);
             throw error;
         }
     },
 
-    // Lấy chi tiết lĩnh vực công việc theo ID
+    // Lấy chi tiết chuyên đề theo ID
     getTopicById: async (id) => {
         try {
             const response = await axiosTopic.get(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết lĩnh vực công việc:", error);
+            console.error("Lỗi khi lấy chi tiết chuyên đề:", error);
             throw error;
         }
     },
 
-    // Cập nhật lĩnh vực công việc (chỉ admin)
+    // Cập nhật chuyên đề (chỉ admin)
     updateTopic: async (id, data) => {
         try {
             const response = await axiosTopic.put(`${BASE_URL}/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật lĩnh vực công việc:", error);
+            console.error("Lỗi khi cập nhật chuyên đề:", error);
             throw error;
         }
     },
 
-    // Xóa lĩnh vực công việc (chỉ admin)
+    // Xóa chuyên đề (chỉ admin)
     deleteTopic: async (id) => {
         try {
             const response = await axiosTopic.delete(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa lĩnh vực công việc:", error);
+            console.error("Lỗi khi xóa chuyên đề:", error);
             throw error;
         }
     },
@@ -120,7 +120,7 @@ const topicService = {
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa nhiều lĩnh vực công việc:", error);
+            console.error("Lỗi khi xóa nhiều chuyên đề:", error);
             throw error;
         }
     },

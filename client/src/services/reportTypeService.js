@@ -56,18 +56,18 @@ const redirectToLogin = () => {
 const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/report-type`;
 
 const reportTypeService = {
-    // Tạo lĩnh vực công việc mới
+    // Tạo loại báo cáo mới
     createReportType: async (data) => {
         try {
             const response = await axiosReportType.post(`${BASE_URL}/`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi tạo lĩnh vực công việc:", error);
+            console.error("Lỗi khi tạo loại báo cáo:", error);
             throw error;
         }
     },
 
-    // Lấy danh sách lĩnh vực công việc với phân trang và lọc
+    // Lấy danh sách loại báo cáo với phân trang và lọc
     getReportTypes: async (page, limit, fields, sort ) => {
         try {
             const response = await axiosReportType.get(`${BASE_URL}/`, {
@@ -75,40 +75,40 @@ const reportTypeService = {
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách lĩnh vực công việc:", error);
+            console.error("Lỗi khi lấy danh sách loại báo cáo:", error);
             throw error;
         }
     },
 
-    // Lấy chi tiết lĩnh vực công việc theo ID
+    // Lấy chi tiết loại báo cáo theo ID
     getReportTypeById: async (id) => {
         try {
             const response = await axiosReportType.get(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết lĩnh vực công việc:", error);
+            console.error("Lỗi khi lấy chi tiết loại báo cáo:", error);
             throw error;
         }
     },
 
-    // Cập nhật lĩnh vực công việc (chỉ admin)
+    // Cập nhật loại báo cáo (chỉ admin)
     updateReportType: async (id, data) => {
         try {
             const response = await axiosReportType.put(`${BASE_URL}/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật lĩnh vực công việc:", error);
+            console.error("Lỗi khi cập nhật loại báo cáo:", error);
             throw error;
         }
     },
 
-    // Xóa lĩnh vực công việc (chỉ admin)
+    // Xóa loại báo cáo (chỉ admin)
     deleteReportType: async (id) => {
         try {
             const response = await axiosReportType.delete(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa lĩnh vực công việc:", error);
+            console.error("Lỗi khi xóa loại báo cáo:", error);
             throw error;
         }
     },
@@ -120,7 +120,7 @@ const reportTypeService = {
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa nhiều lĩnh vực công việc:", error);
+            console.error("Lỗi khi xóa nhiều loại báo cáo:", error);
             throw error;
         }
     },
