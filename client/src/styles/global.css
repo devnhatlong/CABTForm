@@ -49,3 +49,8 @@
 textarea.ant-input {
     font-size: 18px;
 }
+
+.ant-select {
+    display: flex;
+    align-items: center;
+}

@@ -113,7 +113,7 @@ export const Dashboard = () => {
             icon: <SettingOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Phân quyền chức năng', PATHS.SETTING.PERMISSION_FUNCTION, null, null, menuChildrenItemStyle),
+                // getItem('Phân quyền chức năng', PATHS.SETTING.PERMISSION_FUNCTION, null, null, menuChildrenItemStyle),
                 getItem('Phân quyền lĩnh vực vụ việc', PATHS.SETTING.PERMISSION_FIELD, null, null, menuChildrenItemStyle),
             ]
         },
