@@ -14,6 +14,7 @@ import ModalComponent from '../../../../components/ModalComponent/ModalComponent
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
+import fileService from '../../../../services/fileService';
 import reportSendService from '../../../../services/reportSendService';
 import serverDateService from '../../../../services/serverDateService';
 import topicService from '../../../../services/topicService';
@@ -354,8 +355,7 @@ export const ReportSend = () => {
             return {
                 ...record, 
                 key: record._id,
-                createdAt: new Date(record.createdAt),
-                updatedAt: new Date(record.updatedAt),
+                createdAt: moment(record.createdAt).format('DD/MM/YYYY HH:MM'),
             };
         });
     };
@@ -473,19 +473,30 @@ export const ReportSend = () => {
         },
         {
             title: 'File báo cáo',
-            dataIndex: 'reportTypeId',
-            key: 'reportTypeId',
+            dataIndex: 'filename',
+            key: 'filename',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            // ...getColumnSearchProps('reportTypeId', 'mã báo cáo')
+            width: 200,
+            // ...getColumnSearchProps('filename', 'mã báo cáo')
+            render: (text, record) => (
+                <a
+                    href={fileService.getFileDownloadUrl(record.fileId)}
+                    target="_blank"
+                    rel="noopener noreferrer" // Bảo mật
+                >
+                    {text || "Tải xuống"}
+                </a>
+            ),
         },
         {
             title: 'Thời gian gửi',
-            dataIndex: 'reportTypeId',
-            key: 'reportTypeId',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('reportTypeId', 'mã báo cáo')
+            width: 150,
+            // ...getColumnSearchProps('createdAt', 'mã báo cáo')
         },
         {
             title: 'Nội dung báo cáo',
@@ -493,6 +504,11 @@ export const ReportSend = () => {
             key: 'reportContent',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
+            render: (text) => (
+                <div style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                    {text}
+                </div>
+            ),
         },
     ];
 
