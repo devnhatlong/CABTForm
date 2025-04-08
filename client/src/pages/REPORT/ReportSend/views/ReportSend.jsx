@@ -398,19 +398,21 @@ export const ReportSend = () => {
                     <Button
                         type="primary"
                         onClick={() => handleSearch(columnFilters, confirm, dataIndex)}
-                            icon={<SearchOutlined />}
-                            size="small"
-                            style={{
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
                             width: 100,
+                            height: 32,
                         }}
                     >
                         Tìm kiếm
                     </Button>
                     <Button
                         onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
-                            size="small"
-                            style={{
+                        size="small"
+                        style={{
                             width: 100,
+                            height: 32,
                         }}
                     >
                         Xóa
@@ -466,7 +468,7 @@ export const ReportSend = () => {
             key: 'reportTypeName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            width: 400,
+            width: 250,
             ...getColumnSearchProps('reportTypeName', 'loại báo cáo')
         },
         {
@@ -475,7 +477,7 @@ export const ReportSend = () => {
             key: 'filename',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            width: 300,
+            width: 200,
             // ...getColumnSearchProps('filename', 'mã báo cáo')
             render: (text, record) => (
                 <a
@@ -721,7 +723,7 @@ export const ReportSend = () => {
                                 }}
                                 showUploadList={false} // Ẩn danh sách file mặc định của Ant Design
                             >
-                                <Button icon={<PlusOutlined />}>Chọn file đính kèm</Button>
+                                <Button icon={<PlusOutlined />} style={{ height: '38px' }}>Chọn file đính kèm</Button>
                             </Upload>
 
                             {/* Hiển thị tên file đã chọn */}

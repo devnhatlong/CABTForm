@@ -428,19 +428,21 @@ export const AdminUser = () => {
                     <Button
                         type="primary"
                         onClick={() => handleSearch(columnFilters, confirm, dataIndex)}
-                            icon={<SearchOutlined />}
-                            size="small"
-                            style={{
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
                             width: 100,
+                            height: 32,
                         }}
                     >
                         Tìm kiếm
                     </Button>
                     <Button
                         onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
-                            size="small"
-                            style={{
+                        size="small"
+                        style={{
                             width: 100,
+                            height: 32,
                         }}
                     >
                         Xóa
