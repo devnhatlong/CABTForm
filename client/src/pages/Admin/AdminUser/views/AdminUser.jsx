@@ -325,7 +325,7 @@ export const AdminUser = () => {
         });
     }
 
-    const onUpdateLetter = async () => {
+    const onUpdate = async () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
@@ -819,7 +819,7 @@ export const AdminUser = () => {
                         wrapperCol={{ span: 17 }}
                         style={{ maxWidth: 1000 }}
                         initialValues={{ remember: true }}
-                        onFinish={onUpdateLetter} // Hàm xử lý cập nhật tài khoản
+                        onFinish={onUpdate} // Hàm xử lý cập nhật tài khoản
                         autoComplete="on"
                     >
                         <Form.Item

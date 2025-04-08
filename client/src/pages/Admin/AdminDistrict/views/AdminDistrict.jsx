@@ -257,7 +257,7 @@ export const AdminDistrict = () => {
         });
     }
 
-    const onUpdateLetter = async () => {
+    const onUpdate = async () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
@@ -657,7 +657,7 @@ export const AdminDistrict = () => {
                         wrapperCol={{ span: 15 }}
                         style={{ maxWidth: 1000 }}
                         initialValues={{ remember: true }}
-                        onFinish={onUpdateLetter}
+                        onFinish={onUpdate}
                         autoComplete="on"
                     >
                         <Form.Item

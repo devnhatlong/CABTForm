@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { FormListHeader, WrapperHeader } from '../styles/style';
-import { Button, Form, Input, Select, Space } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { FormContainer, FormListHeader, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
+import { Button, Col, Form, Input, Row, Select, Space, Upload } from "antd";
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
 
 import TableComponent from '../../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../../components/InputComponent/InputComponent';
@@ -13,10 +14,11 @@ import ModalComponent from '../../../../components/ModalComponent/ModalComponent
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
-import crimeService from '../../../../services/crimeService';
-import fieldOfWorkService from '../../../../services/fieldOfWorkService';
+import reportSendService from '../../../../services/reportSendService';
+import serverDateService from '../../../../services/serverDateService';
+import topicService from '../../../../services/topicService';
+import reportTypeService from '../../../../services/reportTypeService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
-import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 
 export const ReportSend = () => {
@@ -34,7 +36,10 @@ export const ReportSend = () => {
     const [dataTable, setDataTable] = useState([]);
     const [filters, setFilters] = useState({});
     const [resetSelection, setResetSelection] = useState(false);
-    const [fieldOfWorks, setFieldOfWorks] = useState([]);
+    const [serverDate, setServerDate] = useState([]);
+    const [topics, setTopics] = useState([]);
+    const [reportTypes, setReportTypes] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
         pageSize: 5 // Số lượng mục trên mỗi trang
@@ -50,51 +55,74 @@ export const ReportSend = () => {
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
-        { label: 'Quản lý danh mục' },
-        { label: 'Quản lý tội danh' },
+        { label: 'Báo cáo' },
+        { label: 'Gửi báo cáo' },
     ];
 
     useEffect(() => {
-        const fetchFieldOfWorks = async () => {
+        const fetchServerDate = async () => {
             try {
-                const response = await fieldOfWorkService.getFieldOfWorks(1, 100); // Lấy tối đa 100 bản ghi
+                const response = await serverDateService.getServerDate();
+                if (response?.serverDate) {
+                    setServerDate(response.serverDate);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy ngày giờ từ server", error);
+            }
+        };
+
+        const fetchTopics = async () => {
+            try {
+                const response = await topicService.getTopics(1, 100);
                 if (response?.data) {
-                    setFieldOfWorks(response.data);
+                    setTopics(response.data);
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
             }
         };
-    
-        fetchFieldOfWorks();
+
+        const fetchReportTypes = async () => {
+            try {
+                const response = await reportTypeService.getReportTypes(1, 100); // Lấy tối đa 100 bản ghi
+                if (response?.data) {
+                    setReportTypes(response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
+            }
+        };
+
+        fetchServerDate();
+        fetchTopics();
+        fetchReportTypes();
     }, []);
 
-    const [stateCrime, setStateCrime] = useState({
-        crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
-        description  : ""
+    const [stateReport, setStateReport] = useState({
+        topicId: "",
+        reportTypeId: "",
+        fileId: "",
+        reportContent: ""
     });
 
-    const [stateCrimeDetail, setStateCrimeDetail] = useState({
-        crimeName: "",
-        crimeCode : "",
-        fieldCode : "",
-        description  : ""
+    const [stateReportDetail, setStateReportDetail] = useState({
+        topicId: "",
+        reportTypeId: "",
+        fileId: "",
+        reportContent: ""
     });
 
     const mutation = useMutationHooks(
-        (data) => {
-            const { crimeName, crimeCode, fieldCode, description } = data;
-            const response = crimeService.createCrime({ crimeName, crimeCode, fieldCode, description });
+        (formData) => {
+            const response = reportSendService.createReport(formData); // Gửi FormData đến service
             return response;
         }
-    )
+    );
 
     const mutationUpdate = useMutationHooks(
         (data) => { 
             const { id, ...rests } = data;
-            const response = crimeService.updateCrime(id, { ...rests });
+            const response = reportSendService.updateReport(id, { ...rests });
             return response;
         }
     );
@@ -102,7 +130,7 @@ export const ReportSend = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = crimeService.deleteCrime(id);
+            const response = reportSendService.deleteReport(id);
             return response;
         }
     );
@@ -110,7 +138,7 @@ export const ReportSend = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = crimeService.deleteMultipleRecords(ids);
+          const response = reportSendService.deleteMultipleRecords(ids);
     
           return response;
         }
@@ -118,11 +146,11 @@ export const ReportSend = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateCrime({
-            crimeName: "",
-            crimeCode: "",
-            fieldCode: "",
-            description  : ""
+        setStateReport({
+            topicId: "",
+            reportTypeId: "",
+            fileId: "",
+            reportContent: ""
         });
 
         modalForm.resetFields();
@@ -134,19 +162,19 @@ export const ReportSend = () => {
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await crimeService.getCrimes(currentPage, pageSize, filters);
+        const response = await reportSendService.getReports(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await crimeService.getCrimeById(rowSelected);
+        const response = await reportSendService.getReportById(rowSelected);
 
         if (response?.data) {
-            setStateCrimeDetail({
-                crimeName: response?.data?.crimeName,
-                crimeCode: response?.data?.crimeCode,
-                fieldCode: response?.data?.fieldCode,
-                description: response?.data?.description
+            setStateReportDetail({
+                topicId: response?.data?.topicId,
+                reportTypeId: response?.data?.reportTypeId,
+                fileId: response?.data?.fileId,
+                reportContent: response?.data?.reportContent
             })
         }
         setIsLoadingUpdate(false);
@@ -166,8 +194,8 @@ export const ReportSend = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateCrimeDetail)
-    }, [stateCrimeDetail, drawerForm])
+        drawerForm.setFieldsValue(stateReportDetail)
+    }, [stateReportDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -203,6 +231,7 @@ export const ReportSend = () => {
     useEffect(() => {
         if(isSuccess && data?.success) {
             message.success(data?.message);
+            setSelectedFile(null);
             handleCancel();
         }
         else if (isError) {
@@ -254,18 +283,29 @@ export const ReportSend = () => {
     }, [pagination]);
 
     const onFinish = async () => {
-        mutation.mutate(stateCrime, {
+        if (!selectedFile) {
+            message.error("Vui lòng chọn file đính kèm!");
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append("file", selectedFile); // Thêm file vào FormData
+        formData.append("topicId", stateReport.topicId);
+        formData.append("reportTypeId", stateReport.reportTypeId);
+        formData.append("reportContent", stateReport.reportContent);
+    
+        mutation.mutate(formData, {
             onSettled: () => {
                 query.refetch();
-            }
+            },
         });
-    }
+    };
 
-    const onUpdateLetter = async () => {
+    const onUpdate = async () => {
         mutationUpdate.mutate(
             {
                 id: rowSelected,
-                ...stateCrimeDetail
+                ...stateReportDetail
             }, 
             {
                 onSettled: () => {
@@ -321,15 +361,15 @@ export const ReportSend = () => {
     };
 
     const handleOnChange = (name, value) => {
-        setStateCrime({
-            ...stateCrime,
+        setStateReport({
+            ...stateReport,
             [name]: value
         });
     };
 
     const handleOnChangeDetail = (name, value) => {
-        setStateCrimeDetail({
-            ...stateCrimeDetail,
+        setStateReportDetail({
+            ...stateReportDetail,
             [name]: value
         });
     };
@@ -416,40 +456,43 @@ export const ReportSend = () => {
 
     const columns = [
         {
-            title: 'Tên tội danh',
-            dataIndex: 'crimeName',
-            key: 'crimeName',
+            title: 'Kỳ báo cáo',
+            dataIndex: 'date',
+            key: 'date',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('crimeName', 'tên tội danh')
+            ...getColumnSearchProps('date', 'tên báo cáo')
         },
         {
-            title: 'Mã tội danh',
-            dataIndex: 'crimeCode',
-            key: 'crimeCode',
+            title: 'Mốc thời gian',
+            dataIndex: 'topicId',
+            key: 'topicId',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            // ...getColumnSearchProps('crimeCode', 'mã tội danh')
+            // ...getColumnSearchProps('topicId', 'mã báo cáo')
         },
         {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
+            title: 'File báo cáo',
+            dataIndex: 'reportTypeId',
+            key: 'reportTypeId',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('fieldCode', 'mã tội danh')
+            // ...getColumnSearchProps('reportTypeId', 'mã báo cáo')
         },
         {
-            title: 'Mô tả',
-            dataIndex: 'description',
-            key: 'description',
+            title: 'Thời gian gửi',
+            dataIndex: 'reportTypeId',
+            key: 'reportTypeId',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
+            ...getColumnSearchProps('reportTypeId', 'mã báo cáo')
         },
         {
-          title: buttonReloadTable,
-          dataIndex: 'action',
-          render: renderAction
+            title: 'Nội dung báo cáo',
+            dataIndex: 'reportContent',
+            key: 'reportContent',
+            filteredValue: null, // Loại bỏ filter mặc định
+            onFilter: null, // Loại bỏ filter mặc định
         },
     ];
 
@@ -534,39 +577,157 @@ export const ReportSend = () => {
 
     return (
         <div>
-            <WrapperHeader>Danh sách tội danh</WrapperHeader>
+            <WrapperHeader>Gửi báo cáo</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
-            <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
-                <FormListHeader>
-                    <Button 
-                        type="primary" 
-                        style={{
-                            display: 'flex',
-                            fontSize: '16px',
-                            height: '40px',
-                            alignItems: 'center'
-                        }}
-                        icon={<PlusOutlined />} 
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        Thêm tội danh
-                    </Button>
-                </FormListHeader>
-                <FormListHeader>
-                    <ImportExcel
-                        service={crimeService.importFromExcel}
-                        onSuccess={(response) => {
-                            message.success(`Import thành công: ${response.successCount} bản ghi`);
-                            query.refetch(); // Làm mới danh sách sau khi import thành công
-                        }}
-                        onError={(error) => {
-                            message.error(error.message || "Import thất bại");
-                        }}
-                    />
-                </FormListHeader>
-            </div>
-            <div style={{ marginTop: '20px' }}>
-                <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
+            <FormContainer>
+                <WrapperHeaderH5>Gửi báo cáo {moment(serverDate).format('DD/MM/YYYY')}</WrapperHeaderH5>
+                <Form
+                    form={modalForm}
+                    name="modalForm"
+                    labelCol={{ span: 6 }}
+                    wrapperCol={{ span: 17 }}
+                    style={{ maxWidth: '100%' }}
+                    initialValues={{ remember: true }}
+                    onFinish={onFinish}
+                    autoComplete="on"
+                >
+                    <Row gutter={16}>
+                        {/* Tên báo cáo */}
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Chọn chuyên đề"
+                                name="topicId"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                                rules={[{ required: true, message: 'Vui lòng chọn chuyên đề!' }]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Chọn chuyên đề"
+                                    value={stateReport.topicId}
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleOnChange('topicId', value)}
+                                    filterOption={(input, option) =>
+                                        option?.children?.toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
+                                    {topics.map((field) => (
+                                        <Select.Option key={field._id} value={field._id}>
+                                            {field.topicName}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        {/* Loại báo cáo định kỳ */}
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Chọn loại báo cáo định kỳ"
+                                name="reportTypeId"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                                rules={[{ required: true, message: 'Vui lòng chọn loại báo cáo định kỳ!' }]}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Chọn loại báo cáo định kỳ"
+                                    value={stateReport.reportTypeId}
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleOnChange('reportTypeId', value)}
+                                    filterOption={(input, option) =>
+                                        option?.children?.toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
+                                    {reportTypes.map((field) => (
+                                        <Select.Option key={field._id} value={field._id}>
+                                            {field.reportTypeName}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        {/* Mốc báo cáo */}
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Mốc báo cáo"
+                                name="date"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                                rules={[{ required: true, message: 'Vui lòng nhập mốc báo cáo!' }]}
+                            >
+                                <InputComponent
+                                    name="date"
+                                    // value={stateReport.date}
+                                    style={{ height: 36 }}
+                                    placeholder="Nhập mốc báo cáo"
+                                    onChange={(e) => handleOnChange('date', e.target.value)}
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    {/* Mô tả */}
+                    <Row>
+                        <Col span={24}>
+                            <Form.Item
+                                label="Nội dung báo cáo"
+                                name="reportContent"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Input.TextArea
+                                    name="reportContent"
+                                    value={stateReport.reportContent}
+                                    onChange={(e) => handleOnChange('reportContent', e.target.value)}
+                                    rows={4}
+                                    placeholder="Nhập nội dung báo cáo..."
+                                />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    {/* Nút chọn file đính kèm */}
+                    <Row>
+                        <Col span={24} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 10 }}>
+                            <Upload
+                                beforeUpload={(file) => {
+                                    setSelectedFile(file); // Lưu file vào state
+                                    return false; // Ngăn không upload tự động
+                                }}
+                                showUploadList={false} // Ẩn danh sách file mặc định của Ant Design
+                            >
+                                <Button icon={<PlusOutlined />}>Chọn file đính kèm</Button>
+                            </Upload>
+
+                            {/* Hiển thị tên file đã chọn */}
+                            {selectedFile && (
+                                <span style={{ marginLeft: 10, fontStyle: 'italic', color: '#555' }}>
+                                    {selectedFile.name}
+                                </span>
+                            )}
+                        </Col>
+                    </Row>
+
+                    {/* Nút gửi báo cáo */}
+                    <Row>
+                        <Col span={24} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                            <Button type="primary" style={{ display: 'flex',alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
+                        </Col>
+                    </Row>
+                </Form>
+            </FormContainer>
+            <TableContainer>
+                <WrapperHeaderTable>Danh sách báo cáo của đơn vị</WrapperHeaderTable>
+                <TableComponent
+                    columns={columns}
+                    data={dataTable}
+                    isLoading={isLoadingAllRecords || isLoadingResetFilter}
                     pagination={{
                         current: pagination.currentPage,
                         pageSize: pagination.pageSize,
@@ -576,16 +737,13 @@ export const ReportSend = () => {
                     }}
                     onRow={(record, rowIndex) => {
                         return {
-                            onClick: (event) => {
-                                if (record._id) {
-                                    setRowSelected(record._id);
-                                }
-                            },
+                            onClick: null, // Xóa sự kiện nếu không cần
                         };
                     }}
+                    rowSelection={null} // Vô hiệu hóa tính năng chọn hàng
                 />
-            </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Thêm tội danh" open={isModalOpen} onCancel={handleCancel} footer={null}>
+            </TableContainer>
+            {/* <ModalComponent form={modalForm} forceRender width={500} title="Thêm báo cáo" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
                     <Form
                         form={modalForm}
@@ -598,40 +756,40 @@ export const ReportSend = () => {
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên tội danh"
-                            name="crimeName"
+                            label="Tên báo cáo"
+                            name="userId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên tội danh!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên báo cáo!' }]}
                         >
                             <InputComponent 
-                                name="crimeName" 
-                                value={stateCrime.crimeName} 
-                                placeholder="Nhập tên tội danh" 
-                                onChange={(e) => handleOnChange('crimeName', e.target.value)} 
+                                name="userId" 
+                                value={stateReport.userId} 
+                                placeholder="Nhập tên báo cáo" 
+                                onChange={(e) => handleOnChange('userId', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã tội danh"
-                            name="crimeCode"
+                            label="Mã báo cáo"
+                            name="topicId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã báo cáo!' }]}
                         >
                             <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrime.crimeCode} 
-                                placeholder="Nhập mã tội danh" 
-                                onChange={(e) => handleOnChange('crimeCode', e.target.value)} 
+                                name="topicId" 
+                                value={stateReport.topicId} 
+                                placeholder="Nhập mã báo cáo" 
+                                onChange={(e) => handleOnChange('topicId', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
                             label="Lĩnh vực vụ việc"
-                            name="fieldCode"
+                            name="reportTypeId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
@@ -640,14 +798,14 @@ export const ReportSend = () => {
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
                                 placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrime.fieldCode}
-                                onChange={(value) => handleOnChange('fieldCode', value)}
+                                value={stateReport.reportTypeId}
+                                onChange={(value) => handleOnChange('reportTypeId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 } // Tìm kiếm theo tên lĩnh vực
                             >
                                 {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
+                                    <Select.Option key={field.reportTypeId} value={field.reportTypeId}>
                                         {field.fieldName}
                                     </Select.Option>
                                 ))}
@@ -656,15 +814,15 @@ export const ReportSend = () => {
                         
                         <Form.Item
                             label="Mô tả"
-                            name="description"
+                            name="reportContent"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                         >
                             <Input.TextArea 
-                                name="description" 
-                                value={stateCrime.description} 
-                                onChange={(e) => handleOnChange('description', e.target.value)} 
+                                name="reportContent" 
+                                value={stateReport.reportContent} 
+                                onChange={(e) => handleOnChange('reportContent', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
                             />
@@ -676,7 +834,7 @@ export const ReportSend = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết tội danh" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
+            <DrawerComponent form={drawerForm} title="Chi tiết báo cáo" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
                         form={drawerForm}
@@ -685,44 +843,44 @@ export const ReportSend = () => {
                         wrapperCol={{ span: 15 }}
                         style={{ maxWidth: 1000 }}
                         initialValues={{ remember: true }}
-                        onFinish={onUpdateLetter}
+                        onFinish={onUpdate}
                         autoComplete="on"
                     >
                         <Form.Item
-                            label="Tên tội danh"
-                            name="crimeName"
+                            label="Tên báo cáo"
+                            name="userId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên tội danh!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập tên báo cáo!' }]}
                         >
                             <InputComponent 
-                                name="crimeName" 
-                                value={stateCrimeDetail.crimeName} 
-                                placeholder="Nhập tên tội danh" 
-                                onChange={(e) => handleOnChangeDetail('crimeName', e.target.value)} 
+                                name="userId" 
+                                value={stateReportDetail.userId} 
+                                placeholder="Nhập tên báo cáo" 
+                                onChange={(e) => handleOnChangeDetail('userId', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
-                            label="Mã tội danh"
-                            name="crimeCode"
+                            label="Mã báo cáo"
+                            name="topicId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã tội danh!' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã báo cáo!' }]}
                         >
                             <InputComponent 
-                                name="crimeCode" 
-                                value={stateCrimeDetail.crimeCode} 
-                                placeholder="Nhập mã tội danh" 
-                                onChange={(e) => handleOnChangeDetail('crimeCode', e.target.value)} 
+                                name="topicId" 
+                                value={stateReportDetail.topicId} 
+                                placeholder="Nhập mã báo cáo" 
+                                onChange={(e) => handleOnChangeDetail('topicId', e.target.value)} 
                             />
                         </Form.Item>
 
                         <Form.Item
                             label="Lĩnh vực vụ việc"
-                            name="fieldCode"
+                            name="reportTypeId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
@@ -731,14 +889,14 @@ export const ReportSend = () => {
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
                                 placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateCrimeDetail.fieldCode}
-                                onChange={(value) => handleOnChangeDetail('fieldCode', value)}
+                                value={stateReportDetail.reportTypeId}
+                                onChange={(value) => handleOnChangeDetail('reportTypeId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 } // Tìm kiếm theo tên lĩnh vực
                             >
                                 {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.fieldCode} value={field.fieldCode}>
+                                    <Select.Option key={field.reportTypeId} value={field.reportTypeId}>
                                         {field.fieldName}
                                     </Select.Option>
                                 ))}
@@ -747,15 +905,15 @@ export const ReportSend = () => {
 
                         <Form.Item
                             label="Mô tả"
-                            name="description"
+                            name="reportContent"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                         >
                             <Input.TextArea 
-                                name="description" 
-                                value={stateCrimeDetail.description} 
-                                onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
+                                name="reportContent" 
+                                value={stateReportDetail.reportContent} 
+                                onChange={(e) => handleOnChangeDetail('reportContent', e.target.value)} 
                                 rows={4} // Số dòng hiển thị mặc định
                                 placeholder="Nhập mô tả..." 
                             />
@@ -766,17 +924,17 @@ export const ReportSend = () => {
                         </Form.Item>
                     </Form>
                 </Loading>
-            </DrawerComponent>
+            </DrawerComponent> */}
             <ModalComponent 
                 width={400} 
-                title="Xóa tội danh" 
+                title="Xóa báo cáo" 
                 open={isModalOpenDelete} 
                 onCancel={handleCancelDelete} 
                 onOk={handleDeleteLetter}
                 centered 
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa tội danh này không?</div>
+                    <div>Bạn có muốn xóa báo cáo này không?</div>
                 </Loading>
             </ModalComponent>
         </div>
