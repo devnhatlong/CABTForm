@@ -21,6 +21,7 @@ import { ReportType } from "../../Category/ReportType/views/ReportType";
 import { AdminProvince } from "../../Admin/AdminProvince/views/AdminProvince";
 import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
 import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
+import { ROLE } from "../../../constants/role";
 
 const { Sider, Content } = Layout;
 
@@ -92,10 +93,10 @@ export const Dashboard = () => {
             style: menuItemStyle,
             children: [
                 getItem('Gửi báo cáo', PATHS.REPORT.SEND, null, null, menuChildrenItemStyle),
-                getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
+                user?.role === ROLE.ADMIN && getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
             ]
         },
-        {
+        user?.role === ROLE.ADMIN && {
             key: 'category',
             label: 'Quản lý danh mục',
             icon: <SnippetsOutlined />,
@@ -107,7 +108,7 @@ export const Dashboard = () => {
                 getItem('Loại báo cáo', PATHS.CATEGORY.REPORT_TYPE, null, null, menuChildrenItemStyle),
             ]
         },
-        {
+        user?.role === ROLE.ADMIN && {
             key: 'setting',
             label: 'Cấu hình',
             icon: <SettingOutlined />,
@@ -117,7 +118,7 @@ export const Dashboard = () => {
                 getItem('Phân quyền lĩnh vực vụ việc', PATHS.SETTING.PERMISSION_FIELD, null, null, menuChildrenItemStyle),
             ]
         },
-        user?.role === "admin" && {
+        user?.role === ROLE.ADMIN && {
             key: 'admin',
             label: 'Quản trị',
             icon: <UserOutlined />,

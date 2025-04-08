@@ -17,6 +17,7 @@ import fieldOfWorkService from '../../../../services/fieldOfWorkService';
 import departmentService from '../../../../services/departmentService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { ROLE } from '../../../../constants/role';
 
 export const PermissionField = () => {
     const [modalForm] = Form.useForm();
@@ -42,7 +43,7 @@ export const PermissionField = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(user?.role !== "admin") {
+        if(user?.role !== ROLE.ADMIN) {
             navigate(`/dashboard`);
         }
     }, [user]);
@@ -233,7 +234,6 @@ export const PermissionField = () => {
 
     useEffect(() => {
         if (isSuccessDeletedMultiple && dataDeletedMultiple) {
-            console.log(dataDeletedMultiple);
             if (dataDeletedMultiple.deletedCount > 0) {
                 message.success(dataDeletedMultiple.message);
             } else {

@@ -35,7 +35,9 @@ const createReport = asyncHandler(async (req, res) => {
 const getReports = asyncHandler(async (req, res) => {
     const { page = 1, limit, sort, fields } = req.query;
 
+    // Truyền thông tin user vào service
     const response = await ReportService.getReports(
+        req.user, // Thông tin người dùng
         Number(page),
         limit ? Number(limit) : undefined,
         fields,

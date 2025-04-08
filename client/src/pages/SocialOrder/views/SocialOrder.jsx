@@ -11,6 +11,7 @@ import { useMutationHooks } from '../../../hooks/useMutationHook';
 import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
 import { WrapperContentPopup } from '../../../components/NavbarLoginComponent/style';
 import 'moment-timezone';
+import { ROLE } from '../../../constants/role';
 
 export const SocialOrder = () => {
     const user = useSelector((state) => state?.user);
@@ -21,7 +22,7 @@ export const SocialOrder = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(user?.role !== "admin") {
+        if(user?.role !== ROLE.ADMIN) {
             navigate(`/dashboard`);
         }
     }, [user]);

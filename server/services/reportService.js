@@ -13,10 +13,15 @@ const createReport = async (reportData) => {
     return await report.save();
 };
 
-const getReports = async (page = 1, limit, fields, sort) => {
+const getReports = async (user, page = 1, limit, fields, sort) => {
     try {
         // Chuẩn bị bộ lọc truy vấn
         const queries = {};
+
+        // Nếu không phải admin, chỉ lấy báo cáo theo userId
+        if (user.role !== "admin") {
+            queries.userId = user._id; // Lọc theo userId
+        }
 
         if (fields) {
             for (const key in fields) {
@@ -32,7 +37,14 @@ const getReports = async (page = 1, limit, fields, sort) => {
 
         // Tạo truy vấn
         let queryCommand = Report.find(queries)
-            .populate("userId", "userName") // Populate thông tin người dùng
+            .populate({
+                path: "userId", // Populate thông tin người dùng
+                select: "userName departmentId", // Lấy userName và departmentId
+                populate: {
+                    path: "departmentId", // Populate thông tin phòng ban từ departmentId
+                    select: "departmentName", // Chỉ lấy trường departmentName
+                },
+            })
             .populate("topicId", "topicName") // Populate thông tin chuyên đề
             .populate("reportTypeId", "reportTypeName") // Populate thông tin loại báo cáo
             .select("-__v"); // Loại bỏ trường không cần thiết

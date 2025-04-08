@@ -21,6 +21,8 @@ import topicService from '../../../../services/topicService';
 import reportTypeService from '../../../../services/reportTypeService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { validateAndAttachFile } from '../../../../utils/utils';
+import { ROLE } from '../../../../constants/role';
 
 export const ReportSend = () => {
     const [modalForm] = Form.useForm();
@@ -43,16 +45,10 @@ export const ReportSend = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 7 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if(user?.role !== "admin") {
-            navigate(`/dashboard`);
-        }
-    }, [user]);
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
@@ -169,7 +165,7 @@ export const ReportSend = () => {
 
     const fetchGetDetailRecord = async (rowSelected) => {
         const response = await reportSendService.getReportById(rowSelected);
-
+        console.log("response", response);
         if (response?.data) {
             setStateReportDetail({
                 topicId: response?.data?.topicId,
@@ -268,7 +264,6 @@ export const ReportSend = () => {
 
     useEffect(() => {
         if (isSuccessDeletedMultiple && dataDeletedMultiple) {
-            console.log(dataDeletedMultiple);
             if (dataDeletedMultiple.deletedCount > 0) {
                 message.success(dataDeletedMultiple.message);
             } else {
@@ -355,6 +350,8 @@ export const ReportSend = () => {
             return {
                 ...record, 
                 key: record._id,
+                departmentName: record?.userId?.departmentId?.departmentName,
+                reportTypeName: record?.reportTypeId?.reportTypeName,
                 createdAt: moment(record.createdAt).format('DD/MM/YYYY HH:MM'),
             };
         });
@@ -456,20 +453,21 @@ export const ReportSend = () => {
 
     const columns = [
         {
-            title: 'Kỳ báo cáo',
-            dataIndex: 'date',
-            key: 'date',
+            title: 'Đơn vị',
+            dataIndex: 'departmentName',
+            key: 'departmentName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('date', 'tên báo cáo')
+            ...getColumnSearchProps('departmentName', 'đơn vị')
         },
         {
-            title: 'Mốc thời gian',
-            dataIndex: 'topicId',
-            key: 'topicId',
+            title: 'Loại báo cáo định kỳ',
+            dataIndex: 'reportTypeName',
+            key: 'reportTypeName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            // ...getColumnSearchProps('topicId', 'mã báo cáo')
+            width: 400,
+            ...getColumnSearchProps('reportTypeName', 'loại báo cáo')
         },
         {
             title: 'File báo cáo',
@@ -477,7 +475,7 @@ export const ReportSend = () => {
             key: 'filename',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            width: 200,
+            width: 300,
             // ...getColumnSearchProps('filename', 'mã báo cáo')
             render: (text, record) => (
                 <a
@@ -495,8 +493,8 @@ export const ReportSend = () => {
             key: 'createdAt',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            width: 150,
-            // ...getColumnSearchProps('createdAt', 'mã báo cáo')
+            width: 200,
+            ...getColumnSearchProps('createdAt', 'mã báo cáo')
         },
         {
             title: 'Nội dung báo cáo',
@@ -509,6 +507,11 @@ export const ReportSend = () => {
                     {text}
                 </div>
             ),
+        },
+        {
+            title: buttonReloadTable,
+            dataIndex: 'action',
+            render: user?.role === ROLE.ADMIN ? renderAction : null,
         },
     ];
 
@@ -609,7 +612,7 @@ export const ReportSend = () => {
                 >
                     <Row gutter={16}>
                         {/* Tên báo cáo */}
-                        <Col xs={24} sm={24} md={24} lg={8}>
+                        <Col xs={24} sm={24} md={24} lg={12}>
                             <Form.Item
                                 label="Chọn chuyên đề"
                                 name="topicId"
@@ -638,7 +641,7 @@ export const ReportSend = () => {
                         </Col>
 
                         {/* Loại báo cáo định kỳ */}
-                        <Col xs={24} sm={24} md={24} lg={8}>
+                        <Col xs={24} sm={24} md={24} lg={12}>
                             <Form.Item
                                 label="Chọn loại báo cáo định kỳ"
                                 name="reportTypeId"
@@ -667,7 +670,7 @@ export const ReportSend = () => {
                         </Col>
 
                         {/* Mốc báo cáo */}
-                        <Col xs={24} sm={24} md={24} lg={8}>
+                        {/* <Col xs={24} sm={24} md={24} lg={8}>
                             <Form.Item
                                 label="Mốc báo cáo"
                                 name="date"
@@ -684,7 +687,7 @@ export const ReportSend = () => {
                                     onChange={(e) => handleOnChange('date', e.target.value)}
                                 />
                             </Form.Item>
-                        </Col>
+                        </Col> */}
                     </Row>
 
                     {/* Mô tả */}
@@ -713,7 +716,7 @@ export const ReportSend = () => {
                         <Col span={24} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: 10 }}>
                             <Upload
                                 beforeUpload={(file) => {
-                                    setSelectedFile(file); // Lưu file vào state
+                                    validateAndAttachFile(file, setSelectedFile); // Gọi hàm validateAndAttachFile để kiểm tra file
                                     return false; // Ngăn không upload tự động
                                 }}
                                 showUploadList={false} // Ẩn danh sách file mặc định của Ant Design
@@ -723,7 +726,7 @@ export const ReportSend = () => {
 
                             {/* Hiển thị tên file đã chọn */}
                             {selectedFile && (
-                                <span style={{ marginLeft: 10, fontStyle: 'italic', color: '#555' }}>
+                                <span style={{ marginLeft: 10, fontStyle: 'italic', color: '#555', fontSize: '16px' }}>
                                     {selectedFile.name}
                                 </span>
                             )}
@@ -740,116 +743,47 @@ export const ReportSend = () => {
             </FormContainer>
             <TableContainer>
                 <WrapperHeaderTable>Danh sách báo cáo của đơn vị</WrapperHeaderTable>
-                <TableComponent
-                    columns={columns}
-                    data={dataTable}
-                    isLoading={isLoadingAllRecords || isLoadingResetFilter}
-                    pagination={{
-                        current: pagination.currentPage,
-                        pageSize: pagination.pageSize,
-                        total: allRecords?.total,
-                        onChange: handlePageChange,
-                        showSizeChanger: false
-                    }}
-                    onRow={(record, rowIndex) => {
-                        return {
-                            onClick: null, // Xóa sự kiện nếu không cần
-                        };
-                    }}
-                    rowSelection={null} // Vô hiệu hóa tính năng chọn hàng
-                />
+                {user?.role === ROLE.ADMIN ? (
+                    <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
+                        pagination={{
+                            current: pagination.currentPage,
+                            pageSize: pagination.pageSize,
+                            total: allRecords?.total,
+                            onChange: handlePageChange,
+                            showSizeChanger: false
+                        }}
+                        onRow={(record, rowIndex) => {
+                            return {
+                                onClick: (event) => {
+                                    if (record._id) {
+                                        setRowSelected(record._id);
+                                    }
+                                },
+                            };
+                        }}
+                    />
+                ) : (
+                    <TableComponent
+                        columns={columns}
+                        data={dataTable}
+                        isLoading={isLoadingAllRecords || isLoadingResetFilter}
+                        pagination={{
+                            current: pagination.currentPage,
+                            pageSize: pagination.pageSize,
+                            total: allRecords?.total,
+                            onChange: handlePageChange,
+                            showSizeChanger: false
+                        }}
+                        onRow={(record, rowIndex) => {
+                            return {
+                                onClick: null, // Xóa sự kiện nếu không cần
+                            };
+                        }}
+                        rowSelection={null} // Vô hiệu hóa tính năng chọn hàng
+                    />
+                )}
             </TableContainer>
-            {/* <ModalComponent form={modalForm} forceRender width={500} title="Thêm báo cáo" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <Loading isLoading={isPending}>
-                    <Form
-                        form={modalForm}
-                        name="modalForm"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 17 }}
-                        style={{ maxWidth: 1000 }}
-                        initialValues={{ remember: true }}
-                        onFinish={onFinish}
-                        autoComplete="on"
-                    >
-                        <Form.Item
-                            label="Tên báo cáo"
-                            name="userId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên báo cáo!' }]}
-                        >
-                            <InputComponent 
-                                name="userId" 
-                                value={stateReport.userId} 
-                                placeholder="Nhập tên báo cáo" 
-                                onChange={(e) => handleOnChange('userId', e.target.value)} 
-                            />
-                        </Form.Item>
 
-                        <Form.Item
-                            label="Mã báo cáo"
-                            name="topicId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã báo cáo!' }]}
-                        >
-                            <InputComponent 
-                                name="topicId" 
-                                value={stateReport.topicId} 
-                                placeholder="Nhập mã báo cáo" 
-                                onChange={(e) => handleOnChange('topicId', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Lĩnh vực vụ việc"
-                            name="reportTypeId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực vụ việc!' }]}
-                        >
-                            <Select
-                                showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateReport.reportTypeId}
-                                onChange={(value) => handleOnChange('reportTypeId', value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên lĩnh vực
-                            >
-                                {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.reportTypeId} value={field.reportTypeId}>
-                                        {field.fieldName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        
-                        <Form.Item
-                            label="Mô tả"
-                            name="reportContent"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Input.TextArea 
-                                name="reportContent" 
-                                value={stateReport.reportContent} 
-                                onChange={(e) => handleOnChange('reportContent', e.target.value)} 
-                                rows={4} // Số dòng hiển thị mặc định
-                                placeholder="Nhập mô tả..." 
-                            />
-                        </Form.Item>
-
-                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button type="primary" htmlType="submit">Lưu</Button>
-                        </Form.Item>
-                    </Form>
-                </Loading>
-            </ModalComponent>
             <DrawerComponent form={drawerForm} title="Chi tiết báo cáo" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
                 <Loading isLoading={isLoadingUpdate}>
                     <Form
@@ -862,85 +796,92 @@ export const ReportSend = () => {
                         onFinish={onUpdate}
                         autoComplete="on"
                     >
-                        <Form.Item
-                            label="Tên báo cáo"
-                            name="userId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên báo cáo!' }]}
-                        >
-                            <InputComponent 
-                                name="userId" 
-                                value={stateReportDetail.userId} 
-                                placeholder="Nhập tên báo cáo" 
-                                onChange={(e) => handleOnChangeDetail('userId', e.target.value)} 
-                            />
-                        </Form.Item>
+                        <Row gutter={16}>
+                            {/* Tên báo cáo */}
+                            <Col xs={24} sm={24} md={24} lg={12}>
+                                <Form.Item
+                                    label="Chọn chuyên đề"
+                                    name="topicId"
+                                    labelCol={{ span: 24 }}
+                                    wrapperCol={{ span: 24 }}
+                                    style={{ marginBottom: 10 }}
+                                    rules={[{ required: true, message: 'Vui lòng chọn chuyên đề!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn chuyên đề"
+                                        value={stateReportDetail.topicId}
+                                        style={{ height: 36 }}
+                                        onChange={(value) => handleOnChangeDetail('topicId', value)}
+                                        filterOption={(input, option) =>
+                                            option?.children?.toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {topics.map((field) => (
+                                            <Select.Option key={field._id} value={field._id}>
+                                                {field.topicName}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
 
-                        <Form.Item
-                            label="Mã báo cáo"
-                            name="topicId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã báo cáo!' }]}
-                        >
-                            <InputComponent 
-                                name="topicId" 
-                                value={stateReportDetail.topicId} 
-                                placeholder="Nhập mã báo cáo" 
-                                onChange={(e) => handleOnChangeDetail('topicId', e.target.value)} 
-                            />
-                        </Form.Item>
+                            {/* Loại báo cáo định kỳ */}
+                            <Col xs={24} sm={24} md={24} lg={12}>
+                                <Form.Item
+                                    label="Chọn loại báo cáo định kỳ"
+                                    name="reportTypeId"
+                                    labelCol={{ span: 24 }}
+                                    wrapperCol={{ span: 24 }}
+                                    style={{ marginBottom: 10 }}
+                                    rules={[{ required: true, message: 'Vui lòng chọn loại báo cáo định kỳ!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn loại báo cáo định kỳ"
+                                        value={stateReportDetail.reportTypeId}
+                                        style={{ height: 36 }}
+                                        onChange={(value) => handleOnChangeDetail('reportTypeId', value)}
+                                        filterOption={(input, option) =>
+                                            option?.children?.toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {reportTypes.map((field) => (
+                                            <Select.Option key={field._id} value={field._id}>
+                                                {field.reportTypeName}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                        <Form.Item
-                            label="Lĩnh vực vụ việc"
-                            name="reportTypeId"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực vụ việc!' }]}
-                        >
-                            <Select
-                                showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn lĩnh vực vụ việc"
-                                value={stateReportDetail.reportTypeId}
-                                onChange={(value) => handleOnChangeDetail('reportTypeId', value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên lĩnh vực
-                            >
-                                {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field.reportTypeId} value={field.reportTypeId}>
-                                        {field.fieldName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mô tả"
-                            name="reportContent"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Input.TextArea 
-                                name="reportContent" 
-                                value={stateReportDetail.reportContent} 
-                                onChange={(e) => handleOnChangeDetail('reportContent', e.target.value)} 
-                                rows={4} // Số dòng hiển thị mặc định
-                                placeholder="Nhập mô tả..." 
-                            />
-                        </Form.Item>
+                        <Row>
+                            <Col span={24}>
+                                <Form.Item
+                                    label="Nội dung báo cáo"
+                                    name="reportContent"
+                                    labelCol={{ span: 24 }}
+                                    wrapperCol={{ span: 24 }}
+                                    style={{ marginBottom: 10 }}
+                                >
+                                    <Input.TextArea
+                                        name="reportContent"
+                                        value={stateReportDetail.reportContent}
+                                        onChange={(e) => handleOnChangeDetail('reportContent', e.target.value)}
+                                        rows={4}
+                                        placeholder="Nhập nội dung báo cáo..."
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
                         <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
                             <Button type="primary" htmlType="submit">Cập nhật</Button>
                         </Form.Item>
                     </Form>
                 </Loading>
-            </DrawerComponent> */}
+            </DrawerComponent>
             <ModalComponent 
                 width={400} 
                 title="Xóa báo cáo" 

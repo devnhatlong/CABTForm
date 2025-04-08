@@ -54,3 +54,13 @@ textarea.ant-input {
     display: flex;
     align-items: center;
 }
+
+.ant-btn,
+.ant-table-wrapper .ant-table-filter-trigger {
+    font-size: 16px;
+}
+
+.ant-btn-sm {
+    height: 32px;
+    width: 120px !important;
+}

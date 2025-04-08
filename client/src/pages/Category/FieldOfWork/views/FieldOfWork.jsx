@@ -17,6 +17,7 @@ import fieldOfWorkService from '../../../../services/fieldOfWorkService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { ROLE } from '../../../../constants/role';
 
 export const FieldOfWork = () => {
     const [modalForm] = Form.useForm();
@@ -41,7 +42,7 @@ export const FieldOfWork = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(user?.role !== "admin") {
+        if(user?.role !== ROLE.ADMIN) {
             navigate(`/dashboard`);
         }
     }, [user]);
@@ -213,7 +214,6 @@ export const FieldOfWork = () => {
 
     useEffect(() => {
         if (isSuccessDeletedMultiple && dataDeletedMultiple) {
-            console.log(dataDeletedMultiple);
             if (dataDeletedMultiple.deletedCount > 0) {
                 message.success(dataDeletedMultiple.message);
             } else {

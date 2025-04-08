@@ -21,6 +21,7 @@ import DrawerComponent from '../../../../components/DrawerComponent/DrawerCompon
 import { WrapperContentPopup } from '../../../../components/NavbarLoginComponent/style';
 import ImportExcel from '../../../../components/ImportExcel/ImportExcel';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { ROLE } from '../../../../constants/role';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();
@@ -47,7 +48,7 @@ export const AdminUser = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(user?.role !== "admin") {
+        if(user?.role !== ROLE.ADMIN) {
             navigate(`/dashboard`);
         }
     }, [user]);

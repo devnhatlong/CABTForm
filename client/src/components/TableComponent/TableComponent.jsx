@@ -3,6 +3,7 @@ import { Table, Modal } from 'antd'; // Import Modal
 import Loading from '../LoadingComponent/Loading';
 import { useSelector } from 'react-redux';
 import { StyledTable } from './style';
+import { ROLE } from '../../constants/role';
 
 const TableComponent = (props) => {
   const { selectionType = 'checkbox', data = [], isLoading = false, columns = [], handleDeleteMultiple, resetSelection } = props;
@@ -34,7 +35,7 @@ const TableComponent = (props) => {
 
   return (
     <Loading isLoading={isLoading}>
-      {user?.role === 'admin' && selectedRowKeys.length > 0 && (
+      {user?.role === ROLE.ADMIN && selectedRowKeys.length > 0 && (
         <div
           style={{
             backgroundColor: '#1677ff',

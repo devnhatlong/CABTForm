@@ -73,22 +73,26 @@ export const formatNumber = (number) => {
 //     message.success(`File ${file.name} đã được đính kèm thành công!`);
 // };
 
-export const handleAttachFile = async (info, setSelectedFile) => {
-    const file = info.file;
-
-    // Kiểm tra MIME Type (chỉ cho phép file PDF)
-    const allowedMimeType = 'application/pdf'; // MIME Type cho file PDF
+export const validateAndAttachFile = (file, setSelectedFile) => {
+    console.log("File được chọn:", file);
+    // MIME Type cho phép
+    const allowedMimeTypes = ['application/pdf', 'application/octet-stream']; // MIME Type giả định cho file .bm2
     const fileType = file.type;
 
-    if (fileType && fileType !== allowedMimeType) {
-        message.error('Chỉ cho phép upload file PDF!');
+    // Kiểm tra MIME Type
+    if (fileType && !allowedMimeTypes.includes(fileType)) {
+        message.error('Chỉ cho phép upload file PDF hoặc file BM2!');
         return;
     }
 
-    // Lưu tên file đã chọn
-    setSelectedFile({
-        name: file.name,
-    });
+    // Kiểm tra phần mở rộng file (nếu cần)
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    if (!['pdf', 'bm2'].includes(fileExtension)) {
+        message.error('Chỉ cho phép upload file PDF hoặc file BM2!');
+        return;
+    }
 
+    // Lưu file đã chọn
+    setSelectedFile(file);
     message.success(`File ${file.name} đã được đính kèm thành công!`);
 };
