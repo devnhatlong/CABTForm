@@ -74,7 +74,6 @@ export const formatNumber = (number) => {
 // };
 
 export const validateAndAttachFile = (file, setSelectedFile) => {
-    console.log("File được chọn:", file);
     // MIME Type cho phép
     const allowedMimeTypes = ['application/pdf', 'application/octet-stream']; // MIME Type giả định cho file .bm2
     const fileType = file.type;

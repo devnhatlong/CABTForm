@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { FormContainer, FormListHeader, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
-import { Button, Col, Form, Input, Row, Select, Space, Upload } from "antd";
+import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 
 import { useNavigate } from 'react-router';
@@ -45,7 +45,7 @@ export const ReportSend = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 7 // Số lượng mục trên mỗi trang
+        pageSize: 10 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();
@@ -165,7 +165,6 @@ export const ReportSend = () => {
 
     const fetchGetDetailRecord = async (rowSelected) => {
         const response = await reportSendService.getReportById(rowSelected);
-        console.log("response", response);
         if (response?.data) {
             setStateReportDetail({
                 topicId: response?.data?.topicId,
@@ -436,6 +435,62 @@ export const ReportSend = () => {
         },
     });
 
+    const getDateFilterProps = (dataIndex, placeholder) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <DatePicker
+                    format="DD/MM/YYYY"
+                    value={columnFilters?.dateSent ? moment(columnFilters?.dateSent, "DD/MM/YYYY") : null}
+                    onChange={(date) => {
+                        const dateString = date ? date.format('DD/MM/YYYY') : '';
+                        setColumnFilters(prevFilters => ({
+                            ...prevFilters,
+                            dateSent: dateString,
+                        }));
+                        setSelectedKeys(dateString ? [dateString] : []);
+                    }}
+                    onPressEnter={() => handleSearch(columnFilters, confirm, dataIndex)}
+                    placeholder={`Chọn ${placeholder}`}
+                    style={{
+                        marginBottom: 8,
+                        display: 'block',
+                    }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(columnFilters, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
+                            width: 100,
+                            height: 32,
+                        }}
+                    >
+                        Tìm kiếm
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
+                        size="small"
+                        style={{
+                            width: 100,
+                            height: 32,
+                        }}
+                    >
+                        Xóa
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+        ),
+        onFilter: (value, record) => {
+            const recordDate = moment(record[dataIndex]).format('DD/MM/YYYY');
+            return recordDate === value;
+        },
+    });
+
     const buttonReloadTable = () => {
         return (
             <div style={{display: "flex", justifyContent: "center"}}>
@@ -496,7 +551,7 @@ export const ReportSend = () => {
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
             width: 200,
-            ...getColumnSearchProps('createdAt', 'mã báo cáo')
+            ...getDateFilterProps('dateSent', 'ngày gửi')
         },
         {
             title: 'Nội dung báo cáo',
@@ -541,29 +596,17 @@ export const ReportSend = () => {
     const handleReset = (clearFilters, confirm, dataIndex) => {
         clearFilters();
         
-        if (dataIndex === "ngayDen") {
-            setColumnFilters(prevColumnFilters => {
-                const updatedColumnFilters = { ...prevColumnFilters };
-                return updatedColumnFilters;
-            });
+        setColumnFilters(prevColumnFilters => {
+            const updatedColumnFilters = { ...prevColumnFilters };
+            delete updatedColumnFilters[dataIndex];
+            return updatedColumnFilters;
+        });
 
-            setFilters(prevFilters => {
-                const updatedFilters = { ...prevFilters };
-                return updatedFilters;
-            });
-        }
-        else {
-            setColumnFilters(prevColumnFilters => {
-                const updatedColumnFilters = { ...prevColumnFilters };
-                delete updatedColumnFilters[dataIndex];
-                return updatedColumnFilters;
-            });
-            setFilters(prevFilters => {
-                const updatedFilters = { ...prevFilters };
-                delete updatedFilters[dataIndex];
-                return updatedFilters;
-            });
-        }
+        setFilters(prevFilters => {
+            const updatedFilters = { ...prevFilters };
+            delete updatedFilters[dataIndex];
+            return updatedFilters;
+        });
 
         // Tiếp tục với cuộc gọi hàm getAllRecords và truyền filters vào đó để xóa filter cụ thể trên server.
         getAllRecords(pagination.currentPage, pagination.pageSize, filters)

@@ -2,6 +2,9 @@ require('dotenv').config();
 const mongoose = require("mongoose");
 const { GridFSBucket } = require("mongodb");
 const Report = require("../models/reportModel");
+const Department = require("../models/departmentModel");
+const ReportType = require("../models/reportTypeModel");
+const User = require("../models/userModel");
 
 let bucket;
 mongoose.connection.once("open", () => {
@@ -15,60 +18,84 @@ const createReport = async (reportData) => {
 
 const getReports = async (user, page = 1, limit, fields, sort) => {
     try {
-        // Chuẩn bị bộ lọc truy vấn
         const queries = {};
 
-        // Nếu không phải admin, chỉ lấy báo cáo theo userId
         if (user.role !== "admin") {
-            queries.userId = user._id; // Lọc theo userId
+            queries.userId = user._id;
         }
 
-        if (fields) {
-            for (const key in fields) {
-                if (fields[key]) {
-                    queries[key] = { $regex: fields[key], $options: "i" }; // Tìm kiếm không phân biệt chữ hoa/thường
-                }
-            }
+        // Xử lý lọc theo tên phòng ban và loại báo cáo
+        if (fields?.departmentName) {
+            const departments = await Department.find({
+                departmentName: { $regex: fields.departmentName, $options: "i" },
+            }).select("_id");
+
+            const departmentIds = departments.map((d) => d._id);
+
+            const users = await User.find({
+                departmentId: { $in: departmentIds },
+            }).select("_id");
+
+            const userIds = users.map((u) => u._id);
+            queries.userId = { $in: userIds };
         }
 
-        // Xử lý phân trang
-        limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10); // Số lượng mục trên mỗi trang
+        if (fields?.reportTypeName) {
+            const reportTypes = await ReportType.find({
+                reportTypeName: { $regex: fields.reportTypeName, $options: "i" },
+            }).select("_id");
+
+            const reportTypeIds = reportTypes.map((r) => r._id);
+            queries.reportTypeId = { $in: reportTypeIds };
+        }
+
+        // Lọc theo ngày gửi (dateSent -> createdAt)
+        if (fields?.dateSent) {
+            const [day, month, year] = fields.dateSent.split("/");
+        
+            // Lấy mốc thời gian đầu và cuối ngày đó theo UTC
+            const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+            const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+            queries.createdAt = {
+                $gte: startDate,
+                $lt: endDate,
+            };
+        }
+
+        limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
         const skip = (page - 1) * limit;
 
-        // Tạo truy vấn
         let queryCommand = Report.find(queries)
             .populate({
-                path: "userId", // Populate thông tin người dùng
-                select: "userName departmentId", // Lấy userName và departmentId
+                path: "userId",
+                select: "userName departmentId",
                 populate: {
-                    path: "departmentId", // Populate thông tin phòng ban từ departmentId
-                    select: "departmentName", // Chỉ lấy trường departmentName
+                    path: "departmentId",
+                    select: "departmentName",
                 },
             })
-            .populate("topicId", "topicName") // Populate thông tin chuyên đề
-            .populate("reportTypeId", "reportTypeName") // Populate thông tin loại báo cáo
-            .select("-__v"); // Loại bỏ trường không cần thiết
+            .populate("topicId", "topicName")
+            .populate("reportTypeId", "reportTypeName")
+            .select("-__v");
 
-        // Xử lý sắp xếp
         if (sort) {
             const sortBy = sort.split(",").join(" ");
             queryCommand = queryCommand.sort(sortBy);
         } else {
-            queryCommand = queryCommand.sort("-createdAt"); // Mặc định sắp xếp theo ngày tạo giảm dần
+            queryCommand = queryCommand.sort("-createdAt");
         }
 
-        // Thực hiện truy vấn với phân trang
         const data = await queryCommand.skip(skip).limit(limit);
-        const total = await Report.countDocuments(queries); // Tổng số báo cáo phù hợp
+        const total = await Report.countDocuments(queries);
 
-        // Lấy thông tin filename từ GridFS
         const reportsWithFilename = await Promise.all(
             data.map(async (report) => {
                 if (report.fileId) {
                     const files = await bucket.find({ _id: report.fileId }).toArray();
                     if (files.length > 0) {
-                        report = report.toObject(); // Chuyển sang object để thêm trường mới
-                        report.filename = files[0].filename; // Thêm filename từ GridFS
+                        report = report.toObject();
+                        report.filename = files[0].filename;
                     }
                 }
                 return report;
