@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { FormContainer, FormListHeader, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
-import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker } from "antd";
+import { FormContainer, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
+import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker, ConfigProvider } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
+import viVN from 'antd/es/locale/vi_VN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
 
 import TableComponent from '../../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../../components/InputComponent/InputComponent';
@@ -23,6 +26,7 @@ import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { validateAndAttachFile } from '../../../../utils/utils';
 import { ROLE } from '../../../../constants/role';
+
 
 export const ReportSend = () => {
     const [modalForm] = Form.useForm();
@@ -45,10 +49,8 @@ export const ReportSend = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 10 // Số lượng mục trên mỗi trang
+        pageSize: 10
     });
-
-    const navigate = useNavigate();
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
@@ -640,7 +642,7 @@ export const ReportSend = () => {
     };
 
     return (
-        <div>
+        <ConfigProvider locale={viVN}>
             <WrapperHeader>Gửi báo cáo</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
             <FormContainer>
@@ -713,26 +715,6 @@ export const ReportSend = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
-
-                        {/* Mốc báo cáo */}
-                        {/* <Col xs={24} sm={24} md={24} lg={8}>
-                            <Form.Item
-                                label="Mốc báo cáo"
-                                name="date"
-                                labelCol={{ span: 24 }}
-                                wrapperCol={{ span: 24 }}
-                                style={{ marginBottom: 10 }}
-                                rules={[{ required: true, message: 'Vui lòng nhập mốc báo cáo!' }]}
-                            >
-                                <InputComponent
-                                    name="date"
-                                    // value={stateReport.date}
-                                    style={{ height: 36 }}
-                                    placeholder="Nhập mốc báo cáo"
-                                    onChange={(e) => handleOnChange('date', e.target.value)}
-                                />
-                            </Form.Item>
-                        </Col> */}
                     </Row>
 
                     {/* Mô tả */}
@@ -939,6 +921,6 @@ export const ReportSend = () => {
                     <div>Bạn có muốn xóa báo cáo này không?</div>
                 </Loading>
             </ModalComponent>
-        </div>
+        </ConfigProvider>
     )
 }
