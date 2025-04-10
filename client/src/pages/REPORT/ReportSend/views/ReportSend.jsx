@@ -3,12 +3,10 @@ import { FormContainer, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperH
 import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker, ConfigProvider } from "antd";
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 
-import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import viVN from 'antd/es/locale/vi_VN';
-import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 
 import TableComponent from '../../../../components/TableComponent/TableComponent';
@@ -22,10 +20,12 @@ import reportSendService from '../../../../services/reportSendService';
 import serverDateService from '../../../../services/serverDateService';
 import topicService from '../../../../services/topicService';
 import reportTypeService from '../../../../services/reportTypeService';
+import generalSettingService from '../../../../services/generalSettingService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { validateAndAttachFile } from '../../../../utils/utils';
 import { ROLE } from '../../../../constants/role';
+import { SETTING_KEYS } from '../../../../constants/settingKeys';
 
 
 export const ReportSend = () => {
@@ -47,6 +47,12 @@ export const ReportSend = () => {
     const [topics, setTopics] = useState([]);
     const [reportTypes, setReportTypes] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
+
+    const [lockTime, setLockTime] = useState(null);
+
+    const [disableSendButton, setDisableSendButton] = useState(false);
+    const [remainingTimeText, setRemainingTimeText] = useState('');
+    
     const [pagination, setPagination] = useState({
         currentPage: 1,
         pageSize: 10
@@ -62,11 +68,31 @@ export const ReportSend = () => {
         const fetchServerDate = async () => {
             try {
                 const response = await serverDateService.getServerDate();
-                if (response?.serverDate) {
-                    setServerDate(response.serverDate);
+                if (response?.formattedDate) {
+                    setServerDate(response.formattedDate);
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy ngày giờ từ server", error);
+            }
+        };
+
+        const fetchSettings = async () => {
+            try {
+                const settings = await generalSettingService.getGeneralSettings();
+                // Duyệt qua danh sách cài đặt và thiết lập giá trị cho các state
+                settings?.data?.forEach((setting) => {
+                    switch (setting.key) {
+                        case SETTING_KEYS.IS_LOCK_ENABLED:
+                            setLockTime(setting.time ? moment(setting.time, 'HH:mm:ss') : null);
+                            break;
+    
+                        default:
+                            break;
+                    }
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách cài đặt:', error);
+                message.error('Không thể tải danh sách cài đặt');
             }
         };
 
@@ -93,9 +119,32 @@ export const ReportSend = () => {
         };
 
         fetchServerDate();
+        fetchSettings();
         fetchTopics();
         fetchReportTypes();
     }, []);
+
+    useEffect(() => {
+        // Kiểm tra điều kiện và tính toán thời gian còn lại
+        if (serverDate && lockTime) {
+            const serverMoment = moment(serverDate, 'YYYY-MM-DDTHH:mm:ss');
+            const lockMoment = moment(lockTime, 'HH:mm:ss');
+            const nextDayMidnight = moment(serverDate).endOf('day').add(1, 'second'); // 0 giờ ngày tiếp theo
+
+            if (lockMoment.isBefore(serverMoment) && serverMoment.isBefore(nextDayMidnight)) {
+                const remainingTime = moment.duration(nextDayMidnight.diff(serverMoment));
+                const hours = remainingTime.hours();
+                const minutes = remainingTime.minutes();
+                const seconds = remainingTime.seconds();
+
+                setRemainingTimeText(`Không thể gửi báo cáo sau ${hours} giờ ${minutes} phút`);
+                setDisableSendButton(true);
+            } else {
+                setRemainingTimeText('');
+                setDisableSendButton(false);
+            }
+        }
+    }, [serverDate, lockTime]);
 
     const [stateReport, setStateReport] = useState({
         topicId: "",
@@ -280,6 +329,11 @@ export const ReportSend = () => {
     }, [pagination]);
 
     const onFinish = async () => {
+        if (disableSendButton) {
+            message.error("Không thể gửi báo cáo do thời gian đã bị khóa!");
+            return;
+        }
+        
         if (!selectedFile) {
             message.error("Vui lòng chọn file đính kèm!");
             return;
@@ -402,8 +456,9 @@ export const ReportSend = () => {
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Tìm kiếm
@@ -412,8 +467,9 @@ export const ReportSend = () => {
                         onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Xóa
@@ -465,8 +521,9 @@ export const ReportSend = () => {
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Tìm kiếm
@@ -475,8 +532,9 @@ export const ReportSend = () => {
                         onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Xóa
@@ -759,11 +817,11 @@ export const ReportSend = () => {
                             )}
                         </Col>
                     </Row>
-
+                    {remainingTimeText && <div style={{ color: 'red', marginBottom: '10px', fontSize: '16px', fontWeight: '500' }}>{remainingTimeText}</div>}
                     {/* Nút gửi báo cáo */}
                     <Row>
                         <Col span={24} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button type="primary" style={{ display: 'flex',alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
+                            <Button disabled={disableSendButton} type="primary" style={{ display: 'flex',alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
                         </Col>
                     </Row>
                 </Form>

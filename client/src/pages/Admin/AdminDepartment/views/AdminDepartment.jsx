@@ -339,8 +339,9 @@ export const AdminDepartment = () => {
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Tìm kiếm
@@ -349,8 +350,9 @@ export const AdminDepartment = () => {
                         onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
                         size="small"
                         style={{
-                            width: 100,
+                            width: 120,
                             height: 32,
+                            fontSize: 16,
                         }}
                     >
                         Xóa

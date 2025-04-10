@@ -55,11 +55,7 @@ textarea.ant-input {
     align-items: center;
 }
 
-.ant-btn,
-.ant-table-wrapper .ant-table-filter-trigger {
-    font-size: 16px;
-}
-
-.ant-btn-sm {
-    width: 120px !important;
+.ant-picker .ant-picker-input >input,
+.ant-picker-time-panel-column {
+    font-size: 18px;
 }

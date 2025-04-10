@@ -35,6 +35,7 @@ export const PATHS = {
     SETTING: {
         PERMISSION_FUNCTION: `${ROOTS_SETTING}/permission-function`,
         PERMISSION_FIELD: `${ROOTS_SETTING}/permission-field`,
+        GENERAL: `${ROOTS_SETTING}/general`,
     },
     ADMIN: {
         USER: `${ROOTS_ADMIN}/user`,

@@ -22,6 +22,7 @@ import { AdminProvince } from "../../Admin/AdminProvince/views/AdminProvince";
 import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
 import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
 import { ROLE } from "../../../constants/role";
+import { GeneralSetting } from "../../GeneralSettings/views/GeneralSetting";
 
 const { Sider, Content } = Layout;
 
@@ -93,7 +94,7 @@ export const Dashboard = () => {
             style: menuItemStyle,
             children: [
                 getItem('Gửi báo cáo', PATHS.REPORT.SEND, null, null, menuChildrenItemStyle),
-                user?.role === ROLE.ADMIN && getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
+                // user?.role === ROLE.ADMIN && getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
             ]
         },
         user?.role === ROLE.ADMIN && {
@@ -116,6 +117,7 @@ export const Dashboard = () => {
             children: [
                 // getItem('Phân quyền chức năng', PATHS.SETTING.PERMISSION_FUNCTION, null, null, menuChildrenItemStyle),
                 getItem('Phân quyền lĩnh vực vụ việc', PATHS.SETTING.PERMISSION_FIELD, null, null, menuChildrenItemStyle),
+                getItem('Cài đặt chung', PATHS.SETTING.GENERAL, null, null, menuChildrenItemStyle),
             ]
         },
         user?.role === ROLE.ADMIN && {
@@ -169,6 +171,7 @@ export const Dashboard = () => {
             [PATHS.CATEGORY.REPORT_TYPE]: 'category',
             [PATHS.SETTING.PERMISSION_FUNCTION]: 'setting',
             [PATHS.SETTING.PERMISSION_FIELD]: 'setting',
+            [PATHS.SETTING.GENERAL]: 'setting',
 
 
             [PATHS.ADMIN.USER]: 'admin',
@@ -256,6 +259,7 @@ export const Dashboard = () => {
                         <Route path={PATHS.CATEGORY.REPORT_TYPE} element={<ReportType />} />
                         {/* <Route path={PATHS.SETTING.PERMISSION_FUNCTION} element={<PermissionFunction />} /> */}
                         <Route path={PATHS.SETTING.PERMISSION_FIELD} element={<PermissionField />} />
+                        <Route path={PATHS.SETTING.GENERAL} element={<GeneralSetting />} />
                         <Route path={PATHS.ADMIN.USER} element={<AdminUser />} />
                         <Route path={PATHS.ADMIN.DEPARTMENT} element={<AdminDepartment />} />
                         <Route path={PATHS.ADMIN.PROVINCE} element={<AdminProvince />} />

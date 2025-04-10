@@ -9,6 +9,7 @@ const topicRoutes = require("./topicRouter");
 const reportTypeRoutes = require("./reportTypeRouter");
 const reportRoutes = require("./reportRouter");
 const fileRoutes = require("./fileRouter");
+const generalSettingRoutes = require("./generalSettingRouter");
 const serverDateRoutes = require("./serverDateRouter");
 const { notFound, errHandler } = require("../middlewares/errorHandler");
 
@@ -24,6 +25,7 @@ const initRoutes = (app) => {
     app.use("/api/report-type", reportTypeRoutes);
     app.use("/api/report", reportRoutes);
     app.use("/api/file", fileRoutes);
+    app.use("/api/general-setting", generalSettingRoutes);
 
     app.use("/api/server-date", serverDateRoutes);
     app.use(notFound);
