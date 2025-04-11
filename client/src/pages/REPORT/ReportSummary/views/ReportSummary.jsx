@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { FormListHeader, WrapperHeader } from '../styles/style';
-import { Button, Form, Input, Space } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { FormContainer, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
+import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker, ConfigProvider } from "antd";
+import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 
-import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
+import moment from 'moment';
+import viVN from 'antd/es/locale/vi_VN';
+import 'dayjs/locale/vi';
 
 import TableComponent from '../../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../../components/InputComponent/InputComponent';
@@ -13,11 +15,19 @@ import ModalComponent from '../../../../components/ModalComponent/ModalComponent
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
-import fieldOfWorkService from '../../../../services/fieldOfWorkService';
+import fileService from '../../../../services/fileService';
+import reportSendService from '../../../../services/reportSendService';
+import serverDateService from '../../../../services/serverDateService';
+import topicService from '../../../../services/topicService';
+import reportTypeService from '../../../../services/reportTypeService';
+import generalSettingService from '../../../../services/generalSettingService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
-import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { validateAndAttachFile } from '../../../../utils/utils';
 import { ROLE } from '../../../../constants/role';
+import { SETTING_KEYS } from '../../../../constants/settingKeys';
+import { StyledTimePicker } from '../../../GeneralSettings/styles/style';
+
 
 export const ReportSummary = () => {
     const [modalForm] = Form.useForm();
@@ -32,101 +42,86 @@ export const ReportSummary = () => {
     const searchInput = useRef(null);
     const [columnFilters, setColumnFilters] = useState({});
     const [dataTable, setDataTable] = useState([]);
-    const [filters, setFilters] = useState({});
+    const [filters, setFilters] = useState({
+        dateSent: "",
+        reportTypeId: "",
+        sentStatus: "",
+    });
     const [resetSelection, setResetSelection] = useState(false);
+    const [serverDate, setServerDate] = useState([]);
+    const [topics, setTopics] = useState([]);
+    const [reportTypes, setReportTypes] = useState([]);
+    
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 10
     });
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if(user?.role !== ROLE.ADMIN) {
-            navigate(`/dashboard`);
-        }
-    }, [user]);
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
-        { label: 'Quản lý danh mục' },
-        { label: 'Quản lý lĩnh vực vụ việc' },
+        { label: 'tổng hợp - thống kê' },
+        { label: 'Báo cáo' },
     ];
 
-    const [stateField, setStateField] = useState({
-        fieldName: "",
-        fieldCode : "",
-        description  : ""
+    useEffect(() => {
+        const fetchServerDate = async () => {
+            try {
+                const response = await serverDateService.getServerDate();
+                if (response?.formattedDate) {
+                    setServerDate(response.formattedDate);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy ngày giờ từ server", error);
+            }
+        };
+
+        const fetchTopics = async () => {
+            try {
+                const response = await topicService.getTopics(1, 100);
+                if (response?.data) {
+                    setTopics(response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
+            }
+        };
+
+        const fetchReportTypes = async () => {
+            try {
+                const response = await reportTypeService.getReportTypes(1, 100); // Lấy tối đa 100 bản ghi
+                if (response?.data) {
+                    setReportTypes(response.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
+            }
+        };
+
+        fetchServerDate();
+        fetchTopics();
+        fetchReportTypes();
+    }, []);
+
+    const [stateReportDetail, setStateReportDetail] = useState({
+        topicId: "",
+        reportTypeId: "",
+        fileId: "",
+        reportContent: ""
     });
-
-    const [stateFieldDetail, setStateFieldDetail] = useState({
-        fieldName: "",
-        fieldCode : "",
-        description  : ""
-    });
-
-    const mutation = useMutationHooks(
-        (data) => {
-            const { fieldName, fieldCode, description } = data;
-            const response = fieldOfWorkService.createFieldOfWork({ fieldName, fieldCode, description });
-            return response;
-        }
-    )
-
-    const mutationUpdate = useMutationHooks(
-        (data) => { 
-            const { id, ...rests } = data;
-            const response = fieldOfWorkService.updateFieldOfWork(id, { ...rests });
-            return response;
-        }
-    );
-    
-    const mutationDeleted = useMutationHooks(
-        (data) => { 
-            const { id } = data;
-            const response = fieldOfWorkService.deleteFieldOfWork(id);
-            return response;
-        }
-    );
-
-    const mutationDeletedMultiple = useMutationHooks(
-        (data) => { 
-          const { ids } = data;
-          const response = fieldOfWorkService.deleteMultipleRecords(ids);
-    
-          return response;
-        }
-    );
-
-    const handleCancel = () => {
-        setIsModalOpen(false);
-        setStateField({
-            fieldName: "",
-            fieldCode: "",
-            description: ""
-        });
-
-        modalForm.resetFields();
-    }
-
-    const { data, isSuccess, isError, isPending } = mutation;
-    const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate;
-    const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isLoadingDeleted } = mutationDeleted;
-    const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
-        const response = await fieldOfWorkService.getFieldOfWorks(currentPage, pageSize, filters);
+        const response = await reportSendService.getReports(currentPage, pageSize, filters);
         return response;
     };
 
     const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await fieldOfWorkService.getFieldOfWorkById(rowSelected);
-
+        const response = await reportSendService.getReportById(rowSelected);
         if (response?.data) {
-            setStateFieldDetail({
-                fieldName: response?.data?.fieldName,
-                fieldCode: response?.data?.fieldCode,
-                description: response?.data?.description
+            setStateReportDetail({
+                topicId: response?.data?.topicId,
+                reportTypeId: response?.data?.reportTypeId,
+                fileId: response?.data?.fileId,
+                reportContent: response?.data?.reportContent
             })
         }
         setIsLoadingUpdate(false);
@@ -146,8 +141,8 @@ export const ReportSummary = () => {
     }, []);
 
     useEffect(() => {
-        drawerForm.setFieldsValue(stateFieldDetail)
-    }, [stateFieldDetail, drawerForm])
+        drawerForm.setFieldsValue(stateReportDetail)
+    }, [stateReportDetail, drawerForm])
 
     useEffect(() => {
         if (rowSelected) {
@@ -181,105 +176,8 @@ export const ReportSummary = () => {
     const { isLoading: isLoadingAllRecords, data: allRecords } = query;
 
     useEffect(() => {
-        if(isSuccess && data?.success) {
-            message.success(data?.message);
-            handleCancel();
-        }
-        else if (isError) {
-            message.error("Có gì đó sai sai");
-        }
-        else if (isSuccess && !data?.success) {
-            message.error(data?.message);
-        }
-    }, [isSuccess]);
-
-    useEffect(() => {
-        if(isSuccessUpdated && dataUpdated?.success) {
-            message.success(dataUpdated?.message);
-            handleCloseDrawer();
-        }
-        else if (isError) {
-            message.error("Có gì đó sai sai");
-        }
-        else if (isSuccessUpdated && !dataUpdated?.success) {
-            message.error(dataUpdated?.message);
-        }
-    }, [isSuccessUpdated]);
-
-    useEffect(() => {
-        if(isSuccessDeleted && dataDeleted?.success) {
-            message.success(dataDeleted?.message);
-            handleCancelDelete();
-        }
-        else if (isErrorDeleted) {
-          message.error("Có gì đó sai sai");
-        }
-    }, [isSuccessDeleted])
-
-    useEffect(() => {
-        if (isSuccessDeletedMultiple && dataDeletedMultiple) {
-            if (dataDeletedMultiple.deletedCount > 0) {
-                message.success(dataDeletedMultiple.message);
-            } else {
-                message.error(dataDeletedMultiple.message);
-            }
-        } else if (isErrorDeletedMultiple) {
-            message.error("Có gì đó sai sai");
-        }
-    }, [isSuccessDeletedMultiple, isErrorDeletedMultiple, dataDeletedMultiple]);
-
-    useEffect(() => {
         query.refetch();
     }, [pagination]);
-
-    const onFinish = async () => {
-        mutation.mutate(stateField, {
-            onSettled: () => {
-                query.refetch();
-            }
-        });
-    }
-
-    const onUpdate = async () => {
-        mutationUpdate.mutate(
-            {
-                id: rowSelected,
-                ...stateFieldDetail
-            }, 
-            {
-                onSettled: () => {
-                    query.refetch();
-                }
-            }
-        );
-    }
-
-    const handleDeleteLetter = () => {
-        mutationDeleted.mutate(
-          {
-            id: rowSelected
-          },
-          {
-            onSettled: () => {
-                query.refetch();
-            }
-          }
-        )
-    }
-
-    const handleDeleteMultipleRecords = (ids) => {
-        mutationDeletedMultiple.mutate(
-          {
-            ids: ids,
-          },
-          {
-            onSettled: () => {
-                query.refetch();
-                setResetSelection(prevState => !prevState);
-            }
-          }
-        )
-    }
 
     useEffect(() => {
         if (allRecords?.data) {
@@ -290,26 +188,14 @@ export const ReportSummary = () => {
 
     const fetchDataForDataTable = (allRecords) => {
         return allRecords?.data?.map((record) => {
+            console.log(record)
             return {
                 ...record, 
                 key: record._id,
-                createdAt: new Date(record.createdAt),
-                updatedAt: new Date(record.updatedAt),
+                departmentName: record?.userId?.departmentId?.departmentName || record?.departmentId?.departmentName,
+                reportTypeName: record?.reportTypeId?.reportTypeName,
+                createdAt: record?.createdAt ? moment.utc(record.createdAt).utcOffset(7).format("DD/MM/YYYY HH:mm") : "",
             };
-        });
-    };
-
-    const handleOnChange = (name, value) => {
-        setStateField({
-            ...stateField,
-            [name]: value
-        });
-    };
-
-    const handleOnChangeDetail = (name, value) => {
-        setStateFieldDetail({
-            ...stateFieldDetail,
-            [name]: value
         });
     };
 
@@ -380,50 +266,89 @@ export const ReportSummary = () => {
         },
     });
 
-    const buttonReloadTable = () => {
-        return (
-            <div style={{display: "flex", justifyContent: "center"}}>
-                <ReloadOutlined style={{color: '#1677ff', fontSize: '18px', cursor: 'pointer'}} onClick={handleResetAllFilter}/>
+    const getDateFilterProps = (dataIndex, placeholder) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <DatePicker
+                    format="DD/MM/YYYY"
+                    value={columnFilters?.dateSent ? moment(columnFilters?.dateSent, "DD/MM/YYYY") : null}
+                    onChange={(date) => {
+                        const dateString = date ? date.format('DD/MM/YYYY') : '';
+                        setColumnFilters(prevFilters => ({
+                            ...prevFilters,
+                            dateSent: dateString,
+                        }));
+                        setSelectedKeys(dateString ? [dateString] : []);
+                    }}
+                    onPressEnter={() => handleSearch(columnFilters, confirm, dataIndex)}
+                    placeholder={`Chọn ${placeholder}`}
+                    style={{
+                        marginBottom: 8,
+                        display: 'block',
+                    }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(columnFilters, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{
+                            width: 120,
+                            height: 32,
+                            fontSize: 16,
+                        }}
+                    >
+                        Tìm kiếm
+                    </Button>
+                    <Button
+                        onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
+                        size="small"
+                        style={{
+                            width: 120,
+                            height: 32,
+                            fontSize: 16,
+                        }}
+                    >
+                        Xóa
+                    </Button>
+                </Space>
             </div>
-        )
-    }
-
-    const renderAction = () => {
-        return (
-            <div style={{display: "flex", justifyContent: "center", gap: "10px"}}>
-                <EditOutlined style={{color: 'orange', fontSize: '18px', cursor: 'pointer'}} onClick={handleDetailLetter}/>
-                <DeleteOutlined style={{color: 'red', fontSize: '18px', cursor: 'pointer'}} onClick={() => setIsModalOpenDelete(true)}/>
-            </div>
-        )
-    }
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+        ),
+        onFilter: (value, record) => {
+            const recordDate = moment(record[dataIndex]).format('DD/MM/YYYY');
+            return recordDate === value;
+        },
+    });
 
     const columns = [
         {
-            title: 'Tên lĩnh vực',
-            dataIndex: 'fieldName',
-            key: 'fieldName',
+            title: 'Đơn vị',
+            dataIndex: 'departmentName',
+            key: 'departmentName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-            ...getColumnSearchProps('fieldName', 'tên lĩnh vực')
+            sorter: (a, b) => a.departmentName.localeCompare(b.departmentName),
+            // ...getColumnSearchProps('departmentName', 'đơn vị')
         },
         {
-            title: 'Mã lĩnh vực',
-            dataIndex: 'fieldCode',
-            key: 'fieldCode',
+            title: 'Loại báo cáo',
+            dataIndex: 'reportTypeName',
+            key: 'reportTypeName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
+            // ...getColumnSearchProps('departmentName', 'đơn vị')
         },
         {
-            title: 'Mô tả',
-            dataIndex: 'description',
-            key: 'description',
+            title: 'Thời gian gửi báo cáo gấn nhất',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
-        },
-        {
-          title: buttonReloadTable,
-          dataIndex: 'action',
-          render: renderAction
+            // ...getDateFilterProps('dateSent', 'ngày gửi')
         },
     ];
 
@@ -451,29 +376,17 @@ export const ReportSummary = () => {
     const handleReset = (clearFilters, confirm, dataIndex) => {
         clearFilters();
         
-        if (dataIndex === "ngayDen") {
-            setColumnFilters(prevColumnFilters => {
-                const updatedColumnFilters = { ...prevColumnFilters };
-                return updatedColumnFilters;
-            });
+        setColumnFilters(prevColumnFilters => {
+            const updatedColumnFilters = { ...prevColumnFilters };
+            delete updatedColumnFilters[dataIndex];
+            return updatedColumnFilters;
+        });
 
-            setFilters(prevFilters => {
-                const updatedFilters = { ...prevFilters };
-                return updatedFilters;
-            });
-        }
-        else {
-            setColumnFilters(prevColumnFilters => {
-                const updatedColumnFilters = { ...prevColumnFilters };
-                delete updatedColumnFilters[dataIndex];
-                return updatedColumnFilters;
-            });
-            setFilters(prevFilters => {
-                const updatedFilters = { ...prevFilters };
-                delete updatedFilters[dataIndex];
-                return updatedFilters;
-            });
-        }
+        setFilters(prevFilters => {
+            const updatedFilters = { ...prevFilters };
+            delete updatedFilters[dataIndex];
+            return updatedFilters;
+        });
 
         // Tiếp tục với cuộc gọi hàm getAllRecords và truyền filters vào đó để xóa filter cụ thể trên server.
         getAllRecords(pagination.currentPage, pagination.pageSize, filters)
@@ -496,213 +409,148 @@ export const ReportSummary = () => {
         });
     };
 
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    }
-
-    // Đóng DrawerComponent
-    const handleCloseDrawer = () => {
-        fetchGetDetailRecord(rowSelected);
-        setIsOpenDrawer(false);
-    };
-
     return (
-        <div>
-            <WrapperHeader>Danh sách lĩnh vực vụ việc</WrapperHeader>
+        <ConfigProvider locale={viVN}>
+            <WrapperHeader>Tổng hợp - thống kê báo cáo</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
-            <div style={{display: "flex", gap: "20px", marginTop: "40px" }}>
-                <FormListHeader>
-                    <Button 
-                        type="primary" 
-                        style={{
-                            display: 'flex',
-                            fontSize: '16px',
-                            height: '40px',
-                            alignItems: 'center'
-                        }}
-                        icon={<PlusOutlined />} 
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        Thêm lĩnh vực
-                    </Button>
-                </FormListHeader>
-                <FormListHeader>
-                    <ImportExcel
-                        service={fieldOfWorkService.importFromExcel}
-                        onSuccess={(response) => {
-                            message.success(`Import thành công: ${response.successCount} bản ghi`);
-                            query.refetch(); // Làm mới danh sách sau khi import thành công
-                        }}
-                        onError={(error) => {
-                            message.error(error.message || "Import thất bại");
-                        }}
-                    />
-                </FormListHeader>
-            </div>
-            <div style={{ marginTop: '20px' }}>
-                <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
-                    pagination={{
-                        current: pagination.currentPage,
-                        pageSize: pagination.pageSize,
-                        total: allRecords?.total,
-                        onChange: handlePageChange,
-                        showSizeChanger: false
-                    }}
-                    onRow={(record, rowIndex) => {
-                        return {
-                            onClick: (event) => {
-                                if (record._id) {
-                                    setRowSelected(record._id);
+
+            <Form form={modalForm} name="modalForm">
+                <Row gutter={16}>
+                    {/* Loại báo cáo định kỳ */}
+                    <Col xs={24} sm={24} md={24} lg={8}>
+                        <Form.Item
+                            label="Chọn loại báo cáo định kỳ"
+                            name="reportTypeId"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Chọn loại báo cáo định kỳ"
+                                value={filters.reportTypeId || ''}
+                                style={{ height: 36 }}
+                                onChange={(value) => {
+                                    setFilters((prevFilters) => ({
+                                        ...prevFilters,
+                                        reportTypeId: value || "", // Nếu chọn "Tất cả", đặt giá trị là ""
+                                    }));
+                                }}
+                                filterOption={(input, option) =>
+                                    option?.children?.toLowerCase().includes(input.toLowerCase())
                                 }
-                            },
-                        };
-                    }}
-                />
-            </div>
-            <ModalComponent form={modalForm} forceRender width={500} title="Thêm lĩnh vực vụ việc" open={isModalOpen} onCancel={handleCancel} footer={null}>
-                <Loading isLoading={isPending}>
-                    <Form
-                        form={modalForm}
-                        name="modalForm"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 17 }}
-                        style={{ maxWidth: 1000 }}
-                        initialValues={{ remember: true }}
-                        onFinish={onFinish}
-                        autoComplete="on"
-                    >
-                        <Form.Item
-                            label="Tên lĩnh vực vụ việc"
-                            name="fieldName"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldName" 
-                                value={stateField.fieldName} 
-                                placeholder="Nhập tên lĩnh vực" 
-                                onChange={(e) => handleOnChange('fieldName', e.target.value)} 
-                            />
+                            >
+                                <Select.Option value="">Tất cả</Select.Option>
+                                {reportTypes.map((field) => (
+                                    <Select.Option key={field._id} value={field._id}>
+                                        {field.reportTypeName}
+                                    </Select.Option>
+                                ))}
+                            </Select>
                         </Form.Item>
+                    </Col>
 
+                    {/* Tên báo cáo */}
+                    <Col xs={24} sm={24} md={24} lg={4}>
                         <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateField.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChange('fieldCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mô tả"
-                            name="description"
+                            label="Trạng thái"
+                            name="sentStatus"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                         >
-                            <Input.TextArea 
-                                name="description" 
-                                value={stateField.description} 
-                                onChange={(e) => handleOnChange('description', e.target.value)} 
-                                rows={4} // Số dòng hiển thị mặc định
-                                placeholder="Nhập mô tả..." 
-                            />
+                            <Select
+                                placeholder="Chọn trạng thái"
+                                value={filters.sentStatus || ''}
+                                style={{ height: 36 }}
+                                onChange={(value) => {
+                                    setFilters((prevFilters) => ({
+                                        ...prevFilters,
+                                        sentStatus: value || "", // Nếu chọn "Tất cả", đặt giá trị là ""
+                                    }));
+                                }}
+                            >
+                                <Select.Option value="">Đã gửi báo cáo</Select.Option>
+                                <Select.Option value="notSent">Chưa gửi báo cáo</Select.Option>
+                            </Select>
                         </Form.Item>
+                    </Col>
 
-                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button type="primary" htmlType="submit">Lưu</Button>
-                        </Form.Item>
-                    </Form>
-                </Loading>
-            </ModalComponent>
-            <DrawerComponent form={drawerForm} title="Chi tiết lĩnh vực vụ việc" isOpen={isOpenDrawer} onClose={handleCloseDrawer} width="40%">
-                <Loading isLoading={isLoadingUpdate}>
-                    <Form
-                        form={drawerForm}
-                        name="drawerForm"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 15 }}
-                        style={{ maxWidth: 1000 }}
-                        initialValues={{ remember: true }}
-                        onFinish={onUpdate}
-                        autoComplete="on"
-                    >
+                    <Col xs={24} sm={24} md={24} lg={4}>
                         <Form.Item
-                            label="Tên lĩnh vực vụ việc"
-                            name="fieldName"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập tên lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldName" 
-                                value={stateFieldDetail.fieldName} 
-                                placeholder="Nhập tên lĩnh vực" 
-                                onChange={(e) => handleOnChangeDetail('fieldName', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mã lĩnh vực vụ việc"
-                            name="fieldCode"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng nhập mã lĩnh vực!' }]}
-                        >
-                            <InputComponent 
-                                name="fieldCode" 
-                                value={stateFieldDetail.fieldCode} 
-                                placeholder="Nhập mã lĩnh vực" 
-                                onChange={(e) => handleOnChangeDetail('fieldCode', e.target.value)} 
-                            />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Mô tả"
-                            name="description"
+                            label="Chọn thời gian"
+                            name="dateSent"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
                         >
-                            <Input.TextArea 
-                                name="description" 
-                                value={stateFieldDetail.description} 
-                                onChange={(e) => handleOnChangeDetail('description', e.target.value)} 
-                                rows={4} // Số dòng hiển thị mặc định
-                                placeholder="Nhập mô tả..." 
+                            <DatePicker
+                                format="DD/MM/YYYY"
+                                value={filters?.dateSent ? moment(filters?.dateSent, "DD/MM/YYYY") : null}
+                                onChange={(date) => {
+                                    const dateString = date ? date.format('DD/MM/YYYY') : ""; // Nếu không chọn ngày, đặt giá trị là ""
+                                    setFilters((prevFilters) => ({
+                                        ...prevFilters,
+                                        dateSent: dateString,
+                                    }));
+                                }}
+                                placeholder="Chọn thời gian"
+                                style={{
+                                    width: '100%',
+                                    height: 36,
+                                }}
                             />
                         </Form.Item>
+                    </Col>
 
-                        <Form.Item wrapperCol={{ span: 24 }} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button type="primary" htmlType="submit">Cập nhật</Button>
+                    <Col xs={24} sm={24} md={24} lg={4}>
+                        <Form.Item 
+                            label=" "
+                            name="dateSent"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Button
+                                type="primary"
+                                style={{ width: '100%', height: 36 }}
+                                onClick={() => {
+                                    // Gọi hàm tìm kiếm với các bộ lọc hiện tại
+                                    getAllRecords(pagination.currentPage, pagination.pageSize, filters)
+                                        .then((response) => {
+                                            query.refetch();
+                                        })
+                                        .catch(error => {
+                                            // Xử lý lỗi nếu có
+                                            message.error(error);
+                                        });
+                                }}
+                            >
+                                Tìm kiếm
+                            </Button>
                         </Form.Item>
-                    </Form>
-                </Loading>
-            </DrawerComponent>
-            <ModalComponent 
-                width={400} 
-                title="Xóa lĩnh vực vụ việc" 
-                open={isModalOpenDelete} 
-                onCancel={handleCancelDelete} 
-                onOk={handleDeleteLetter}
-                centered 
-            >
-                <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa lĩnh vực vụ việc này không?</div>
-                </Loading>
-            </ModalComponent>
-        </div>
+                    </Col>
+                </Row>
+            </Form>
+            <TableComponent columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
+                pagination={{
+                    current: pagination.currentPage,
+                    pageSize: pagination.pageSize,
+                    total: allRecords?.total,
+                    onChange: handlePageChange,
+                    showSizeChanger: false
+                }}
+                onRow={(record, rowIndex) => {
+                    return {
+                        onClick: (event) => {
+                            if (record._id) {
+                                setRowSelected(record._id);
+                            }
+                        },
+                    };
+                }}
+                rowSelection={null}
+            />
+        </ConfigProvider>
     )
 }

@@ -781,7 +781,7 @@ export const AdminUser = () => {
                     </Form>
                 </Loading>
             </ModalComponent>
-            <ModalComponent form={modalChangePasswordForm} forceRender width={500} title="Đổi mật khẩu" open={isModalChangePasswordOpen} onCancel={handleCloseChangePassword} footer={null}>
+            <ModalComponent form={modalChangePasswordForm} forceRender width={800} title="Đổi mật khẩu" open={isModalChangePasswordOpen} onCancel={handleCloseChangePassword} footer={null}>
                 <Loading isLoading = {isPending}>
                     <Form
                         name="modalChangePasswordForm"

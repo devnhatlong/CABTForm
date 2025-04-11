@@ -179,7 +179,7 @@ export const NavbarLoginComponent = () => {
                     </ul>
                 </nav>
             </WrapperHeaderContainerLogin>
-            <ModalComponent form={modalChangePasswordForm} forceRender width={600} title="Đổi mật khẩu" open={isModalChangePasswordOpen} onCancel={handleCloseChangePassword} footer={null}>
+            <ModalComponent form={modalChangePasswordForm} forceRender width={800} title="Đổi mật khẩu" open={isModalChangePasswordOpen} onCancel={handleCloseChangePassword} footer={null}>
                 <Loading isLoading = {isPendingPasswordChangedByUser}>
                     <Form
                         name="modalChangePasswordForm"

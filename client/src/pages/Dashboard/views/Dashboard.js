@@ -94,7 +94,7 @@ export const Dashboard = () => {
             style: menuItemStyle,
             children: [
                 getItem('Gửi báo cáo', PATHS.REPORT.SEND, null, null, menuChildrenItemStyle),
-                // user?.role === ROLE.ADMIN && getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
+                user?.role === ROLE.ADMIN && getItem('Tổng hợp báo cáo', PATHS.REPORT.SUMMARY, null, null, menuChildrenItemStyle),
             ]
         },
         user?.role === ROLE.ADMIN && {

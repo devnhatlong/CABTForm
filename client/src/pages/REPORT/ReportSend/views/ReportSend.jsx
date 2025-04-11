@@ -83,7 +83,9 @@ export const ReportSend = () => {
                 settings?.data?.forEach((setting) => {
                     switch (setting.key) {
                         case SETTING_KEYS.IS_LOCK_ENABLED:
-                            setLockTime(setting.time ? moment(setting.time, 'HH:mm:ss') : null);
+                            if (setting.value) {
+                                setLockTime(moment(setting.time, 'HH:mm:ss'));
+                            }
                             break;
     
                         default:
@@ -329,16 +331,16 @@ export const ReportSend = () => {
     }, [pagination]);
 
     const onFinish = async () => {
+        if (!selectedFile) {
+            message.error("Vui lòng chọn file đính kèm!");
+            return;
+        }
+
         if (disableSendButton) {
             message.error("Không thể gửi báo cáo do thời gian đã bị khóa!");
             return;
         }
         
-        if (!selectedFile) {
-            message.error("Vui lòng chọn file đính kèm!");
-            return;
-        }
-    
         const formData = new FormData();
         formData.append("file", selectedFile); // Thêm file vào FormData
         formData.append("topicId", stateReport.topicId);
@@ -407,7 +409,7 @@ export const ReportSend = () => {
                 key: record._id,
                 departmentName: record?.userId?.departmentId?.departmentName,
                 reportTypeName: record?.reportTypeId?.reportTypeName,
-                createdAt: moment(record.createdAt).format('DD/MM/YYYY HH:MM'),
+                createdAt: moment.utc(record.createdAt).utcOffset(7).format("DD/MM/YYYY HH:mm"),
             };
         });
     };
