@@ -1,43 +1,34 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { FormContainer, TableContainer, WrapperHeader, WrapperHeaderH5, WrapperHeaderTable } from '../styles/style';
-import { Button, Col, Form, Input, Row, Select, Space, Upload, DatePicker, ConfigProvider } from "antd";
-import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
+import { WrapperHeader } from '../styles/style';
+import { Button, Col, Form, Row, Select, Space, DatePicker, ConfigProvider } from "antd";
+import { SearchOutlined } from '@ant-design/icons'
 
 import { useQuery } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import viVN from 'antd/es/locale/vi_VN';
 import 'dayjs/locale/vi';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from "docx";
+import { saveAs } from "file-saver";
 
 import TableComponent from '../../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../../components/InputComponent/InputComponent';
-import ModalComponent from '../../../../components/ModalComponent/ModalComponent';
 import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
-import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
-import fileService from '../../../../services/fileService';
 import reportSendService from '../../../../services/reportSendService';
 import serverDateService from '../../../../services/serverDateService';
 import topicService from '../../../../services/topicService';
 import reportTypeService from '../../../../services/reportTypeService';
-import generalSettingService from '../../../../services/generalSettingService';
-import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
-import { validateAndAttachFile } from '../../../../utils/utils';
-import { ROLE } from '../../../../constants/role';
-import { SETTING_KEYS } from '../../../../constants/settingKeys';
-import { StyledTimePicker } from '../../../GeneralSettings/styles/style';
 
 
 export const ReportSummary = () => {
     const [modalForm] = Form.useForm();
     const [drawerForm] = Form.useForm();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelected, setRowSelected] = useState();
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [isLoadingResetFilter, setIsLoadingResetFilter] = useState(false);
     const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
-    const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const user = useSelector((state) => state?.user);
     const searchInput = useRef(null);
     const [columnFilters, setColumnFilters] = useState({});
@@ -188,7 +179,6 @@ export const ReportSummary = () => {
 
     const fetchDataForDataTable = (allRecords) => {
         return allRecords?.data?.map((record) => {
-            console.log(record)
             return {
                 ...record, 
                 key: record._id,
@@ -343,7 +333,7 @@ export const ReportSummary = () => {
             // ...getColumnSearchProps('departmentName', 'đơn vị')
         },
         {
-            title: 'Thời gian gửi báo cáo gấn nhất',
+            title: 'Thời gian gửi báo cáo lần cuối',
             dataIndex: 'createdAt',
             key: 'createdAt',
             filteredValue: null, // Loại bỏ filter mặc định
@@ -407,6 +397,265 @@ export const ReportSummary = () => {
             currentPage: page,
             pageSize: pageSize
         });
+    };
+
+    // const handleExportWord = async () => {
+    //     try {
+    //         // Tạo các hàng cho bảng từ dữ liệu trong dataTable
+    //         const tableRows = [
+    //             // Hàng tiêu đề
+    //             new TableRow({
+    //                 children: [
+    //                     new TableCell({
+    //                         children: [new Paragraph("STT")],
+    //                         width: { size: 10, type: WidthType.PERCENTAGE },
+    //                     }),
+    //                     new TableCell({
+    //                         children: [new Paragraph("Đơn vị")],
+    //                         width: { size: 30, type: WidthType.PERCENTAGE },
+    //                     }),
+    //                     new TableCell({
+    //                         children: [new Paragraph("Loại báo cáo")],
+    //                         width: { size: 30, type: WidthType.PERCENTAGE },
+    //                     }),
+    //                     new TableCell({
+    //                         children: [new Paragraph("Thời gian gửi")],
+    //                         width: { size: 30, type: WidthType.PERCENTAGE },
+    //                     }),
+    //                 ],
+    //             }),
+    //             // Hàng dữ liệu
+    //             ...dataTable.map((record, index) =>
+    //                 new TableRow({
+    //                     children: [
+    //                         new TableCell({
+    //                             children: [new Paragraph((index + 1).toString())],
+    //                         }),
+    //                         new TableCell({
+    //                             children: [new Paragraph(record.departmentName || "")],
+    //                         }),
+    //                         new TableCell({
+    //                             children: [new Paragraph(record.reportTypeName || "")],
+    //                         }),
+    //                         new TableCell({
+    //                             children: [new Paragraph(record.createdAt || "")],
+    //                         }),
+    //                     ],
+    //                 })
+    //             ),
+    //         ];
+    
+    //         // Tạo nội dung file Word
+    //         const doc = new Document({
+    //             sections: [
+    //                 {
+    //                     properties: {},
+    //                     children: [
+    //                         new Paragraph({
+    //                             children: [
+    //                                 new TextRun({
+    //                                     text: "Tổng hợp - Thống kê báo cáo",
+    //                                     bold: true,
+    //                                     size: 28,
+    //                                 }),
+    //                             ],
+    //                         }),
+    //                         new Paragraph({ text: "" }), // Dòng trống
+    //                         new Table({
+    //                             rows: tableRows,
+    //                         }),
+    //                     ],
+    //                 },
+    //             ],
+    //         });
+    
+    //         // Tạo file Word và tải xuống
+    //         const blob = await Packer.toBlob(doc);
+    //         saveAs(blob, "BaoCao.docx");
+    //         message.success("Xuất file Word thành công!");
+    //     } catch (error) {
+    //         console.error("Lỗi khi xuất file Word:", error);
+    //         message.error("Lỗi khi xuất file Word!");
+    //     }
+    // };
+    const fetchAllRecords = async (filters) => {
+        try {
+            const response = await reportSendService.getReports(1, 10000, filters); // Giả sử server hỗ trợ limit lớn
+            return response?.data || [];
+        } catch (error) {
+            console.error("Lỗi khi lấy toàn bộ dữ liệu:", error);
+            message.error("Không thể lấy dữ liệu để xuất file Word!");
+            return [];
+        }
+    };
+
+    const handleExportWord = async () => {
+        try {
+            // Lấy toàn bộ dữ liệu từ server
+            const allData = await fetchAllRecords(filters);
+    
+            if (allData.length === 0) {
+                message.warning("Không có dữ liệu để xuất file Word!");
+                return;
+            }
+    
+            // Tạo các hàng cho bảng từ dữ liệu trong allData
+            const tableRows = [
+                // Hàng tiêu đề
+                new TableRow({
+                    children: [
+                        new TableCell({
+                            children: [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: "STT",
+                                            bold: true, // In đậm
+                                            size: 28, // Font size 14 (14 * 2 = 28)
+                                        }),
+                                    ],
+                                }),
+                            ],
+                            width: { size: 10, type: WidthType.PERCENTAGE },
+                        }),
+                        new TableCell({
+                            children: [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: "Đơn vị",
+                                            bold: true,
+                                            size: 28,
+                                        }),
+                                    ],
+                                }),
+                            ],
+                            width: { size: 30, type: WidthType.PERCENTAGE },
+                        }),
+                        new TableCell({
+                            children: [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: "Loại báo cáo",
+                                            bold: true,
+                                            size: 28,
+                                        }),
+                                    ],
+                                }),
+                            ],
+                            width: { size: 30, type: WidthType.PERCENTAGE },
+                        }),
+                        new TableCell({
+                            children: [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({
+                                            text: "Thời gian gửi báo cáo lần cuối",
+                                            bold: true,
+                                            size: 28,
+                                        }),
+                                    ],
+                                }),
+                            ],
+                            width: { size: 30, type: WidthType.PERCENTAGE },
+                        }),
+                    ],
+                }),
+                // Hàng dữ liệu
+                ...allData.map((record, index) =>
+                    new TableRow({
+                        children: [
+                            new TableCell({
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: (index + 1).toString(),
+                                                size: 28, // Font size 14
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            new TableCell({
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: record?.userId?.departmentId?.departmentName || "",
+                                                size: 28,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            new TableCell({
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: record?.reportTypeId?.reportTypeName || "",
+                                                size: 28,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            new TableCell({
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new TextRun({
+                                                text: record.createdAt
+                                                    ? moment
+                                                          .utc(record.createdAt)
+                                                          .utcOffset(7)
+                                                          .format("DD/MM/YYYY HH:mm")
+                                                    : "",
+                                                size: 28,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                        ],
+                    })
+                ),
+            ];
+    
+            // Tạo nội dung file Word
+            const doc = new Document({
+                sections: [
+                    {
+                        properties: {},
+                        children: [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({
+                                        text: "Tổng hợp - Thống kê báo cáo",
+                                        bold: true, // In đậm
+                                        size: 28, // Font size 14
+                                    }),
+                                ],
+                            }),
+                            new Paragraph({ text: "" }), // Dòng trống
+                            new Table({
+                                rows: tableRows,
+                            }),
+                        ],
+                    },
+                ],
+            });
+    
+            // Tạo file Word và tải xuống
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, "BaoCao.docx");
+            message.success("Xuất file Word thành công!");
+        } catch (error) {
+            console.error("Lỗi khi xuất file Word:", error);
+            message.error("Lỗi khi xuất file Word!");
+        }
     };
 
     return (
@@ -527,6 +776,26 @@ export const ReportSummary = () => {
                                 }}
                             >
                                 Tìm kiếm
+                            </Button>
+                        </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={24} lg={4}>
+                        <Form.Item
+                            label=" "
+                            name="exportWord"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                        >
+                            <Button
+                                type="default"
+                                style={{ width: '100%', height: 36 }}
+                                onClick={() => {
+                                    handleExportWord();
+                                }}
+                            >
+                                Xuất file báo cáo
                             </Button>
                         </Form.Item>
                     </Col>
