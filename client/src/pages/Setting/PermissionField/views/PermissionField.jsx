@@ -18,6 +18,7 @@ import departmentService from '../../../../services/departmentService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const PermissionField = () => {
     const [modalForm] = Form.useForm();
@@ -57,7 +58,7 @@ export const PermissionField = () => {
     useEffect(() => {
         const fetchDepartment = async () => {
             try {
-                const response = await departmentService.getDepartments(1, 100, {departmentType: "phòng ban"}); // Lấy tối đa 100 bản ghi
+                const response = await departmentService.getDepartments(1, LIMIT_RECORD.ALL, {departmentType: "phòng ban"});
                 if (response?.data) {
                     setDepartment(response.data);
                 }

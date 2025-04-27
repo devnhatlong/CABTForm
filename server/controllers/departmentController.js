@@ -79,12 +79,7 @@ const createDepartment = asyncHandler(async (req, res) => {
 const getDepartments = asyncHandler(async (req, res) => {
     const { page = 1, limit, sort, fields } = req.query;
 
-    const response = await DepartmentService.getDepartments(
-        Number(page),
-        limit ? Number(limit) : undefined,
-        fields,
-        sort
-    );
+    const response = await DepartmentService.getDepartments(page, limit, fields, sort);
 
     res.status(200).json({
         success: true,

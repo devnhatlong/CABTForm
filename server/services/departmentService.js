@@ -33,6 +33,18 @@ const getDepartments = async (page = 1, limit, fields, sort) => {
             }
         }
 
+        // Nếu limit là "ALL", lấy toàn bộ dữ liệu
+        if (limit === process.env.All_RECORDS) {
+            const data = await Department.find(queries).sort(sort || "-createdAt");
+            const total = data.length;
+
+            return {
+                success: true,
+                forms: data,
+                total,
+            };
+        }
+
         // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
 

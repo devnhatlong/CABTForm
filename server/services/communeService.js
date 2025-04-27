@@ -33,7 +33,19 @@ const getCommunes = async (page = 1, limit, fields, sort) => {
             }
         }
 
-        // Pagination và sorting
+        // Nếu limit là "all", lấy toàn bộ dữ liệu
+        if (limit === process.env.All_RECORDS) {
+            const data = await Commune.find(queries).populate("districtId", "districtName").sort(sort || "-createdAt");
+            const total = data.length;
+
+            return {
+                success: true,
+                forms: data,
+                total,
+            };
+        }
+
+        // Sử dụng DEFAULT_LIMIT nếu limit không được truyền
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
         const skip = (page - 1) * limit;
 

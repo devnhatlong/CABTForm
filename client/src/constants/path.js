@@ -10,6 +10,7 @@ const ROOTS_REPORT = '/report';
 export const PATHS = {
     ROOT: ROOTS_DASHBOARD,
     SOCIAL_ORDER: {
+        NEW: `${ROOTS_SOCIAL_ORDER}/new`,
         LIST: `${ROOTS_SOCIAL_ORDER}/list`,
         LOOKUP: `${ROOTS_SOCIAL_ORDER}/lookup`,
         STATS: `${ROOTS_SOCIAL_ORDER}/stats`,

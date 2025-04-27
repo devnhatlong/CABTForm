@@ -33,6 +33,19 @@ const getDistricts = async (page = 1, limit, fields, sort) => {
             }
         }
 
+        // Nếu limit là "ALL", lấy toàn bộ dữ liệu
+        if (limit === process.env.All_RECORDS) {
+            const data = await District.find(queries)
+                .populate("provinceId", "provinceName")
+                .sort(sort || "-createdAt");
+
+            return {
+                success: true,
+                forms: data,
+                total: data.length,
+            };
+        }
+
         // Pagination và sorting
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
         const skip = (page - 1) * limit;

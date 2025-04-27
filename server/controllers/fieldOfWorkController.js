@@ -86,12 +86,7 @@ const createFieldOfWork = asyncHandler(async (req, res) => {
 const getFieldOfWorks = asyncHandler(async (req, res) => {
     const { page = 1, limit, fields, sort } = req.query;
 
-    const response = await FieldOfWorkService.getFieldOfWorks(
-        Number(page),
-        limit ? Number(limit) : undefined,
-        fields,
-        sort
-    );
+    const response = await FieldOfWorkService.getFieldOfWorks(page, limit, fields, sort);
 
     res.status(200).json({
         success: true,

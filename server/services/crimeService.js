@@ -64,6 +64,24 @@ const getCrimes = async (page = 1, limit, fields, sort) => {
             }
         }
 
+        // Nếu limit là "ALL", lấy toàn bộ dữ liệu
+        if (limit === process.env.All_RECORDS) {
+            const data = await Crime.find(queries)
+                .populate({
+                    path: "fieldId",
+                    select: "fieldName",
+                })
+                .sort(sort || "-createdAt");
+
+            return {
+                success: true,
+                forms: data,
+                total: data.length,
+            };
+        }
+
+        // Sử dụng DEFAULT_LIMIT nếu limit không được truyền
+
         // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
 

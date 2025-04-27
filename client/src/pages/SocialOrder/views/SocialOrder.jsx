@@ -12,6 +12,7 @@ import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent
 import { WrapperContentPopup } from '../../../components/NavbarLoginComponent/style';
 import 'moment-timezone';
 import { ROLE } from '../../../constants/role';
+import { useSelector } from 'react-redux';
 
 export const SocialOrder = () => {
     const user = useSelector((state) => state?.user);

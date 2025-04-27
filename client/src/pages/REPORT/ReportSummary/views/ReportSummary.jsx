@@ -20,6 +20,7 @@ import serverDateService from '../../../../services/serverDateService';
 import topicService from '../../../../services/topicService';
 import reportTypeService from '../../../../services/reportTypeService';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 
 export const ReportSummary = () => {
@@ -39,8 +40,6 @@ export const ReportSummary = () => {
         sentStatus: "",
     });
     const [resetSelection, setResetSelection] = useState(false);
-    const [serverDate, setServerDate] = useState([]);
-    const [topics, setTopics] = useState([]);
     const [reportTypes, setReportTypes] = useState([]);
     
     const [pagination, setPagination] = useState({
@@ -50,36 +49,14 @@ export const ReportSummary = () => {
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
-        { label: 'tổng hợp - thống kê' },
+        { label: 'Tổng hợp - thống kê' },
         { label: 'Báo cáo' },
     ];
 
     useEffect(() => {
-        const fetchServerDate = async () => {
-            try {
-                const response = await serverDateService.getServerDate();
-                if (response?.formattedDate) {
-                    setServerDate(response.formattedDate);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy ngày giờ từ server", error);
-            }
-        };
-
-        const fetchTopics = async () => {
-            try {
-                const response = await topicService.getTopics(1, 100);
-                if (response?.data) {
-                    setTopics(response.data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
-            }
-        };
-
         const fetchReportTypes = async () => {
             try {
-                const response = await reportTypeService.getReportTypes(1, 100); // Lấy tối đa 100 bản ghi
+                const response = await reportTypeService.getReportTypes(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setReportTypes(response.data);
                 }
@@ -88,8 +65,6 @@ export const ReportSummary = () => {
             }
         };
 
-        fetchServerDate();
-        fetchTopics();
         fetchReportTypes();
     }, []);
 
@@ -480,7 +455,7 @@ export const ReportSummary = () => {
     // };
     const fetchAllRecords = async (filters) => {
         try {
-            const response = await reportSendService.getReports(1, 10000, filters); // Giả sử server hỗ trợ limit lớn
+            const response = await reportSendService.getReports(1, LIMIT_RECORD.ALL, filters); // Giả sử server hỗ trợ limit lớn
             return response?.data || [];
         } catch (error) {
             console.error("Lỗi khi lấy toàn bộ dữ liệu:", error);

@@ -19,6 +19,7 @@ import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const PermissionFunction = () => {
     const [modalForm] = Form.useForm();
@@ -58,7 +59,7 @@ export const PermissionFunction = () => {
     useEffect(() => {
         const fetchFieldOfWorks = async () => {
             try {
-                const response = await fieldOfWorkService.getFieldOfWorks(1, 100); // Lấy tối đa 100 bản ghi
+                const response = await fieldOfWorkService.getFieldOfWorks(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setFieldOfWorks(response.data);
                 }

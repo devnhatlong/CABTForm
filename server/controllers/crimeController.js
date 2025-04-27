@@ -98,12 +98,7 @@ const createCrime = asyncHandler(async (req, res) => {
 const getCrimes = asyncHandler(async (req, res) => {
     const { page = 1, limit, sort, fields } = req.query;
 
-    const response = await CrimeService.getCrimes(
-        Number(page),
-        limit ? Number(limit) : undefined,
-        fields,
-        sort
-    );
+    const response = await CrimeService.getCrimes(page, limit, fields, sort);
 
     res.status(200).json({
         success: true,

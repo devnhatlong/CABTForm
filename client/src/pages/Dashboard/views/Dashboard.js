@@ -23,6 +23,7 @@ import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
 import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
 import { ROLE } from "../../../constants/role";
 import { GeneralSetting } from "../../GeneralSettings/views/GeneralSetting";
+import { SocialOrderNew } from "../../SocialOrder/views/SocialOrderNew";
 
 const { Sider, Content } = Layout;
 
@@ -62,6 +63,7 @@ export const Dashboard = () => {
             icon: <IdcardOutlined />,
             style: menuItemStyle,
             children: [
+                getItem('Thêm vụ việc TTXH', PATHS.SOCIAL_ORDER.NEW, null, null, menuChildrenItemStyle),
                 getItem('Danh sách vụ việc TTXH', PATHS.SOCIAL_ORDER.LIST, null, null, menuChildrenItemStyle),
                 getItem('Tra cứu đối tượng', PATHS.SOCIAL_ORDER.LOOKUP, null, null, menuChildrenItemStyle),
                 getItem('Thống kê số liệu', PATHS.SOCIAL_ORDER.STATS, null, null, menuChildrenItemStyle),
@@ -156,6 +158,7 @@ export const Dashboard = () => {
     // Sync openKeys with URL
     useEffect(() => {
         const pathToKeyMap = {
+            [PATHS.SOCIAL_ORDER.NEW]: 'social_order',
             [PATHS.SOCIAL_ORDER.LIST]: 'social_order',
             [PATHS.SOCIAL_ORDER.LOOKUP]: 'social_order',
             [PATHS.SOCIAL_ORDER.STATS]: 'social_order',
@@ -251,6 +254,8 @@ export const Dashboard = () => {
                     }}
                 >
                     <Routes>
+                        <Route path={PATHS.SOCIAL_ORDER.NEW} element={<SocialOrderNew />} />
+
                         <Route path={PATHS.REPORT.SEND} element={<ReportSend />} />
                         <Route path={PATHS.REPORT.SUMMARY} element={<ReportSummary />} />
                         <Route path={PATHS.CATEGORY.FIELD_OF_WORK} element={<FieldOfWork />} />

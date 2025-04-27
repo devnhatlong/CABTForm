@@ -86,12 +86,7 @@ const createReportType = asyncHandler(async (req, res) => {
 const getReportTypes = asyncHandler(async (req, res) => {
     const { page = 1, limit, fields, sort } = req.query;
 
-    const response = await ReportTypeService.getReportTypes(
-        Number(page),
-        limit ? Number(limit) : undefined,
-        fields,
-        sort
-    );
+    const response = await ReportTypeService.getReportTypes(page, limit, fields, sort);
 
     res.status(200).json({
         success: true,

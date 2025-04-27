@@ -22,6 +22,7 @@ import { WrapperContentPopup } from '../../../../components/NavbarLoginComponent
 import ImportExcel from '../../../../components/ImportExcel/ImportExcel';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const AdminUser = () => {
     const [modalForm] = Form.useForm();
@@ -62,7 +63,7 @@ export const AdminUser = () => {
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
-                const response = await departmentService.getDepartments(1, 1000); // Lấy tối đa 100 bản ghi
+                const response = await departmentService.getDepartments(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setDepartments(response.data);
                 }

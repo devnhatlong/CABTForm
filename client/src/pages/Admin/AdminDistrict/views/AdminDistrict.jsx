@@ -19,6 +19,7 @@ import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const AdminDistrict = () => {
     const [modalForm] = Form.useForm();
@@ -58,7 +59,7 @@ export const AdminDistrict = () => {
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
-                const response = await provinceService.getProvinces(1, 100); // Lấy tối đa 100 bản ghi
+                const response = await provinceService.getProvinces(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setProvinces(response.data);
                 }

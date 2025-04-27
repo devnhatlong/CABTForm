@@ -166,6 +166,29 @@ const getReports = async (user, page = 1, limit, fields, sort) => {
             };
         }
 
+        // Nếu limit là "ALL", lấy toàn bộ dữ liệu
+        if (limit === process.env.All_RECORDS) {
+            const data = await Report.find(queries)
+                .populate({
+                    path: "userId",
+                    select: "userName departmentId",
+                    populate: {
+                        path: "departmentId",
+                        select: "departmentName",
+                    },
+                })
+                .populate("topicId", "topicName")
+                .populate("reportTypeId", "reportTypeName")
+                .select("-__v")
+                .sort(sort || "-createdAt");
+
+            return {
+                success: true,
+                forms: data,
+                total: data.length,
+            };
+        }
+
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
         const skip = (page - 1) * limit;
 

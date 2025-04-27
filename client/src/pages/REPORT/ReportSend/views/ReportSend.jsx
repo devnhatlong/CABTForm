@@ -26,6 +26,7 @@ import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/Brea
 import { validateAndAttachFile } from '../../../../utils/utils';
 import { ROLE } from '../../../../constants/role';
 import { SETTING_KEYS } from '../../../../constants/settingKeys';
+import { LIMIT_RECORD } from '../../../../constants/limit';
 
 
 export const ReportSend = () => {
@@ -100,7 +101,7 @@ export const ReportSend = () => {
 
         const fetchTopics = async () => {
             try {
-                const response = await topicService.getTopics(1, 100);
+                const response = await topicService.getTopics(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setTopics(response.data);
                 }
@@ -111,7 +112,7 @@ export const ReportSend = () => {
 
         const fetchReportTypes = async () => {
             try {
-                const response = await reportTypeService.getReportTypes(1, 100); // Lấy tối đa 100 bản ghi
+                const response = await reportTypeService.getReportTypes(1, LIMIT_RECORD.ALL);
                 if (response?.data) {
                     setReportTypes(response.data);
                 }
