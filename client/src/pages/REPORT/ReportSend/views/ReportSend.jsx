@@ -824,7 +824,7 @@ export const ReportSend = () => {
                     {/* Nút gửi báo cáo */}
                     <Row>
                         <Col span={24} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button disabled={disableSendButton} type="primary" style={{ display: 'flex',alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
+                            <Button disabled={disableSendButton} type="primary" style={{ display: 'flex', alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
                         </Col>
                     </Row>
                 </Form>

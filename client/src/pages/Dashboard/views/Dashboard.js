@@ -242,6 +242,7 @@ export const Dashboard = () => {
                 </Sider>
                 <Content
                     style={{
+                        transition: 'margin-left 0.6s ease-in-out',
                         marginTop: 0,
                         marginRight: 12,
                         marginBottom: 0,

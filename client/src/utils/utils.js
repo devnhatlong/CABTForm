@@ -95,3 +95,15 @@ export const validateAndAttachFile = (file, setSelectedFile) => {
     setSelectedFile(file);
     message.success(`File ${file.name} đã được đính kèm thành công!`);
 };
+
+export const preventNonNumericInput = (event) => {
+    // Cho phép: phím điều hướng, backspace, delete, tab, enter
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+
+    if (
+        !/^\d$/.test(event.key) && // Không phải số
+        !allowedKeys.includes(event.key)
+    ) {
+        event.preventDefault(); // Chặn nhập ký tự không hợp lệ
+    }
+};
