@@ -15,7 +15,8 @@ const getSocialOrders = asyncHandler(async (req, res) => {
 
 // Tạo mới vụ việc
 const createSocialOrder = asyncHandler(async (req, res) => {
-    const response = await SocialOrderService.createSocialOrder(req.body);
+    const { _id: userId } = req.user;
+    const response = await SocialOrderService.createSocialOrder(req.body, userId);
 
     res.status(201).json({
         success: true,

@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 
 const SocialOrderSchema = new mongoose.Schema(
     {
-        userName: {
-            type: String,
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
             required: true,
         },
         fieldOfWork: {
@@ -49,7 +50,7 @@ const SocialOrderSchema = new mongoose.Schema(
             enum: ['Nghiêm trọng và ít nghiêm trọng', 'Rất nghiêm trọng', 'Đặc biệt nghiêm trọng'],
             required: true,
         },
-        isInitialProcessing: {
+        isHandledByCommune: {
             type: Boolean,
             default: false,
         },

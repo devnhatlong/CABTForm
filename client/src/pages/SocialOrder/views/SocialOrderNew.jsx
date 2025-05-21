@@ -10,6 +10,8 @@ import 'dayjs/locale/vi';
 
 import InputComponent from '../../../components/InputComponent/InputComponent';
 import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
+import { useMutationHooks } from '../../../hooks/useMutationHook';
+import socialOrderService from '../../../services/socialOrderService';
 import * as message from '../../../components/Message/Message';
 import { LIMIT_RECORD } from '../../../constants/limit';
 import { preventNonNumericInput } from '../../../utils/utils';
@@ -27,8 +29,26 @@ export const SocialOrderNew = () => {
     const [districts, setDistricts] = useState([]);
     const [communes, setCommunes] = useState([]);
     const [crimes, setCrimes] = useState([]);
-    const [tableData, setTableData] = useState([]);
-    const [annexData, setAnnexData] = useState({
+    
+    const [stateSocialOrder, setStateSocialOrder] = useState({
+        fieldOfWork: "",
+        incidentDate: "",
+        district: "",
+        commune: "",
+        crime: "",
+        reportContent: "",
+        investigationResult: "",
+        handlingResult: "",
+        severityLevel: "",
+        isHandledByCommune: false,
+        isExtendedCase: false,
+        isGangRelated: false,
+        hasAssignmentDecision: false
+    });
+
+    const [stateCriminalData, setStateCriminalData] = useState([]);
+    
+    const [stateAnnexData, setStateAnnexData] = useState({
         commonAnnex: {
             numberOfDeaths: "", // Số người chết
             numberOfInjuries: "", // Số người bị thương
@@ -50,8 +70,8 @@ export const SocialOrderNew = () => {
         },
     });
 
-    const commonAnnexData = [annexData.commonAnnex];
-    const drugAnnexData = [annexData.drugAnnex]; // Dữ liệu cho phụ lục ma túy
+    const commonAnnexData = [stateAnnexData.commonAnnex];
+    const drugAnnexData = [stateAnnexData.drugAnnex]; // Dữ liệu cho phụ lục ma túy
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -142,7 +162,7 @@ export const SocialOrderNew = () => {
             render: (text, record, index) => (
                 <Input
                     value={text}
-                    onChange={(e) => handleInputChange(index, "fullName", e.target.value)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "fullName", e.target.value)}
                 />
             ),
             width: 200,
@@ -163,7 +183,7 @@ export const SocialOrderNew = () => {
                     format="DD/MM/YYYY"
                     value={text ? moment(text, "DD/MM/YYYY") : null}
                     onChange={(date) =>
-                        handleInputChange(index, "birthDate", date ? date.format("DD/MM/YYYY") : "")
+                        handleOnChangeCriminalData(index, "birthDate", date ? date.format("DD/MM/YYYY") : "")
                     }
                 />
             ),
@@ -185,7 +205,7 @@ export const SocialOrderNew = () => {
                     showSearch
                     placeholder="Chọn tội danh"
                     value={value}
-                    onChange={(val) => handleInputChange(index, "crime", val)}
+                    onChange={(val) => handleOnChangeCriminalData(index, "crime", val)}
                     style={{ width: "100%" }}
                     optionFilterProp="children"
                 >
@@ -214,7 +234,7 @@ export const SocialOrderNew = () => {
                     showSearch
                     placeholder="Chọn tỉnh"
                     value={value}
-                    onChange={(val) => handleInputChange(index, "province", val)}
+                    onChange={(val) => handleOnChangeCriminalData(index, "province", val)}
                     style={{ width: "100%" }}
                     optionFilterProp="children"
                 >
@@ -243,7 +263,7 @@ export const SocialOrderNew = () => {
                     showSearch
                     placeholder="Chọn huyện"
                     value={value}
-                    onChange={(val) => handleInputChange(index, "district", val)}
+                    onChange={(val) => handleOnChangeCriminalData(index, "district", val)}
                     style={{ width: "100%" }}
                     optionFilterProp="children"
                 >
@@ -272,7 +292,7 @@ export const SocialOrderNew = () => {
                     showSearch
                     placeholder="Chọn xã"
                     value={value}
-                    onChange={(val) => handleInputChange(index, "commune", val)}
+                    onChange={(val) => handleOnChangeCriminalData(index, "commune", val)}
                     style={{ width: "100%" }}
                     optionFilterProp="children"
                 >
@@ -299,7 +319,7 @@ export const SocialOrderNew = () => {
             render: (text, record, index) => (
                 <Input
                     value={text}
-                    onChange={(e) => handleInputChange(index, "job", e.target.value)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "job", e.target.value)}
                 />
             ),
             width: 150,
@@ -318,7 +338,7 @@ export const SocialOrderNew = () => {
             render: (checked, record, index) => (
                 <Checkbox
                     checked={checked}
-                    onChange={(e) => handleInputChange(index, "isFemale", e.target.checked)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "isFemale", e.target.checked)}
                 />
             ),
             width: 80,
@@ -342,7 +362,7 @@ export const SocialOrderNew = () => {
             render: (checked, record, index) => (
                 <Checkbox
                     checked={checked}
-                    onChange={(e) => handleInputChange(index, "isDrugAddict", e.target.checked)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "isDrugAddict", e.target.checked)}
                 />
             ),
             width: 100,
@@ -366,7 +386,7 @@ export const SocialOrderNew = () => {
             render: (checked, record, index) => (
                 <Checkbox
                     checked={checked}
-                    onChange={(e) => handleInputChange(index, "criminalRecord", e.target.checked)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "criminalRecord", e.target.checked)}
                 />
             ),
             width: 100,
@@ -390,7 +410,7 @@ export const SocialOrderNew = () => {
             render: (checked, record, index) => (
                 <Checkbox
                     checked={checked}
-                    onChange={(e) => handleInputChange(index, "prosecution", e.target.checked)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "prosecution", e.target.checked)}
                 />
             ),
             width: 80,
@@ -414,7 +434,7 @@ export const SocialOrderNew = () => {
             render: (checked, record, index) => (
                 <Checkbox
                     checked={checked}
-                    onChange={(e) => handleInputChange(index, "administrativeHandling", e.target.checked)}
+                    onChange={(e) => handleOnChangeCriminalData(index, "administrativeHandling", e.target.checked)}
                 />
             ),
             width: 80,
@@ -440,7 +460,7 @@ export const SocialOrderNew = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <InputNumber
                             value={value}
-                            onChange={(val) => handleInputChange(index, "fine", val)}
+                            onChange={(val) => handleOnChangeCriminalData(index, "fine", val)}
                             min={0}
                             onKeyDown={preventNonNumericInput}
                             style={{ width: "100%" }}
@@ -486,16 +506,11 @@ export const SocialOrderNew = () => {
         },
     ];
 
-    const handleInputChange = (index, field, value) => {
-        const newData = [...tableData];
-        newData[index][field] = value;
-        setTableData(newData);
-    };    
-
     const handleAddRow = () => {
-        setTableData([
-            ...tableData,
+        setStateCriminalData([
+            ...stateCriminalData,
             {
+                key: Date.now(), // Thêm key duy nhất
                 fullName: "",
                 birthDate: "",
                 crime: "",
@@ -514,9 +529,9 @@ export const SocialOrderNew = () => {
     };
     
     const handleDeleteRow = (index) => {
-        const newData = [...tableData];
+        const newData = [...stateCriminalData];
         newData.splice(index, 1);
-        setTableData(newData);
+        setStateCriminalData(newData);
     };
 
     const commonAnnexColumns = [
@@ -526,12 +541,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, numberOfDeaths: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "numberOfDeaths", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -552,12 +562,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, numberOfInjuries: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "numberOfInjuries", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -578,12 +583,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, numberOfChildrenAbused: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "numberOfChildrenAbused", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -604,12 +604,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, propertyDamage: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyDamage", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -630,12 +625,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, propertyRecovered: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyRecovered", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -656,12 +646,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, gunsRecovered: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "gunsRecovered", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -682,12 +667,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            commonAnnex: { ...annexData.commonAnnex, explosivesRecovered: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "explosivesRecovered", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -711,12 +691,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, heroin: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "heroin", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput} // Chặn ký tự không hợp lệ
                     style={{ width: "100%" }}
@@ -737,12 +712,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, opium: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "opium", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -763,12 +733,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, cannabis: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "cannabis", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -789,12 +754,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, drugPlants: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "drugPlants", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -815,12 +775,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, syntheticDrugs: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "syntheticDrugs", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -841,12 +796,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, syntheticDrugPills: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "syntheticDrugPills", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -867,12 +817,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, otherDrugsWeight: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "otherDrugsWeight", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -893,12 +838,7 @@ export const SocialOrderNew = () => {
             render: (value) => (
                 <InputNumber
                     value={value}
-                    onChange={(val) =>
-                        setAnnexData({
-                            ...annexData,
-                            drugAnnex: { ...annexData.drugAnnex, otherDrugsVolume: val },
-                        })
-                    }
+                    onChange={(val) => handleOnChangeAnnexData("drugAnnex", "otherDrugsVolume", val)}
                     min={0}
                     onKeyDown={preventNonNumericInput}
                     style={{ width: "100%" }}
@@ -915,14 +855,52 @@ export const SocialOrderNew = () => {
         },
     ];
 
-    const handleSubmit = () => {
-        // Xử lý logic gửi vụ việc
-        console.log("Gửi vụ việc");
+    // Mutation để gọi API tạo mới vụ việc
+    const mutation = useMutationHooks((data) => {
+        return socialOrderService.createSocialOrder(data);
+    });
+
+    const { data, isSuccess, isError, isPending } = mutation;
+
+    // Xử lý khi form được submit
+    const onFinish = async () => {
+        mutation.mutate(stateSocialOrder, {
+            onSettled: () => {
+                modalForm.resetFields(); // Reset form sau khi gửi
+            },
+        });
     };
-    
-    const handleGoToList = () => {
-        // Điều hướng đến danh sách vụ việc
-        console.log("Đi đến danh sách vụ việc");
+
+    // Hiển thị thông báo khi có kết quả từ API
+    useEffect(() => {
+        if (isSuccess && data?.success) {
+            message.success(data?.message || 'Tạo vụ việc thành công');
+        } else if (isError) {
+            message.error('Có lỗi xảy ra khi tạo vụ việc');
+        }
+    }, [isSuccess, isError, data]);
+
+    const handleOnChangeSocialOrder = (name, value) => {
+        setStateSocialOrder((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleOnChangeCriminalData = (index, name, value) => {
+        const updatedCriminalData = [...stateCriminalData];
+        updatedCriminalData[index][name] = value;
+        setStateCriminalData(updatedCriminalData);
+    };
+
+    const handleOnChangeAnnexData = (section, name, value) => {
+        setStateAnnexData((prevState) => ({
+            ...prevState,
+            [section]: {
+                ...prevState[section],
+                [name]: value,
+            },
+        }));
     };
 
     return (
@@ -930,7 +908,11 @@ export const SocialOrderNew = () => {
             <WrapperHeader>Thêm vụ việc mới</WrapperHeader>
             <BreadcrumbComponent items={breadcrumbItems} />
 
-            <Form form={modalForm} name="modalForm">
+            <Form 
+                form={modalForm} 
+                name="modalForm"
+                onFinish={onFinish}
+            >
                 <Row gutter={16}>
                     <Col xs={24} sm={24} md={24} lg={8}>
                         <Form.Item
@@ -955,17 +937,11 @@ export const SocialOrderNew = () => {
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn lĩnh vực vụ việc!' }]}
                         >
                             <Select
-                                showSearch
                                 placeholder="Chọn lĩnh vực vụ việc"
-                                style={{ height: 36 }}
-                                onChange={(value) => {
-                                    modalForm.setFieldsValue({ fieldOfWork: value });
-                                }}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                }
+                                onChange={(value) => handleOnChangeSocialOrder("fieldOfWork", value)}
                             >
                                 {fieldOfWorks.map((field) => (
                                     <Select.Option key={field._id} value={field._id}>
@@ -979,17 +955,16 @@ export const SocialOrderNew = () => {
                     <Col xs={24} sm={24} md={24} lg={8}>
                         <Form.Item
                             label="Ngày xảy ra"
-                            name="date" // Đặt tên phù hợp cho trường
+                            name="incidentDate" // Đặt tên phù hợp cho trường
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn ngày xảy ra!' }]}
                         >
                             <DatePicker
                                 format="DD/MM/YYYY"
                                 style={{ width: "100%" }}
-                                onChange={(date) =>
-                                    modalForm.setFieldsValue({ incidentDate: date ? date.format("DD/MM/YYYY") : null })
-                                }
+                                onChange={(value) => handleOnChangeSocialOrder("incidentDate", value)}
                             />
                         </Form.Item>
                     </Col>
@@ -1001,14 +976,13 @@ export const SocialOrderNew = () => {
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn địa bàn Huyện, TX, TP!' }]}
                         >
                             <Select
                                 showSearch
                                 placeholder="Chọn địa bàn Huyện, TX, TP"
                                 style={{ height: 36 }}
-                                onChange={(value) => {
-                                    modalForm.setFieldsValue({ district: value });
-                                }}
+                                onChange={(value) => handleOnChangeSocialOrder("district", value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 }
@@ -1029,14 +1003,13 @@ export const SocialOrderNew = () => {
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn địa bàn Phường, xã, thị trấn!' }]}
                         >
                             <Select
                                 showSearch
                                 placeholder="Chọn địa bàn Phường, xã, thị trấn"
                                 style={{ height: 36 }}
-                                onChange={(value) => {
-                                    modalForm.setFieldsValue({ commune: value });
-                                }}
+                                onChange={(value) => handleOnChangeSocialOrder("commune", value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 }
@@ -1057,14 +1030,13 @@ export const SocialOrderNew = () => {
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn tội danh!' }]}
                         >
                             <Select
                                 showSearch
                                 placeholder="Chọn tội danh"
                                 style={{ height: 36 }}
-                                onChange={(value) => {
-                                    modalForm.setFieldsValue({ crime: value });
-                                }}
+                                onChange={(value) => handleOnChangeSocialOrder("crime", value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
                                 }
@@ -1085,11 +1057,11 @@ export const SocialOrderNew = () => {
                                 labelCol={{ span: 24 }}
                                 wrapperCol={{ span: 24 }}
                                 style={{ marginBottom: 10 }}
+                                rules={[{ required: true, message: 'Vui lòng nhập nội dung vụ việc!' }]}
                             >
                                 <Input.TextArea
                                     name="reportContent"
-                                    // value={stateReport.reportContent}
-                                    // onChange={(e) => handleOnChange('reportContent', e.target.value)}
+                                    onChange={(e) => handleOnChangeSocialOrder('reportContent', e.target.value)}
                                     rows={4}
                                     placeholder="Nhập nội dung vụ việc..."
                                 />
@@ -1099,14 +1071,16 @@ export const SocialOrderNew = () => {
                     <Col xs={24} sm={24} md={24} lg={8}>
                         <Form.Item
                             label="Kết quả điều tra"
-                            name="sentStatus"
+                            name="investigationResult"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn kết quả điều tra!' }]}
                         >
                             <Select
                                 placeholder="Chọn kết quả điều tra"
                                 style={{ height: 36 }}
+                                onChange={(value) => handleOnChangeSocialOrder("investigationResult", value)}
                             >
                                 <Select.Option value="Đã điều tra làm rõ">Đã điều tra làm rõ</Select.Option>
                                 <Select.Option value="Đang điều tra">Đang điều tra</Select.Option>
@@ -1119,14 +1093,16 @@ export const SocialOrderNew = () => {
                     <Col xs={24} sm={24} md={24} lg={8}>
                         <Form.Item
                             label="Kết quả xử lý"
-                            name="sentStatus"
+                            name="handlingResult"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn kết quả xử lý!' }]}
                         >
                             <Select
                                 placeholder="Chọn kết quả xử lý"
                                 style={{ height: 36 }}
+                                onChange={(value) => handleOnChangeSocialOrder("handlingResult", value)}
                             >
                                 <Select.Option value="Đã khởi tố">Đã khởi tố</Select.Option>
                                 <Select.Option value="Đã xử lý hành chính">Đã xử lý hành chính</Select.Option>
@@ -1139,14 +1115,16 @@ export const SocialOrderNew = () => {
                     <Col xs={24} sm={24} md={24} lg={8}>
                         <Form.Item
                             label="Mức độ vụ việc"
-                            name="sentStatus"
+                            name="severityLevel"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng chọn mức độ vụ việc!' }]}
                         >
                             <Select
                                 placeholder="Chọn mức độ vụ việc"
                                 style={{ height: 36 }}
+                                onChange={(value) => handleOnChangeSocialOrder("severityLevel", value)}
                             >
                                 <Select.Option value="Nghiêm trọng và ít nghiêm trọng">Nghiêm trọng và ít nghiêm trọng</Select.Option>
                                 <Select.Option value="Rất nghiêm trọng">Rất nghiêm trọng</Select.Option>
@@ -1158,16 +1136,60 @@ export const SocialOrderNew = () => {
 
                 <Row gutter={16} style={{ marginTop: 20, marginBottom: 20 }}>
                     <Col xs={24} sm={12} md={6} lg={6}>
-                        <Checkbox style={{ fontSize: "18px", color: "#012970" }} value="option1">Cấp xã thụ lý ban đầu</Checkbox>
+                        <Form.Item
+                            name="isHandledByCommune"
+                            valuePropName="checked"
+                        >
+                            <Checkbox 
+                                style={{ fontSize: "18px", color: "#012970" }}
+                                checked={stateSocialOrder.isHandledByCommune}
+                                onChange={(e) => handleOnChangeSocialOrder("isHandledByCommune", e.target.checked)}
+                            >
+                                Cấp xã thụ lý ban đầu
+                            </Checkbox>
+                        </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={6} lg={6}>
-                        <Checkbox style={{ fontSize: "18px", color: "#012970" }} value="option2">Án mở rộng</Checkbox>
+                        <Form.Item
+                            name="isExtendedCase"
+                            valuePropName="checked"
+                        >
+                            <Checkbox 
+                                style={{ fontSize: "18px", color: "#012970" }}
+                                checked={stateSocialOrder.isExtendedCase}
+                                onChange={(e) => handleOnChangeSocialOrder("isExtendedCase", e.target.checked)}
+                            >
+                                Án mở rộng
+                            </Checkbox>
+                        </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={6} lg={6}>
-                        <Checkbox style={{ fontSize: "18px", color: "#012970" }} value="option3">Băng ổ nhóm</Checkbox>
+                        <Form.Item
+                            name="isGangRelated"
+                            valuePropName="checked"
+                        >
+                            <Checkbox 
+                                style={{ fontSize: "18px", color: "#012970" }}
+                                checked={stateSocialOrder.isGangRelated}
+                                onChange={(e) => handleOnChangeSocialOrder("isGangRelated", e.target.checked)}
+                            >
+                                Băng ổ nhóm
+                            </Checkbox>
+                        </Form.Item>
                     </Col>
                     <Col xs={24} sm={12} md={6} lg={6}>
-                        <Checkbox style={{ fontSize: "18px", color: "#012970" }} value="option4">QĐ phân công (Hồ sơ AD)</Checkbox>
+                        <Form.Item
+                            name="hasAssignmentDecision"
+                            valuePropName="checked"
+                        >
+                            <Checkbox 
+                                style={{ fontSize: "18px", color: "#012970" }}
+                                checked={stateSocialOrder.hasAssignmentDecision}
+                                onChange={(e) => handleOnChangeSocialOrder("hasAssignmentDecision", e.target.checked)}
+                            >
+                                QĐ phân công (Hồ sơ AD)
+                            </Checkbox>
+                        </Form.Item>
                     </Col>
                 </Row>
 
@@ -1176,10 +1198,10 @@ export const SocialOrderNew = () => {
                     <Col span={24}>
                         <Table
                             columns={columns}
-                            dataSource={tableData}
+                            dataSource={stateCriminalData}
                             pagination={false}
                             scroll={{ x: "max-content" }}
-                            rowKey={(record, index) => index}
+                            rowKey={(record) => record.key} // Sử dụng key duy nhất từ dữ liệu
                             bordered
                             footer={() => (
                                 <div style={{ textAlign: "center" }}>
@@ -1220,8 +1242,12 @@ export const SocialOrderNew = () => {
 
                 <Row gutter={16} style={{ marginTop: 40, marginBottom: 40, display: "flex", justifyContent: "flex-end" }}>
                     <Col>
-                        <Button type="primary" style={{ width: "150px", display: 'flex', justifyContent: "center", alignItems: 'center' }} onClick={handleSubmit}>
-                            <SendOutlined style={{fontSize: '16px'}}/>
+                        <Button 
+                            type="primary" 
+                            htmlType="submit"
+                            style={{ width: "150px", display: 'flex', justifyContent: "center", alignItems: 'center' }}
+                        >
+                            <SendOutlined style={{ fontSize: '16px' }} />
                             Gửi vụ việc
                         </Button>
                     </Col>

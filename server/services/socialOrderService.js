@@ -1,8 +1,9 @@
-const SocialOrder = require('../models/SocialOrderModel');
+const SocialOrder = require('../models/socialOrderModel');
 
-const createSocialOrder = async (data) => {
+const createSocialOrder = async (data, userId) => {
     // Tạo mới vụ việc
-    return await SocialOrder.create(data);
+    const payload = { ...data, user: userId };
+    return await SocialOrder.create(payload);
 };
 
 const getSocialOrders = async (page = 1, limit, fields, sort) => {
