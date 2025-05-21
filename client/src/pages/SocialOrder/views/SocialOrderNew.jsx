@@ -12,6 +12,8 @@ import InputComponent from '../../../components/InputComponent/InputComponent';
 import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
 import socialOrderService from '../../../services/socialOrderService';
+import criminalService from '../../../services/criminalService';
+import socialOrderAnnexService from '../../../services/socialOrderAnnexService';
 import * as message from '../../../components/Message/Message';
 import { LIMIT_RECORD } from '../../../constants/limit';
 import { preventNonNumericInput } from '../../../utils/utils';
@@ -183,7 +185,7 @@ export const SocialOrderNew = () => {
                     format="DD/MM/YYYY"
                     value={text ? moment(text, "DD/MM/YYYY") : null}
                     onChange={(date) =>
-                        handleOnChangeCriminalData(index, "birthDate", date ? date.format("DD/MM/YYYY") : "")
+                        handleOnChangeCriminalData(index, "birthDate", date ? date : "")
                     }
                 />
             ),
@@ -862,13 +864,79 @@ export const SocialOrderNew = () => {
 
     const { data, isSuccess, isError, isPending } = mutation;
 
-    // Xử lý khi form được submit
+
     const onFinish = async () => {
-        mutation.mutate(stateSocialOrder, {
-            onSettled: () => {
-                modalForm.resetFields(); // Reset form sau khi gửi
-            },
-        });
+        try {
+            // Gửi dữ liệu SocialOrder
+            const socialOrderResponse = await socialOrderService.createSocialOrder(stateSocialOrder);
+
+            if (socialOrderResponse?.success) {
+                const socialOrderId = socialOrderResponse.data?._id; // Lấy SocialOrderId từ API
+                // Gửi dữ liệu CriminalData
+                if (stateCriminalData.length > 0) {
+                    const criminalDataPayload = stateCriminalData.map((item) => ({
+                        ...item,
+                        socialOrderId, // Gắn SocialOrderId vào từng đối tượng
+                    }));
+                    await criminalService.createCriminal(criminalDataPayload);
+                }
+    
+                // Gửi dữ liệu AnnexData
+                const annexDataPayload = {
+                    ...stateAnnexData,
+                    socialOrderId, // Gắn SocialOrderId vào AnnexData
+                };
+                await socialOrderAnnexService.createAnnex(annexDataPayload);
+    
+                // Hiển thị thông báo thành công
+                message.success("Tạo vụ việc và lưu dữ liệu thành công");
+    
+                // Reset form và state
+                modalForm.resetFields();
+                setStateSocialOrder({
+                    fieldOfWork: "",
+                    incidentDate: "",
+                    district: "",
+                    commune: "",
+                    crime: "",
+                    reportContent: "",
+                    investigationResult: "",
+                    handlingResult: "",
+                    severityLevel: "",
+                    isHandledByCommune: false,
+                    isExtendedCase: false,
+                    isGangRelated: false,
+                    hasAssignmentDecision: false,
+                });
+                setStateCriminalData([]);
+                setStateAnnexData({
+                    commonAnnex: {
+                        numberOfDeaths: "",
+                        numberOfInjuries: "",
+                        numberOfChildrenAbused: "",
+                        propertyDamage: "",
+                        propertyRecovered: "",
+                        gunsRecovered: "",
+                        explosivesRecovered: "",
+                    },
+                    drugAnnex: {
+                        heroin: "",
+                        opium: "",
+                        cannabis: "",
+                        drugPlants: "",
+                        syntheticDrugs: "",
+                        syntheticDrugPills: "",
+                        otherDrugsWeight: "",
+                        otherDrugsVolume: "",
+                    },
+                });
+            } else {
+                message.error("Có lỗi xảy ra khi tạo vụ việc");
+            }
+        } catch (error) {
+            console.error("Lỗi khi lưu dữ liệu:", error);
+            message.error("Có lỗi xảy ra khi lưu dữ liệu");
+        }
     };
 
     // Hiển thị thông báo khi có kết quả từ API

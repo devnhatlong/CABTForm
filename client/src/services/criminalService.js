@@ -2,10 +2,10 @@ import axios from 'axios';
 import { getTokenFromCookie } from '../utils/utils';
 import userService from './userService';
 
-export const axiosSocialOrder = axios.create();
+export const axiosCriminal = axios.create();
 
 // Add a request interceptor to add the JWT token to the authorization header
-axiosSocialOrder.interceptors.request.use(
+axiosCriminal.interceptors.request.use(
     (config) => {
         const accessToken = getTokenFromCookie("accessToken_SLCB");
 
@@ -19,7 +19,7 @@ axiosSocialOrder.interceptors.request.use(
 );
 
 // Add a response interceptor to refresh the JWT token if it's expired
-axiosSocialOrder.interceptors.response.use(
+axiosCriminal.interceptors.response.use(
     async (response) => response,
     async (error) => {
         const originalRequest = error.config;
@@ -31,7 +31,7 @@ axiosSocialOrder.interceptors.response.use(
                 document.cookie = `accessToken_SLCB=${newAccessToken}; path=/`;
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-                return axiosSocialOrder(originalRequest);
+                return axiosCriminal(originalRequest);
             } catch (refreshError) {
                 console.error(refreshError);
                 redirectToLogin();
@@ -53,78 +53,78 @@ const redirectToLogin = () => {
     window.location.href = "/login";
 };
 
-const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/social-orders`;
+const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/criminal`;
 
-const socialOrderService = {
-    // Tạo mới vụ việc
-    createSocialOrder: async (data) => {
+const criminalService = {
+    // Tạo mới dữ liệu đối tượng
+    createCriminal: async (data) => {
         try {
-            const response = await axiosSocialOrder.post(`${BASE_URL}/`, data);
+            const response = await axiosCriminal.post(`${BASE_URL}/`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi tạo vụ việc:", error);
+            console.error("Lỗi khi tạo dữ liệu đối tượng:", error);
             throw error;
         }
     },
 
-    // Lấy danh sách vụ việc với phân trang và lọc
-    getSocialOrders: async (page, limit, fields, sort) => {
+    // Lấy danh sách dữ liệu đối tượng
+    getCriminals: async (page, limit, fields, sort) => {
         try {
-            const response = await axiosSocialOrder.get(`${BASE_URL}/`, {
+            const response = await axiosCriminal.get(`${BASE_URL}/`, {
                 params: { page, limit, fields, sort },
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách vụ việc:", error);
+            console.error("Lỗi khi lấy danh sách dữ liệu đối tượng:", error);
             throw error;
         }
     },
 
-    // Lấy chi tiết vụ việc theo ID
-    getSocialOrderById: async (id) => {
+    // Lấy chi tiết đối tượng theo ID
+    getCriminalById: async (id) => {
         try {
-            const response = await axiosSocialOrder.get(`${BASE_URL}/${id}`);
+            const response = await axiosCriminal.get(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi lấy chi tiết vụ việc:", error);
+            console.error("Lỗi khi lấy chi tiết đối tượng:", error);
             throw error;
         }
     },
 
-    // Cập nhật vụ việc
-    updateSocialOrder: async (id, data) => {
+    // Cập nhật đối tượng
+    updateCriminal: async (id, data) => {
         try {
-            const response = await axiosSocialOrder.put(`${BASE_URL}/${id}`, data);
+            const response = await axiosCriminal.put(`${BASE_URL}/${id}`, data);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi cập nhật vụ việc:", error);
+            console.error("Lỗi khi cập nhật đối tượng:", error);
             throw error;
         }
     },
 
-    // Xóa vụ việc
-    deleteSocialOrder: async (id) => {
+    // Xóa dữ liệu đối tượng
+    deleteCriminal: async (id) => {
         try {
-            const response = await axiosSocialOrder.delete(`${BASE_URL}/${id}`);
+            const response = await axiosCriminal.delete(`${BASE_URL}/${id}`);
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa vụ việc:", error);
+            console.error("Lỗi khi xóa dữ liệu đối tượng:", error);
             throw error;
         }
     },
 
-    // Xóa nhiều vụ việc
-    deleteMultipleRecords: async (ids) => {
+    // Xóa nhiều dữ liệu đối tượng
+    deleteMultipleCriminal: async (ids) => {
         try {
-            const response = await axiosSocialOrder.delete(`${BASE_URL}/delete-multiple`, {
-                data: { ids }, // Đảm bảo gửi đúng định dạng
+            const response = await axiosCriminal.delete(`${BASE_URL}/delete-multiple`, {
+                data: { ids },
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi xóa nhiều vụ việc:", error);
+            console.error("Lỗi khi xóa nhiều dữ liệu đối tượng:", error);
             throw error;
         }
     },
 };
 
-export default socialOrderService;
+export default criminalService;
