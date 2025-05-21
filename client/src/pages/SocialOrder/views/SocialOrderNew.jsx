@@ -183,7 +183,7 @@ export const SocialOrderNew = () => {
             render: (text, record, index) => (
                 <DatePicker
                     format="DD/MM/YYYY"
-                    value={text ? moment(text, "DD/MM/YYYY") : null}
+                    disabledDate={(current) => current && current > moment().endOf('day')}
                     onChange={(date) =>
                         handleOnChangeCriminalData(index, "birthDate", date ? date : "")
                     }
@@ -462,6 +462,12 @@ export const SocialOrderNew = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <InputNumber
                             value={value}
+                            formatter={(value) =>
+                                value ? new Intl.NumberFormat("vi-VN").format(value) : ""
+                            }
+                            parser={(value) =>
+                                value?.replace(/[^\d]/g, "") || ""
+                            }
                             onChange={(val) => handleOnChangeCriminalData(index, "fine", val)}
                             min={0}
                             onKeyDown={preventNonNumericInput}
@@ -1032,6 +1038,7 @@ export const SocialOrderNew = () => {
                             <DatePicker
                                 format="DD/MM/YYYY"
                                 style={{ width: "100%" }}
+                                disabledDate={(current) => current && current > moment().endOf('day')}
                                 onChange={(value) => handleOnChangeSocialOrder("incidentDate", value)}
                             />
                         </Form.Item>
