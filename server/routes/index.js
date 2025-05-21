@@ -11,6 +11,9 @@ const reportRoutes = require("./reportRouter");
 const fileRoutes = require("./fileRouter");
 const generalSettingRoutes = require("./generalSettingRouter");
 const serverDateRoutes = require("./serverDateRouter");
+const socialOrderRoutes = require("./socialOrderRouter");
+const criminalRoutes = require("./criminalRouter");
+const socialOrderAnnexRoutes = require("./socialOrderAnnexRouter");
 const { notFound, errHandler } = require("../middlewares/errorHandler");
 
 const initRoutes = (app) => { 
@@ -26,6 +29,10 @@ const initRoutes = (app) => {
     app.use("/api/report", reportRoutes);
     app.use("/api/file", fileRoutes);
     app.use("/api/general-setting", generalSettingRoutes);
+
+    app.use("/api/social-orders", socialOrderRoutes);
+    app.use("/api/criminal", criminalRoutes);
+    app.use("/api/social-order-annex", socialOrderAnnexRoutes);
 
     app.use("/api/server-date", serverDateRoutes);
     app.use(notFound);

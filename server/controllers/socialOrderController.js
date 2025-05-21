@@ -1,0 +1,89 @@
+const asyncHandler = require('express-async-handler');
+const SocialOrderService = require('../services/socialOrderService');
+
+// Lấy danh sách vụ việc
+const getSocialOrders = asyncHandler(async (req, res) => {
+    const response = await SocialOrderService.getSocialOrders(req.query);
+
+    res.status(200).json({
+        success: true,
+        data: response.forms,
+        total: response.total,
+        message: "Lấy danh sách vụ việc thành công",
+    });
+});
+
+// Tạo mới vụ việc
+const createSocialOrder = asyncHandler(async (req, res) => {
+    const response = await SocialOrderService.createSocialOrder(req.body);
+
+    res.status(201).json({
+        success: true,
+        data: response,
+        message: "Tạo vụ việc thành công",
+    });
+});
+
+// Lấy thông tin vụ việc theo ID
+const getSocialOrderById = asyncHandler(async (req, res) => {
+    const response = await SocialOrderService.getSocialOrderById(req.params.id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Lấy thông tin vụ việc thành công"
+            : "Không tìm thấy vụ việc",
+    });
+});
+
+// Cập nhật vụ việc
+const updateSocialOrder = asyncHandler(async (req, res) => {
+    const response = await SocialOrderService.updateSocialOrder(req.params.id, req.body);
+
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Cập nhật vụ việc thành công"
+            : "Không thể cập nhật vụ việc",
+    });
+});
+
+// Xóa vụ việc
+const deleteSocialOrder = asyncHandler(async (req, res) => {
+    const response = await SocialOrderService.deleteSocialOrder(req.params.id);
+
+    res.status(response ? 200 : 400).json({
+        success: !!response,
+        message: response
+            ? "Xóa vụ việc thành công"
+            : "Không thể xóa vụ việc",
+    });
+});
+
+// Xóa nhiều vụ việc
+const deleteMultipleSocialOrders = asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+
+    if (!ids) throw new Error("Thiếu id");
+
+    const response = await SocialOrderService.deleteMultipleSocialOrders(ids);
+
+    res.status(response.success ? 200 : 400).json({
+        success: response.success,
+        message: response.success
+            ? "Xóa vụ việc thành công"
+            : "Không thể xóa vụ việc",
+        deletedCount: response.deletedCount,
+    });
+});
+
+module.exports = {
+    getSocialOrders,
+    createSocialOrder,
+    getSocialOrderById,
+    updateSocialOrder,
+    deleteSocialOrder,
+    deleteMultipleSocialOrders,
+};
