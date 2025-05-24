@@ -37,12 +37,10 @@ export const FormListHeader = styled.div`
     margin-bottom: 20px;
 `;
 
-export const CreateFormButton = styled(Button)`
-    height: 120px;
-    width: 160px;
-    border-radius: 6px;
+export const WrapperButton = styled(Button)`
+    font-size: 16px;
+    height: 32px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
 `;

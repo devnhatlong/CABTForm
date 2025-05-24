@@ -999,6 +999,7 @@ export const SocialOrderNew = () => {
                             <InputComponent 
                                 name="userName"
                                 placeholder="Đơn vị thụ lý" 
+                                style={{ height: 36 }}
                                 disabled
                             />
                         </Form.Item>
@@ -1015,6 +1016,7 @@ export const SocialOrderNew = () => {
                         >
                             <Select
                                 placeholder="Chọn lĩnh vực vụ việc"
+                                style={{ height: 36 }}
                                 onChange={(value) => handleOnChangeSocialOrder("fieldOfWork", value)}
                             >
                                 {fieldOfWorks.map((field) => (
@@ -1037,7 +1039,7 @@ export const SocialOrderNew = () => {
                         >
                             <DatePicker
                                 format="DD/MM/YYYY"
-                                style={{ width: "100%" }}
+                                style={{ width: "100%", height: 36 }}
                                 disabledDate={(current) => current && current > moment().endOf('day')}
                                 onChange={(value) => handleOnChangeSocialOrder("incidentDate", value)}
                             />
@@ -1126,21 +1128,21 @@ export const SocialOrderNew = () => {
                     </Col>
 
                     <Col xs={24} sm={24} md={24} lg={24}>
-                            <Form.Item
-                                label="Nội dung vụ việc"
+                        <Form.Item
+                            label="Nội dung vụ việc"
+                            name="reportContent"
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            style={{ marginBottom: 10 }}
+                            rules={[{ required: true, message: 'Vui lòng nhập nội dung vụ việc!' }]}
+                        >
+                            <Input.TextArea
                                 name="reportContent"
-                                labelCol={{ span: 24 }}
-                                wrapperCol={{ span: 24 }}
-                                style={{ marginBottom: 10 }}
-                                rules={[{ required: true, message: 'Vui lòng nhập nội dung vụ việc!' }]}
-                            >
-                                <Input.TextArea
-                                    name="reportContent"
-                                    onChange={(e) => handleOnChangeSocialOrder('reportContent', e.target.value)}
-                                    rows={4}
-                                    placeholder="Nhập nội dung vụ việc..."
-                                />
-                            </Form.Item>
+                                onChange={(e) => handleOnChangeSocialOrder('reportContent', e.target.value)}
+                                rows={4}
+                                placeholder="Nhập nội dung vụ việc..."
+                            />
+                        </Form.Item>
                     </Col>
 
                     <Col xs={24} sm={24} md={24} lg={8}>

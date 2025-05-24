@@ -13,49 +13,53 @@ const getSocialOrders = async (page = 1, limit, fields, sort) => {
         // Xử lý các trường trong fields để tạo bộ lọc
         if (fields) {
             for (const key in fields) {
-                if (fields[key]) {
-                    // Sử dụng regex để tìm kiếm không phân biệt hoa thường
-                    queries[key] = { $regex: fields[key], $options: "i" };
+                if (fields[key] && fields[key] !== 'all') {
+                    // Nếu trường là ID (ví dụ: district, fieldOfWork, crime), áp dụng so sánh trực tiếp
+                    if (['district', 'fieldOfWork', 'crime'].includes(key)) {
+                        queries[key] = fields[key];
+                    }
+
+                    // Xử lý các trường văn bản
+                    if (!['district', 'fieldOfWork', 'crime', 'fromDate', 'toDate', 'dateType'].includes(key)) {
+                        queries[key] = { $regex: fields[key], $options: "i" };
+                    }
                 }
             }
         }
 
-        // Nếu limit là "ALL", lấy toàn bộ dữ liệu
-        if (limit === process.env.ALL_RECORDS) {
-            const data = await SocialOrder.find(queries).sort(sort || "-createdAt");
+        // Lấy tất cả dữ liệu từ cơ sở dữ liệu
+        let data = await SocialOrder.find(queries)
+            .populate('user', 'userName')
+            .populate('fieldOfWork', 'fieldName')
+            .populate('district', 'districtName')
+            .populate('commune', 'communeName')
+            .populate('crime', 'crimeName')
+            .sort(sort || "-createdAt");
 
-            return {
-                success: true,
-                forms: data,
-                total: data.length,
-            };
-        }
-
-        // Sử dụng giá trị limit từ biến môi trường nếu không được truyền
-        limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
-
-        // Tạo câu lệnh query
-        let queryCommand = SocialOrder.find(queries);
-
-        // Sorting
-        if (sort) {
-            const sortBy = sort.split(',').join(' ');
-            queryCommand = queryCommand.sort(sortBy);
-        } else {
-            queryCommand = queryCommand.sort('-createdAt'); // Mặc định sắp xếp theo ngày tạo giảm dần
+        // Lọc dữ liệu theo fromDate, toDate, và dateType
+        if (fields.fromDate || fields.toDate) {
+            const dateField = fields.dateType || 'createdAt'; // Mặc định là createdAt
+            data = data.filter((item) => {
+                const dateValue = new Date(item[dateField]);
+                if (fields.fromDate && new Date(fields.fromDate) > dateValue) {
+                    return false; // Loại bỏ nếu nhỏ hơn fromDate
+                }
+                if (fields.toDate && new Date(fields.toDate) < dateValue) {
+                    return false; // Loại bỏ nếu lớn hơn toDate
+                }
+                return true;
+            });
         }
 
         // Pagination
-        const skip = (page - 1) * limit;
-        queryCommand = queryCommand.skip(skip).limit(limit);
-
-        // Execute query
-        const data = await queryCommand;
-        const total = await SocialOrder.countDocuments(queries);
+        const total = data.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedData = data.slice(startIndex, endIndex);
 
         return {
             success: true,
-            forms: data,
+            forms: paginatedData,
             total,
         };
     } catch (error) {

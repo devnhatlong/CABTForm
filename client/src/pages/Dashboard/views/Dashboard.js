@@ -24,6 +24,7 @@ import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
 import { ROLE } from "../../../constants/role";
 import { GeneralSetting } from "../../GeneralSettings/views/GeneralSetting";
 import { SocialOrderNew } from "../../SocialOrder/views/SocialOrderNew";
+import { SocialOrderList } from "../../SocialOrder/views/SocialOrderList";
 
 const { Sider, Content } = Layout;
 
@@ -256,6 +257,7 @@ export const Dashboard = () => {
                 >
                     <Routes>
                         <Route path={PATHS.SOCIAL_ORDER.NEW} element={<SocialOrderNew />} />
+                        <Route path={PATHS.SOCIAL_ORDER.LIST} element={<SocialOrderList />} />
 
                         <Route path={PATHS.REPORT.SEND} element={<ReportSend />} />
                         <Route path={PATHS.REPORT.SUMMARY} element={<ReportSummary />} />

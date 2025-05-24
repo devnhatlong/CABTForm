@@ -3,7 +3,8 @@ const SocialOrderService = require('../services/socialOrderService');
 
 // Lấy danh sách vụ việc
 const getSocialOrders = asyncHandler(async (req, res) => {
-    const response = await SocialOrderService.getSocialOrders(req.query);
+    const { page = 1, limit, sort, fields } = req.query;
+    const response = await SocialOrderService.getSocialOrders(page, limit, fields, sort);
 
     res.status(200).json({
         success: true,
@@ -21,7 +22,7 @@ const createSocialOrder = asyncHandler(async (req, res) => {
     res.status(201).json({
         success: true,
         data: response,
-        message: "Tạo vụ việc thành công",
+        message: "Gửi vụ việc thành công",
     });
 });
 
