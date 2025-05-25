@@ -4,7 +4,7 @@ const SocialOrderService = require('../services/socialOrderService');
 // Lấy danh sách vụ việc
 const getSocialOrders = asyncHandler(async (req, res) => {
     const { page = 1, limit, sort, fields } = req.query;
-    const response = await SocialOrderService.getSocialOrders(page, limit, fields, sort);
+    const response = await SocialOrderService.getSocialOrders(req.user, page, limit, fields, sort);
 
     res.status(200).json({
         success: true,

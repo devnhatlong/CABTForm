@@ -57,3 +57,20 @@ export const FormContainer = styled.div`
     margin-bottom: 20px; /* Tạo khoảng cách với bảng */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); /* Hiệu ứng đổ bóng */
 `;
+
+export const StyledButtonStatus = styled.div`
+    display: inline-block;
+    text-align: center;
+    background-color: ${(props) => (props.disabled ? "#d9d9d9" : "#1890ff")};
+    border: 1px solid ${(props) => (props.disabled ? "#d9d9d9" : "#1890ff")};
+    color: ${(props) => (props.disabled ? "#8c8c8c" : "#fff")};
+    height: 24px;
+    line-height: 24px;
+    font-size: 12px;
+    font-style: italic;
+    border-radius: 4px;
+    padding: 0 12px;
+    user-select: none; /* Ngăn chọn văn bản */
+    margin: 10px;
+    font-weight: 500;
+`;

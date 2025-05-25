@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CreateFormButton, WrapperButton, WrapperHeader } from '../styles/style';
+import { StyledButtonStatus, WrapperButton, WrapperHeader } from '../styles/style';
 import { Table, Space, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber } from "antd";
 import { DeleteOutlined, EyeOutlined, EditOutlined, SearchOutlined, FileExcelOutlined, ExpandAltOutlined, ReloadOutlined } from '@ant-design/icons'
 
@@ -512,13 +512,30 @@ export const SocialOrderList = () => {
             title: "Phê duyệt của đơn vị",
             dataIndex: "approvalStatus",
             key: "approvalStatus",
-            render: (status) => (status ? "Đã phê duyệt" : "Chưa phê duyệt"),
+            render: (_, record) => (
+                <>
+                    <StyledButtonStatus disabled={record.approvalStatus === "Chưa gửi"}>
+                        {record.approvalStatus}
+                    </StyledButtonStatus>
+                    <Button
+                        type="primary"
+                        // onClick={() => handleSendToDepartment(record)}
+                    >
+                        Gửi đến phòng chức năng
+                    </Button>
+                </>
+            ),
             onHeaderCell: () => ({
                 style: {
                     backgroundColor: '#27567e',
                     color: 'white',
                     fontWeight: 'bold',
                     textAlign: 'center',
+                },
+            }),
+            onCell: () => ({
+                style: {
+                    textAlign: 'center', // Căn giữa nội dung ô
                 },
             }),
         },

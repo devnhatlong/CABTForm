@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const CriminalSchema = new mongoose.Schema(
+var CriminalSchema = new mongoose.Schema(
     {
         socialOrderId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -69,4 +69,4 @@ const CriminalSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('Criminal', CriminalSchema);
+module.exports = mongoose.models.Criminal || mongoose.model('Criminal', CriminalSchema);

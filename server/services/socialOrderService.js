@@ -1,4 +1,8 @@
-const SocialOrder = require('../models/socialOrderModel');
+const User = require('../models/userModel');
+const Department = require('../models/departmentModel');
+const Criminal = require('../models/criminalModel');
+const FieldOfWork = require('../models/fieldOfWorkModel');
+const SocialOrder = require('../models/socialOrderModel'); 
 
 const createSocialOrder = async (data, userId) => {
     // Tạo mới vụ việc
@@ -6,21 +10,41 @@ const createSocialOrder = async (data, userId) => {
     return await SocialOrder.create(payload);
 };
 
-const getSocialOrders = async (page = 1, limit, fields, sort) => {
+const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
     try {
         const queries = {};
+
+        // Nếu không phải admin, xử lý theo departmentId và departmentType
+        if (user.role !== "admin") {
+            const userData = await User.findById(user._id).select('departmentId');
+            if (!userData || !userData.departmentId) {
+                throw new Error("Không tìm thấy departmentId của người dùng");
+            }
+
+            const departmentData = await Department.findById(userData.departmentId).select('departmentType');
+            if (!departmentData) {
+                throw new Error("Không tìm thấy thông tin phòng ban");
+            }
+            
+            if (departmentData.departmentType === "Phòng ban") {
+                // Lấy danh sách fieldOfWorkId nếu departmentType là "Phòng ban"
+                const fieldOfWorks = await FieldOfWork.find({ departmentId: userData.departmentId }).select('_id');
+                const fieldOfWorkIds = fieldOfWorks.map((field) => field._id);
+                queries.fieldOfWork = { $in: fieldOfWorkIds };
+            } else if (departmentData.departmentType === "Xã, phường, thị trấn") {
+                // Lọc theo user nếu departmentType là "Xã, phường, thị trấn"
+                queries.user = user._id;
+            }
+        }
 
         // Xử lý các trường trong fields để tạo bộ lọc
         if (fields) {
             for (const key in fields) {
                 if (fields[key] && fields[key] !== 'all') {
-                    // Nếu trường là ID (ví dụ: district, fieldOfWork, crime), áp dụng so sánh trực tiếp
-                    if (['district', 'fieldOfWork', 'crime'].includes(key)) {
+                    if (['district', 'fieldOfWork', 'crime', 'commune'].includes(key)) {
                         queries[key] = fields[key];
                     }
-
-                    // Xử lý các trường văn bản
-                    if (!['district', 'fieldOfWork', 'crime', 'fromDate', 'toDate', 'dateType'].includes(key)) {
+                    if (!['district', 'fieldOfWork', 'crime', 'commune', 'fromDate', 'toDate', 'dateType'].includes(key)) {
                         queries[key] = { $regex: fields[key], $options: "i" };
                     }
                 }
@@ -38,18 +62,37 @@ const getSocialOrders = async (page = 1, limit, fields, sort) => {
 
         // Lọc dữ liệu theo fromDate, toDate, và dateType
         if (fields.fromDate || fields.toDate) {
-            const dateField = fields.dateType || 'createdAt'; // Mặc định là createdAt
+            const dateField = fields.dateType || 'createdAt';
             data = data.filter((item) => {
                 const dateValue = new Date(item[dateField]);
                 if (fields.fromDate && new Date(fields.fromDate) > dateValue) {
-                    return false; // Loại bỏ nếu nhỏ hơn fromDate
+                    return false;
                 }
                 if (fields.toDate && new Date(fields.toDate) < dateValue) {
-                    return false; // Loại bỏ nếu lớn hơn toDate
+                    return false;
                 }
                 return true;
             });
         }
+
+        // Đếm số đối tượng (criminal) cho từng SocialOrder
+        const socialOrderIds = data.map((item) => item._id);
+        const criminalCounts = await Criminal.aggregate([
+            { $match: { socialOrderId: { $in: socialOrderIds } } },
+            { $group: { _id: "$socialOrderId", count: { $sum: 1 } } },
+        ]);
+
+        // Tạo một map để tra cứu nhanh số lượng đối tượng
+        const criminalCountMap = criminalCounts.reduce((acc, curr) => {
+            acc[curr._id.toString()] = curr.count;
+            return acc;
+        }, {});
+
+        // Gắn số đối tượng vào từng bản ghi SocialOrder
+        data = data.map((item) => ({
+            ...item.toObject(),
+            numberOfSubjects: criminalCountMap[item._id.toString()] || 0, // Mặc định là 0 nếu không có đối tượng
+        }));
 
         // Pagination
         const total = data.length;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { WrapperHeader } from '../styles/style';
 import { Table, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber } from "antd";
-import { DeleteOutlined, SendOutlined } from '@ant-design/icons'
+import { DeleteOutlined, SaveOutlined } from '@ant-design/icons'
 
 import { useSelector } from 'react-redux';
 import moment from 'moment';
@@ -607,16 +607,27 @@ export const SocialOrderNew = () => {
             }),
         },
         {
-            title: "Tài sản thiệt hại (tr đồng)",
+            title: "Tài sản thiệt hại (triệu đồng)",
             dataIndex: "propertyDamage",
             render: (value) => (
-                <InputNumber
-                    value={value}
-                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyDamage", val)}
-                    min={0}
-                    onKeyDown={preventNonNumericInput}
-                    style={{ width: "100%" }}
-                />
+                <>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <InputNumber
+                            value={value}
+                            formatter={(value) =>
+                                value ? new Intl.NumberFormat("vi-VN").format(value) : ""
+                            }
+                            parser={(value) =>
+                                value?.replace(/[^\d]/g, "") || ""
+                            }
+                            onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyDamage", val)}
+                            min={0}
+                            onKeyDown={preventNonNumericInput}
+                            style={{ width: "100%" }}
+                        />
+                        <span> VNĐ</span>
+                    </div>
+                </>
             ),
             onHeaderCell: () => ({
                 style: {
@@ -628,16 +639,27 @@ export const SocialOrderNew = () => {
             }),
         },
         {
-            title: "Tài sản thu hồi (tr đồng)",
+            title: "Tài sản thu hồi (triệu đồng)",
             dataIndex: "propertyRecovered",
             render: (value) => (
-                <InputNumber
-                    value={value}
-                    onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyRecovered", val)}
-                    min={0}
-                    onKeyDown={preventNonNumericInput}
-                    style={{ width: "100%" }}
-                />
+                <>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <InputNumber
+                            value={value}
+                            formatter={(value) =>
+                                value ? new Intl.NumberFormat("vi-VN").format(value) : ""
+                            }
+                            parser={(value) =>
+                                value?.replace(/[^\d]/g, "") || ""
+                            }
+                            onChange={(val) => handleOnChangeAnnexData("commonAnnex", "propertyRecovered", val)}
+                            min={0}
+                            onKeyDown={preventNonNumericInput}
+                            style={{ width: "100%" }}
+                        />
+                        <span> VNĐ</span>
+                    </div>
+                </>
             ),
             onHeaderCell: () => ({
                 style: {
@@ -649,7 +671,7 @@ export const SocialOrderNew = () => {
             }),
         },
         {
-            title: "Số lượng súng (thu hồi)",
+            title: "Số lượng súng thu hồi",
             dataIndex: "gunsRecovered",
             render: (value) => (
                 <InputNumber
@@ -670,7 +692,7 @@ export const SocialOrderNew = () => {
             }),
         },
         {
-            title: "Thuốc nổ (kg) thu hồi",
+            title: "Số thuốc nổ thu hồi (kg)",
             dataIndex: "explosivesRecovered",
             render: (value) => (
                 <InputNumber
@@ -1324,8 +1346,8 @@ export const SocialOrderNew = () => {
                             htmlType="submit"
                             style={{ width: "150px", display: 'flex', justifyContent: "center", alignItems: 'center' }}
                         >
-                            <SendOutlined style={{ fontSize: '16px' }} />
-                            Gửi vụ việc
+                            <SaveOutlined style={{ fontSize: '18px' }} />
+                            Lưu vụ việc
                         </Button>
                     </Col>
                 </Row>

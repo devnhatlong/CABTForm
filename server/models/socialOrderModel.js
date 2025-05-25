@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const SocialOrderSchema = new mongoose.Schema(
+var SocialOrderSchema = new mongoose.Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -65,6 +65,29 @@ const SocialOrderSchema = new mongoose.Schema(
         hasAssignmentDecision: {
             type: Boolean,
             default: false,
+        },
+        approvalStatus: {
+            type: String,
+            enum: ['Chưa gửi', 'Đã gửi lên Phòng', 'Đã phê duyệt', 'Đã gửi Bộ'],
+            default: 'Chưa gửi',
+        },
+        approvedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User', // Hoặc 'Officer' nếu có schema riêng cho cán bộ phòng/ban
+            default: null,
+        },
+        approvedAt: {
+            type: Date,
+            default: null,
+        },
+        sentToMinistryBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            default: null,
+        },
+        sentToMinistryAt: {
+            type: Date,
+            default: null,
         },
     },
     {

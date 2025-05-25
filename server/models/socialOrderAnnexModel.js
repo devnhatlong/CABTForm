@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const SocialOrderAnnexSchema = new mongoose.Schema(
+var SocialOrderAnnexSchema = new mongoose.Schema(
     {
         socialOrderId: {
             type: mongoose.Schema.Types.ObjectId,
