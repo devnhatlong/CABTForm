@@ -1,4 +1,4 @@
-const Criminal = require('../models/CriminalModel');
+const Criminal = require('../models/criminalModel');
 
 const createCriminal = async (data) => {
     // Tạo mới đối tượng tội phạm
@@ -72,6 +72,15 @@ const getCriminalById = async (id) => {
     return await Criminal.findById(id);
 };
 
+const getCriminalBySocialOrderId = async (socialOrderId) => {
+    return await Criminal.find({ socialOrderId })
+        .populate('socialOrderId')
+        .populate('crime')
+        .populate('province')
+        .populate('district')
+        .populate('commune');
+};
+
 const updateCriminal = async (id, data) => {
     // Cập nhật đối tượng tội phạm
     const updatedCriminal = await Criminal.findByIdAndUpdate(id, data, { new: true });
@@ -94,6 +103,7 @@ module.exports = {
     createCriminal,
     getCriminals,
     getCriminalById,
+    getCriminalBySocialOrderId,
     updateCriminal,
     deleteCriminal,
 };

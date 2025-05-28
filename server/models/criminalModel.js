@@ -69,4 +69,5 @@ var CriminalSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.models.Criminal || mongoose.model('Criminal', CriminalSchema);
+module.exports = mongoose.model('Criminal', CriminalSchema);
+// module.exports = mongoose.models.Criminal || mongoose.model('Criminal', CriminalSchema);

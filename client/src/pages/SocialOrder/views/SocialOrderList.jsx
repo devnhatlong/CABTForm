@@ -27,9 +27,11 @@ import CrimeService from '../../../services/crimeService';
 import socialOrderService from '../../../services/socialOrderService';
 import { useQuery } from '@tanstack/react-query';
 import serverDateService from '../../../services/serverDateService';
+import { useNavigate } from 'react-router-dom';
 
 export const SocialOrderList = () => {
     const { Option } = Select;
+    const navigate = useNavigate(); 
     const [modalForm] = Form.useForm();
     const [drawerForm] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -224,7 +226,6 @@ export const SocialOrderList = () => {
 
     const getAllRecords = async (currentPage, pageSize, filters) => {
         const response = await socialOrderService.getSocialOrders(currentPage, pageSize, filters);
-        console.log("response", response);
         return response;
     };
 
@@ -245,12 +246,12 @@ export const SocialOrderList = () => {
         drawerForm.setFieldsValue(stateDistrictDetail)
     }, [stateDistrictDetail, drawerForm])
 
-    useEffect(() => {
-        if (rowSelected) {
-            setIsLoadingUpdate(true);
-            fetchGetDetailRecord(rowSelected);
-        }
-    }, [rowSelected])
+    // useEffect(() => {
+    //     if (rowSelected) {
+    //         setIsLoadingUpdate(true);
+    //         fetchGetDetailRecord(rowSelected);
+    //     }
+    // }, [rowSelected])
 
     const handleDetailLetter = () => {
         setIsOpenDrawer(true);
@@ -414,6 +415,10 @@ export const SocialOrderList = () => {
         )
     }
 
+    const handleViewDetails = (record) => {
+        navigate(`/social-order/${record._id}`, { state: { record } });
+    };
+
     const columns = [
         {
             title: "Đơn vị thụ lý",
@@ -546,7 +551,7 @@ export const SocialOrderList = () => {
                 <Button
                     type="link"
                     icon={<EyeOutlined />}
-                    // onClick={() => handleViewDetails(record)}
+                    onClick={() => handleViewDetails(record)}
                 >
                     Xem
                 </Button>

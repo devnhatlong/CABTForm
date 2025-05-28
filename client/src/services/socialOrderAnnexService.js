@@ -91,6 +91,17 @@ const socialOrderAnnexService = {
         }
     },
 
+    // Lấy chi tiết phụ lục theo ID
+    getAnnexBySocialOrderId: async (id) => {
+        try {
+            const response = await axiosAnnex.get(`${BASE_URL}/social-order/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết phụ lục:", error);
+            throw error;
+        }
+    },
+
     // Cập nhật phụ lục
     updateAnnex: async (id, data) => {
         try {

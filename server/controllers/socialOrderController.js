@@ -32,7 +32,7 @@ const getSocialOrderById = asyncHandler(async (req, res) => {
 
     res.status(response ? 200 : 404).json({
         success: !!response,
-        data: response || null,
+        data: response.form || null,
         message: response
             ? "Lấy thông tin vụ việc thành công"
             : "Không tìm thấy vụ việc",

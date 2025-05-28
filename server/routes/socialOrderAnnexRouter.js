@@ -6,6 +6,7 @@ const { verifyAccessToken } = require("../middlewares/verifyToken");
 router.get("/", verifyAccessToken, ctrls.getAnnexes); // Lấy danh sách phụ lục
 router.post("/", verifyAccessToken, ctrls.createAnnex); // Tạo mới phụ lục
 router.get("/:id", verifyAccessToken, ctrls.getAnnexById); // Lấy thông tin phụ lục theo ID
+router.get("/social-order/:id", verifyAccessToken, ctrls.getAnnexBySocialOrderId); // Lấy thông tin phụ lục theo ID
 router.put("/:id", verifyAccessToken, ctrls.updateAnnex); // Cập nhật phụ lục
 router.delete("/:id", verifyAccessToken, ctrls.deleteAnnex); // Xóa phụ lục
 

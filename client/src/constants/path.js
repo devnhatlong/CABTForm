@@ -12,6 +12,7 @@ export const PATHS = {
     SOCIAL_ORDER: {
         NEW: `${ROOTS_SOCIAL_ORDER}/new`,
         LIST: `${ROOTS_SOCIAL_ORDER}/list`,
+        DETAIL: `${ROOTS_SOCIAL_ORDER}/:id`,
         LOOKUP: `${ROOTS_SOCIAL_ORDER}/lookup`,
         STATS: `${ROOTS_SOCIAL_ORDER}/stats`,
     },

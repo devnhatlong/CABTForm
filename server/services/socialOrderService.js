@@ -53,7 +53,14 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
 
         // Lấy tất cả dữ liệu từ cơ sở dữ liệu
         let data = await SocialOrder.find(queries)
-            .populate('user', 'userName')
+            .populate({
+                path: 'user',
+                select: 'userName departmentId',
+                populate: {
+                    path: 'departmentId',
+                    select: 'departmentName',
+                }
+            })
             .populate('fieldOfWork', 'fieldName')
             .populate('district', 'districtName')
             .populate('commune', 'communeName')
@@ -89,10 +96,15 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
         }, {});
 
         // Gắn số đối tượng vào từng bản ghi SocialOrder
-        data = data.map((item) => ({
-            ...item.toObject(),
-            numberOfSubjects: criminalCountMap[item._id.toString()] || 0, // Mặc định là 0 nếu không có đối tượng
-        }));
+        data = data.map((item) => {
+            const obj = item.toObject();
+            const departmentName = obj.user?.departmentId?.departmentName || null;
+            return {
+                ...obj,
+                departmentName,
+                numberOfSubjects: criminalCountMap[item._id.toString()] || 0,
+            };
+        });
 
         // Pagination
         const total = data.length;
@@ -111,9 +123,50 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
     }
 };
 
+// const getSocialOrderById = async (id) => {
+//     // Lấy thông tin vụ việc theo ID
+//     return await SocialOrder.findById(id);
+// };
+
 const getSocialOrderById = async (id) => {
-    // Lấy thông tin vụ việc theo ID
-    return await SocialOrder.findById(id);
+    try {
+        const data = await SocialOrder.findById(id)
+            .populate({
+                path: 'user',
+                select: 'userName departmentId',
+                populate: {
+                    path: 'departmentId',
+                    select: 'departmentName',
+                }
+            })
+            .populate('fieldOfWork', 'fieldName')
+            .populate('district', 'districtName')
+            .populate('commune', 'communeName')
+            .populate('crime', 'crimeName');
+
+        if (!data) {
+            throw new Error("Không tìm thấy bản ghi vụ việc");
+        }
+
+        // Đếm số đối tượng (criminal) liên quan đến SocialOrder này
+        const criminalCount = await Criminal.countDocuments({ socialOrderId: id });
+
+        // Chuyển về object thường và gắn thêm thông tin
+        const obj = data.toObject();
+        const departmentName = obj.user?.departmentId?.departmentName || null;
+
+        return {
+            success: true,
+            form: {
+                ...obj,
+                departmentName,
+                numberOfSubjects: criminalCount,
+            }
+        };
+    } catch (error) {
+        console.error("Error in getSocialOrderById:", error);
+        throw new Error("Không thể lấy thông tin vụ việc");
+    }
 };
 
 const updateSocialOrder = async (id, data) => {

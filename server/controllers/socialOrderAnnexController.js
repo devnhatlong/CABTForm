@@ -40,6 +40,18 @@ const getAnnexById = asyncHandler(async (req, res) => {
     });
 });
 
+const getAnnexBySocialOrderId = asyncHandler(async (req, res) => {
+    const response = await SocialOrderAnnexService.getAnnexBySocialOrderId(req.params.id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Lấy thông tin phụ lục thành công"
+            : "Không tìm thấy phụ lục",
+    });
+});
+
 // Cập nhật phụ lục
 const updateAnnex = asyncHandler(async (req, res) => {
     const response = await SocialOrderAnnexService.updateAnnex(req.params.id, req.body);
@@ -69,6 +81,7 @@ module.exports = {
     getAnnexes,
     createAnnex,
     getAnnexById,
+    getAnnexBySocialOrderId,
     updateAnnex,
     deleteAnnex,
 };

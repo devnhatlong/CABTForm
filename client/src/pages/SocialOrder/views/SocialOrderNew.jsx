@@ -168,14 +168,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 200,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Ngày sinh (dd/mm/yyyy)",
@@ -190,14 +183,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 180,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Tội danh",
@@ -219,14 +205,7 @@ export const SocialOrderNew = () => {
                 </Select>
             ),
             width: 220,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Tỉnh HKTT",
@@ -248,14 +227,7 @@ export const SocialOrderNew = () => {
                 </Select>
             ),
             width: 200,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Huyện HKTT",
@@ -277,14 +249,7 @@ export const SocialOrderNew = () => {
                 </Select>
             ),
             width: 200,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Xã HKTT",
@@ -306,14 +271,7 @@ export const SocialOrderNew = () => {
                 </Select>
             ),
             width: 200,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Nghề nghiệp",
@@ -325,14 +283,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 150,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Nữ giới",
@@ -344,14 +295,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 80,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -368,14 +312,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 100,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -392,14 +329,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 100,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -416,14 +346,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 80,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -440,14 +363,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 80,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -478,14 +394,7 @@ export const SocialOrderNew = () => {
                 </>
             ),
             width: 180,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Xóa",
@@ -498,14 +407,7 @@ export const SocialOrderNew = () => {
                 />
             ),
             width: 80,
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
             onCell: () => ({
                 style: {
                     textAlign: 'center', // Căn giữa nội dung ô
@@ -542,6 +444,13 @@ export const SocialOrderNew = () => {
         setStateCriminalData(newData);
     };
 
+    const headerStyle = {
+        backgroundColor: '#27567e',
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    };
+
     const commonAnnexColumns = [
         {
             title: "Số người chết",
@@ -555,14 +464,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Số người bị thương",
@@ -576,14 +478,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Số trẻ em bị xâm hại",
@@ -597,14 +492,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Tài sản thiệt hại (triệu đồng)",
@@ -629,14 +517,7 @@ export const SocialOrderNew = () => {
                     </div>
                 </>
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Tài sản thu hồi (triệu đồng)",
@@ -661,14 +542,7 @@ export const SocialOrderNew = () => {
                     </div>
                 </>
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Số lượng súng thu hồi",
@@ -682,14 +556,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Số thuốc nổ thu hồi (kg)",
@@ -703,14 +570,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
     ];
 
@@ -727,14 +587,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Thuốc phiện (g)",
@@ -748,14 +601,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Cần sa (g)",
@@ -769,14 +615,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Cây có chứa chất ma túy (g)",
@@ -790,14 +629,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Ma túy tổng hợp (g)",
@@ -811,14 +643,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Ma túy tổng hợp (viên)",
@@ -832,14 +657,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Loại ma túy khác (g)",
@@ -853,14 +671,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
         {
             title: "Loại ma túy khác (ml)",
@@ -874,14 +685,7 @@ export const SocialOrderNew = () => {
                     style={{ width: "100%" }}
                 />
             ),
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: '#27567e',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                },
-            }),
+            onHeaderCell: () => ({ style: headerStyle }),
         },
     ];
 
@@ -1059,10 +863,20 @@ export const SocialOrderNew = () => {
                             style={{ marginBottom: 10 }}
                             rules={[{ required: true, message: 'Vui lòng chọn ngày xảy ra!' }]}
                         >
-                            <DatePicker
+                            {/* <DatePicker
                                 format="DD/MM/YYYY"
                                 style={{ width: "100%", height: 36 }}
                                 disabledDate={(current) => current && current > moment().endOf('day')}
+                                onChange={(value) => handleOnChangeSocialOrder("incidentDate", value)}
+                            /> */}
+                            <DatePicker
+                                format="DD/MM/YYYY"
+                                style={{ width: "100%", height: 36 }}
+                                disabledDate={(current) => {
+                                    const today = moment().endOf('day');
+                                    const threeDaysAgo = moment().subtract(2, 'days').startOf('day');
+                                    return current && (current < threeDaysAgo || current > today);
+                                }}
                                 onChange={(value) => handleOnChangeSocialOrder("incidentDate", value)}
                             />
                         </Form.Item>

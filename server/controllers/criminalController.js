@@ -40,6 +40,18 @@ const getCriminalById = asyncHandler(async (req, res) => {
     });
 });
 
+const getCriminalBySocialOrderId = asyncHandler(async (req, res) => {
+    const response = await CriminalService.getCriminalBySocialOrderId(req.params.id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || null,
+        message: response
+            ? "Lấy thông tin đối tượng tội phạm thành công"
+            : "Không tìm thấy đối tượng tội phạm",
+    });
+});
+
 // Cập nhật đối tượng tội phạm
 const updateCriminal = asyncHandler(async (req, res) => {
     const response = await CriminalService.updateCriminal(req.params.id, req.body);
@@ -69,6 +81,7 @@ module.exports = {
     getCriminals,
     createCriminal,
     getCriminalById,
+    getCriminalBySocialOrderId,
     updateCriminal,
     deleteCriminal,
 };

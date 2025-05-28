@@ -72,6 +72,10 @@ const getAnnexById = async (id) => {
     return await SocialOrderAnnex.findById(id);
 };
 
+const getAnnexBySocialOrderId = async (socialOrderId) => {
+    return await SocialOrderAnnex.findOne({ socialOrderId });
+};
+
 const updateAnnex = async (id, data) => {
     // Cập nhật phụ lục
     const updatedAnnex = await SocialOrderAnnex.findByIdAndUpdate(id, data, { new: true });
@@ -94,6 +98,7 @@ module.exports = {
     createAnnex,
     getAnnexes,
     getAnnexById,
+    getAnnexBySocialOrderId,
     updateAnnex,
     deleteAnnex,
 };

@@ -91,6 +91,16 @@ const criminalService = {
         }
     },
 
+    getCriminalBySocialOrderId: async (id) => {
+        try {
+            const response = await axiosCriminal.get(`${BASE_URL}/social-order/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy chi tiết đối tượng:", error);
+            throw error;
+        }
+    },
+
     // Cập nhật đối tượng
     updateCriminal: async (id, data) => {
         try {
