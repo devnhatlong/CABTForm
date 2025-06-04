@@ -1,5 +1,9 @@
 const Criminal = require('../models/criminalModel');
 const CriminalHistory = require('../models/criminalHistoryModel');
+const Province = require('../models/provinceModel');
+const District = require('../models/districtModel');
+const Commune = require('../models/communeModel');
+const Crime = require('../models/crimeModel');
 
 const createCriminal = async (data) => {
     try {
@@ -161,7 +165,31 @@ const getHistoryDetailByHistoryId = async (historyId) => {
     try {
         const historyRecords = await CriminalHistory.find({
             socialOrderHistoryId: historyId
-        }).sort({ updatedAt: -1 }); // Sắp xếp giảm dần theo thời gian nếu cần
+        }).sort({ updatedAt: -1 });
+
+        for (const record of historyRecords) {
+            const ds = record.dataSnapshot;
+
+            if (ds.crime) {
+                const crime = await Crime.findById(ds.crime);
+                ds.crime = crime ? { _id: crime._id, crimeName: crime.crimeName } : null;
+            }
+
+            if (ds.province) {
+                const province = await Province.findById(ds.province);
+                ds.province = province ? { _id: province._id, provinceName: province.provinceName } : null;
+            }
+
+            if (ds.district) {
+                const district = await District.findById(ds.district);
+                ds.district = district ? { _id: district._id, districtName: district.districtName } : null;
+            }
+
+            if (ds.commune) {
+                const commune = await Commune.findById(ds.commune);
+                ds.commune = commune ? { _id: commune._id, communeName: commune.communeName } : null;
+            }
+        }
 
         return historyRecords;
     } catch (error) {

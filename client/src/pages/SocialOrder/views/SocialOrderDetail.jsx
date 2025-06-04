@@ -26,7 +26,6 @@ export const SocialOrderDetail = () => {
     const [historyCriminalDetail, setHistoryCriminalDetail] = useState([]);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [modalContent, setModalContent] = useState(null);
 
     const breadcrumbItems = [
         { label: 'Trang chủ', path: '/dashboard' },
@@ -103,7 +102,7 @@ export const SocialOrderDetail = () => {
             console.error("Lỗi khi tải lịch sử chỉnh sửa:", error);
         }
     };
-
+    console.log("historyCriminalDetail", historyCriminalDetail);
     const headerStyle = {
         backgroundColor: '#27567e',
         color: 'white',
@@ -404,7 +403,6 @@ export const SocialOrderDetail = () => {
     ];
 
     const showDetail = (_id) => {
-        setModalContent(_id);
         fetchSocialOrderHistoryDetail(_id); // gọi API lấy chi tiết
         fetchAnnexHistoryDetail(_id); // gọi API lấy phụ lục chi tiết
         fetchCriminalHistoryDetail(_id); // gọi API lấy tội phạm chi tiết
@@ -413,7 +411,6 @@ export const SocialOrderDetail = () => {
 
     const handleCancel = () => {
         setIsModalVisible(false);
-        setModalContent(null);
     };
 
     const historyColumns = [
