@@ -1,8 +1,28 @@
-const SocialOrderAnnex = require('../models/SocialOrderAnnexModel');
+const SocialOrderAnnex = require('../models/socialOrderAnnexModel');
+const SocialOrderAnnexHistory = require('../models/socialOrderAnnexHistoryModel');
 
 const createAnnex = async (data) => {
-    // Tạo mới phụ lục
-    return await SocialOrderAnnex.create(data);
+    try {
+        // Tạo mới phụ lục
+        const newAnnex = await SocialOrderAnnex.create(data);
+
+        // Ghi lịch sử bản tạo mới
+        const history = await SocialOrderAnnexHistory.create({
+            annexId: newAnnex._id,
+            dataSnapshot: newAnnex.toObject(),
+            socialOrderHistoryId: data.socialOrderHistoryId,
+            updatedAt: new Date(),
+        });
+
+        // Trả về cả phụ lục và lịch sử
+        return {
+            annex: newAnnex,
+            history: history,
+        };
+    } catch (error) {
+        console.error("Error creating Annex:", error);
+        throw new Error("Không thể tạo mới phụ lục");
+    }
 };
 
 const getAnnexes = async (page = 1, limit, fields, sort, socialOrderId) => {
@@ -76,13 +96,30 @@ const getAnnexBySocialOrderId = async (socialOrderId) => {
     return await SocialOrderAnnex.findOne({ socialOrderId });
 };
 
-const updateAnnex = async (id, data) => {
-    // Cập nhật phụ lục
-    const updatedAnnex = await SocialOrderAnnex.findByIdAndUpdate(id, data, { new: true });
-    if (!updatedAnnex) {
-        throw new Error("Phụ lục không tồn tại");
+const updateAnnex = async (socialOrderId, newData) => {
+    try {
+        // Xoá bản ghi cũ (nếu có)
+        await SocialOrderAnnex.deleteMany({ socialOrderId });
+
+        // Gắn socialOrderId vào bản ghi mới và tạo mới
+        const newAnnex = await SocialOrderAnnex.create({
+            ...newData,
+            socialOrderId,
+        });
+
+        // Sau khi tạo mới thành công, lưu lịch sử
+        await SocialOrderAnnexHistory.create({
+            annexId: newAnnex._id,
+            dataSnapshot: newAnnex.toObject(),
+            socialOrderHistoryId: newData.socialOrderHistoryId,
+            updatedAt: new Date(),
+        });
+
+        return newAnnex;
+    } catch (error) {
+        console.error("Error updating SocialOrderAnnex:", error);
+        throw new Error("Không thể cập nhật phụ lục");
     }
-    return updatedAnnex;
 };
 
 const deleteAnnex = async (id) => {
@@ -94,6 +131,19 @@ const deleteAnnex = async (id) => {
     return deletedAnnex;
 };
 
+const getHistoryDetailByHistoryId = async (historyId) => {
+    try {
+        const historyRecord = await SocialOrderAnnexHistory.findOne({
+            socialOrderHistoryId: historyId
+        });
+
+        return historyRecord;
+    } catch (error) {
+        console.error("Lỗi khi lấy chi tiết lịch sử phụ lục:", error);
+        throw new Error("Không thể lấy chi tiết lịch sử phụ lục");
+    }
+};
+
 module.exports = {
     createAnnex,
     getAnnexes,
@@ -101,4 +151,5 @@ module.exports = {
     getAnnexBySocialOrderId,
     updateAnnex,
     deleteAnnex,
+    getHistoryDetailByHistoryId
 };

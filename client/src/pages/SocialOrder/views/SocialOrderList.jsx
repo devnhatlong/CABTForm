@@ -416,7 +416,11 @@ export const SocialOrderList = () => {
     }
 
     const handleViewDetails = (record) => {
-        navigate(`/social-order/${record._id}`, { state: { record } });
+        navigate(`/social-order/detail/${record._id}`, { state: { record } });
+    };
+
+    const handleViewEdit = (record) => {
+        navigate(`/social-order/edit/${record._id}`, { state: { record } });
     };
 
     const columns = [
@@ -573,7 +577,7 @@ export const SocialOrderList = () => {
                     <Button
                         type="link"
                         icon={<EditOutlined />}
-                        // onClick={() => handleEdit(record)}
+                        onClick={() => handleViewEdit(record)}
                     >
                         Sửa
                     </Button>
@@ -625,262 +629,264 @@ export const SocialOrderList = () => {
 
     return (
         <ConfigProvider locale={viVN}>
-            <WrapperHeader>Danh sách vụ việc</WrapperHeader>
-            <BreadcrumbComponent items={breadcrumbItems} />
+            <Loading isLoading = {isLoadingAllRecords}>
+                <WrapperHeader>Danh sách vụ việc</WrapperHeader>
+                <BreadcrumbComponent items={breadcrumbItems} />
 
-            <Form 
-                form={modalForm} 
-                name="modalForm"
-                onFinish={onFinish}
-                
-            >
-                <Row gutter={16}>
-                    <Col xs={24} sm={24} md={24} lg={24}>
-                        <Form.Item
-                            label="Nội dung tìm kiếm"
-                            name="reportContent"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <InputComponent 
+                <Form 
+                    form={modalForm} 
+                    name="modalForm"
+                    onFinish={onFinish}
+                    
+                >
+                    <Row gutter={16}>
+                        <Col xs={24} sm={24} md={24} lg={24}>
+                            <Form.Item
+                                label="Nội dung tìm kiếm"
                                 name="reportContent"
-                                placeholder="Nội dung tìm kiếm"
-                                onChange={(e) => handleFilterChange("reportContent", e.target.value)}
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <InputComponent 
+                                    name="reportContent"
+                                    placeholder="Nội dung tìm kiếm"
+                                    onChange={(e) => handleFilterChange("reportContent", e.target.value)}
+                                />
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Lĩnh vực vụ việc"
+                                name="fieldOfWork"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    placeholder="Chọn lĩnh vực vụ việc"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("fieldOfWork", value)}
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    {fieldOfWorks.map((field) => (
+                                        <Select.Option key={field._id} value={field._id}>
+                                            {field.fieldName}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Địa bàn Huyện, TX, TP"
+                                name="district"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Chọn địa bàn Huyện, TX, TP"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("district", value)}
+                                    filterOption={(input, option) =>
+                                        option?.children?.toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    {districts.map((field) => (
+                                        <Select.Option key={field._id} value={field._id}>
+                                            {field.districtName}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Tội danh"
+                                name="crime"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Chọn tội danh"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("crime", value)}
+                                    filterOption={(input, option) =>
+                                        option?.children?.toLowerCase().includes(input.toLowerCase())
+                                    }
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    {crimes.map((field) => (
+                                        <Select.Option key={field._id} value={field._id}>
+                                            {field.crimeName}
+                                        </Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Từ ngày"
+                                name="fromDate" // Đặt tên phù hợp cho trường
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <DatePicker
+                                    format="DD/MM/YYYY"
+                                    style={{ width: "100%", height: 36 }}
+                                    disabledDate={(current) => current && current > moment().endOf('day')}
+                                    onChange={(value) => handleFilterChange("fromDate", value)}
+                                />
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Đến ngày"
+                                name="toDate"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <DatePicker
+                                    format="DD/MM/YYYY"
+                                    style={{ width: "100%", height: 36 }}
+                                    disabledDate={(current) => current && current > moment().endOf('day')}
+                                    onChange={(value) => handleFilterChange("toDate", value)}
+                                />
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Loại ngày tìm kiếm"
+                                name="dateType"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    placeholder="Chọn loại ngày tìm kiếm"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("dateType", value)}
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    <Select.Option value="createdAt">Ngày báo cáo</Select.Option>
+                                    <Select.Option value="incidentDate">Ngày xảy ra vụ việc</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Kết quả điều tra"
+                                name="investigationResult"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    placeholder="Chọn kết quả điều tra"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("investigationResult", value)}
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    <Select.Option value="Đã điều tra làm rõ">Đã điều tra làm rõ</Select.Option>
+                                    <Select.Option value="Đang điều tra">Đang điều tra</Select.Option>
+                                    <Select.Option value="Đình chỉ">Đình chỉ</Select.Option>
+                                    <Select.Option value="Tạm đình chỉ">Tạm đình chỉ</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Kết quả xử lý"
+                                name="handlingResult"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    placeholder="Chọn kết quả xử lý"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("handlingResult", value)}
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    <Select.Option value="Đã khởi tố">Đã khởi tố</Select.Option>
+                                    <Select.Option value="Đã xử lý hành chính">Đã xử lý hành chính</Select.Option>
+                                    <Select.Option value="Chuyển cơ quan khác">Chuyển cơ quan khác</Select.Option>
+                                    <Select.Option value="Chưa có kết quả">Chưa có kết quả</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col xs={24} sm={24} md={24} lg={8}>
+                            <Form.Item
+                                label="Mức độ vụ việc"
+                                name="severityLevel"
+                                labelCol={{ span: 24 }}
+                                wrapperCol={{ span: 24 }}
+                                style={{ marginBottom: 10 }}
+                            >
+                                <Select
+                                    placeholder="Chọn mức độ vụ việc"
+                                    style={{ height: 36 }}
+                                    onChange={(value) => handleFilterChange("severityLevel", value)}
+                                >
+                                    <Select.Option value="all">Tất cả</Select.Option>
+                                    <Select.Option value="Nghiêm trọng và ít nghiêm trọng">Nghiêm trọng và ít nghiêm trọng</Select.Option>
+                                    <Select.Option value="Rất nghiêm trọng">Rất nghiêm trọng</Select.Option>
+                                    <Select.Option value="Đặc biệt nghiêm trọng">Đặc biệt nghiêm trọng</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    
+                    <div style={{ marginTop: 20, marginBottom: 20, gap: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                        <WrapperButton type="primary" htmlType="submit" icon={<SearchOutlined />}>Tìm kiếm</WrapperButton>
+                        <WrapperButton type="default" icon={<ExpandAltOutlined />}>Tìm kiếm mở rộng</WrapperButton>
+                        <WrapperButton style={{ backgroundColor: '#1D6B40', color: '#fff' }} icon={<FileExcelOutlined />}>Xuất Excel</WrapperButton>
+                    </div>
+                    
+
+                    <Row gutter={16}>
+                        <Col xs={24} sm={24} md={24} lg={24}>
+                            <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
+                                pagination={{
+                                    current: pagination.currentPage,
+                                    pageSize: pagination.pageSize,
+                                    total: allRecords?.total,
+                                    onChange: handlePageChange,
+                                    showSizeChanger: false
+                                }}
+                                onRow={(record, rowIndex) => {
+                                    return {
+                                        onClick: (event) => {
+                                            if (record._id) {
+                                                setRowSelected(record._id);
+                                            }
+                                        },
+                                    };
+                                }}
                             />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Lĩnh vực vụ việc"
-                            name="fieldOfWork"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                placeholder="Chọn lĩnh vực vụ việc"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("fieldOfWork", value)}
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                {fieldOfWorks.map((field) => (
-                                    <Select.Option key={field._id} value={field._id}>
-                                        {field.fieldName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Địa bàn Huyện, TX, TP"
-                            name="district"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Chọn địa bàn Huyện, TX, TP"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("district", value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                }
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                {districts.map((field) => (
-                                    <Select.Option key={field._id} value={field._id}>
-                                        {field.districtName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Tội danh"
-                            name="crime"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="Chọn tội danh"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("crime", value)}
-                                filterOption={(input, option) =>
-                                    option?.children?.toLowerCase().includes(input.toLowerCase())
-                                }
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                {crimes.map((field) => (
-                                    <Select.Option key={field._id} value={field._id}>
-                                        {field.crimeName}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Từ ngày"
-                            name="fromDate" // Đặt tên phù hợp cho trường
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <DatePicker
-                                format="DD/MM/YYYY"
-                                style={{ width: "100%", height: 36 }}
-                                disabledDate={(current) => current && current > moment().endOf('day')}
-                                onChange={(value) => handleFilterChange("fromDate", value)}
-                            />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Đến ngày"
-                            name="toDate"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <DatePicker
-                                format="DD/MM/YYYY"
-                                style={{ width: "100%", height: 36 }}
-                                disabledDate={(current) => current && current > moment().endOf('day')}
-                                onChange={(value) => handleFilterChange("toDate", value)}
-                            />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Loại ngày tìm kiếm"
-                            name="dateType"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                placeholder="Chọn loại ngày tìm kiếm"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("dateType", value)}
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                <Select.Option value="createdAt">Ngày báo cáo</Select.Option>
-                                <Select.Option value="incidentDate">Ngày xảy ra vụ việc</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                <Row gutter={16}>
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Kết quả điều tra"
-                            name="investigationResult"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                placeholder="Chọn kết quả điều tra"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("investigationResult", value)}
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                <Select.Option value="Đã điều tra làm rõ">Đã điều tra làm rõ</Select.Option>
-                                <Select.Option value="Đang điều tra">Đang điều tra</Select.Option>
-                                <Select.Option value="Đình chỉ">Đình chỉ</Select.Option>
-                                <Select.Option value="Tạm đình chỉ">Tạm đình chỉ</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Kết quả xử lý"
-                            name="handlingResult"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                placeholder="Chọn kết quả xử lý"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("handlingResult", value)}
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                <Select.Option value="Đã khởi tố">Đã khởi tố</Select.Option>
-                                <Select.Option value="Đã xử lý hành chính">Đã xử lý hành chính</Select.Option>
-                                <Select.Option value="Chuyển cơ quan khác">Chuyển cơ quan khác</Select.Option>
-                                <Select.Option value="Chưa có kết quả">Chưa có kết quả</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} sm={24} md={24} lg={8}>
-                        <Form.Item
-                            label="Mức độ vụ việc"
-                            name="severityLevel"
-                            labelCol={{ span: 24 }}
-                            wrapperCol={{ span: 24 }}
-                            style={{ marginBottom: 10 }}
-                        >
-                            <Select
-                                placeholder="Chọn mức độ vụ việc"
-                                style={{ height: 36 }}
-                                onChange={(value) => handleFilterChange("severityLevel", value)}
-                            >
-                                <Select.Option value="all">Tất cả</Select.Option>
-                                <Select.Option value="Nghiêm trọng và ít nghiêm trọng">Nghiêm trọng và ít nghiêm trọng</Select.Option>
-                                <Select.Option value="Rất nghiêm trọng">Rất nghiêm trọng</Select.Option>
-                                <Select.Option value="Đặc biệt nghiêm trọng">Đặc biệt nghiêm trọng</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row>
-
-                
-                <div style={{ marginTop: 20, marginBottom: 20, gap: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                    <WrapperButton type="primary" htmlType="submit" icon={<SearchOutlined />}>Tìm kiếm</WrapperButton>
-                    <WrapperButton type="default" icon={<ExpandAltOutlined />}>Tìm kiếm mở rộng</WrapperButton>
-                    <WrapperButton style={{ backgroundColor: '#1D6B40', color: '#fff' }} icon={<FileExcelOutlined />}>Xuất Excel</WrapperButton>
-                </div>
-                
-
-                <Row gutter={16}>
-                    <Col xs={24} sm={24} md={24} lg={24}>
-                        <TableComponent handleDeleteMultiple={handleDeleteMultipleRecords} columns={columns} data={dataTable} isLoading={isLoadingAllRecords || isLoadingResetFilter} resetSelection={resetSelection}
-                            pagination={{
-                                current: pagination.currentPage,
-                                pageSize: pagination.pageSize,
-                                total: allRecords?.total,
-                                onChange: handlePageChange,
-                                showSizeChanger: false
-                            }}
-                            onRow={(record, rowIndex) => {
-                                return {
-                                    onClick: (event) => {
-                                        if (record._id) {
-                                            setRowSelected(record._id);
-                                        }
-                                    },
-                                };
-                            }}
-                        />
-                    </Col>
-                </Row>
-            </Form>
+                        </Col>
+                    </Row>
+                </Form>
+            </Loading>
         </ConfigProvider>
     )
 }

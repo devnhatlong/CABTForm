@@ -43,12 +43,12 @@ const getAnnexById = asyncHandler(async (req, res) => {
 const getAnnexBySocialOrderId = asyncHandler(async (req, res) => {
     const response = await SocialOrderAnnexService.getAnnexBySocialOrderId(req.params.id);
 
-    res.status(response ? 200 : 404).json({
-        success: !!response,
+    res.status(200).json({
+        success: true,
         data: response || null,
         message: response
             ? "Lấy thông tin phụ lục thành công"
-            : "Không tìm thấy phụ lục",
+            : "Không có dữ liệu phụ lục",
     });
 });
 
@@ -77,6 +77,19 @@ const deleteAnnex = asyncHandler(async (req, res) => {
     });
 });
 
+const getHistoryDetailByHistoryId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await SocialOrderAnnexService.getHistoryDetailByHistoryId(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || [],
+        message: response
+            ? "Lấy lịch sử chỉnh sửa thành công"
+            : "Không tìm thấy lịch sử chỉnh sửa",
+    });
+});
+
 module.exports = {
     getAnnexes,
     createAnnex,
@@ -84,4 +97,5 @@ module.exports = {
     getAnnexBySocialOrderId,
     updateAnnex,
     deleteAnnex,
+    getHistoryDetailByHistoryId
 };

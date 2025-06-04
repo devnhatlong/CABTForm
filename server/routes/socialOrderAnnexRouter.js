@@ -10,4 +10,7 @@ router.get("/social-order/:id", verifyAccessToken, ctrls.getAnnexBySocialOrderId
 router.put("/:id", verifyAccessToken, ctrls.updateAnnex); // Cập nhật phụ lục
 router.delete("/:id", verifyAccessToken, ctrls.deleteAnnex); // Xóa phụ lục
 
+// history
+router.get("/:id/history-detail", verifyAccessToken, ctrls.getHistoryDetailByHistoryId);
+
 module.exports = router;

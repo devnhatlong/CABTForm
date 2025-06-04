@@ -260,6 +260,7 @@ export const Dashboard = () => {
                         <Route path={PATHS.SOCIAL_ORDER.NEW} element={<SocialOrderNew />} />
                         <Route path={PATHS.SOCIAL_ORDER.LIST} element={<SocialOrderList />} />
                         <Route path={PATHS.SOCIAL_ORDER.DETAIL} element={<SocialOrderDetail />} />
+                        <Route path={PATHS.SOCIAL_ORDER.EDIT} element={<SocialOrderNew />} />
 
                         <Route path={PATHS.REPORT.SEND} element={<ReportSend />} />
                         <Route path={PATHS.REPORT.SUMMARY} element={<ReportSummary />} />

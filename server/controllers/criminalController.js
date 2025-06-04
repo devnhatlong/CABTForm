@@ -77,6 +77,19 @@ const deleteCriminal = asyncHandler(async (req, res) => {
     });
 });
 
+const getHistoryDetailByHistoryId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await CriminalService.getHistoryDetailByHistoryId(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || [],
+        message: response
+            ? "Lấy lịch sử chỉnh sửa thành công"
+            : "Không tìm thấy lịch sử chỉnh sửa",
+    });
+});
+
 module.exports = {
     getCriminals,
     createCriminal,
@@ -84,4 +97,5 @@ module.exports = {
     getCriminalBySocialOrderId,
     updateCriminal,
     deleteCriminal,
+    getHistoryDetailByHistoryId,
 };

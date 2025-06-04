@@ -10,4 +10,7 @@ router.get("/social-order/:id", verifyAccessToken, ctrls.getCriminalBySocialOrde
 router.put("/:id", verifyAccessToken, ctrls.updateCriminal); // Cập nhật đối tượng tội phạm
 router.delete("/:id", verifyAccessToken, ctrls.deleteCriminal); // Xóa đối tượng tội phạm
 
+// history
+router.get("/:id/history-detail", verifyAccessToken, ctrls.getHistoryDetailByHistoryId);
+
 module.exports = router;

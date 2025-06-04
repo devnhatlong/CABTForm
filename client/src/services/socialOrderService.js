@@ -125,6 +125,27 @@ const socialOrderService = {
             throw error;
         }
     },
+
+    // Lấy lịch sử chỉnh sửa của một vụ việc theo ID
+    getHistoryBySocialOrderId: async (id) => {
+        try {
+            const response = await axiosSocialOrder.get(`${BASE_URL}/${id}/history`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy lịch sử chỉnh sửa vụ việc:", error);
+            throw error;
+        }
+    },
+
+    getHistoryDetailByHistoryId: async (id) => {
+        try {
+            const response = await axiosSocialOrder.get(`${BASE_URL}/${id}/history-detail`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy lịch sử chỉnh sửa vụ việc:", error);
+            throw error;
+        }
+    },
 };
 
 export default socialOrderService;

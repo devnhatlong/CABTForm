@@ -89,6 +89,11 @@ var SocialOrderSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        originalId: {
+            type: mongoose.Schema.Types.ObjectId,
+            default: null,
+            index: true,
+        }
     },
     {
         timestamps: true,

@@ -1,8 +1,41 @@
 const Criminal = require('../models/criminalModel');
+const CriminalHistory = require('../models/criminalHistoryModel');
 
 const createCriminal = async (data) => {
-    // Tạo mới đối tượng tội phạm
-    return await Criminal.create(data);
+    try {
+        // Nếu là mảng (nhiều bản ghi), thì dùng insertMany
+        const created = Array.isArray(data)
+            ? await Criminal.insertMany(data)
+            : [await Criminal.create(data)];
+
+        // Ghi lịch sử cho từng bản
+        const historyDocs = created.map((item, index) => {
+            return {
+                criminalId: item._id,
+                dataSnapshot: item.toObject(),
+                socialOrderHistoryId: Array.isArray(data)
+                    ? data[index]?.socialOrderHistoryId
+                    : data.socialOrderHistoryId,
+                updatedAt: new Date(),
+            };
+        });
+
+        const createdHistories = await CriminalHistory.insertMany(historyDocs);
+
+        // Trả về cả hai: bản ghi criminal và history tương ứng
+        return Array.isArray(data)
+            ? created.map((criminal, index) => ({
+                  criminal,
+                  history: createdHistories[index],
+              }))
+            : {
+                  criminal: created[0],
+                  history: createdHistories[0],
+              };
+    } catch (error) {
+        console.error("Error creating Criminal:", error);
+        throw new Error("Không thể tạo mới đối tượng tội phạm");
+    }
 };
 
 const getCriminals = async (page = 1, limit, fields, sort, socialOrderId) => {
@@ -81,15 +114,40 @@ const getCriminalBySocialOrderId = async (socialOrderId) => {
         .populate('commune');
 };
 
-const updateCriminal = async (id, data) => {
-    // Cập nhật đối tượng tội phạm
-    const updatedCriminal = await Criminal.findByIdAndUpdate(id, data, { new: true });
-    if (!updatedCriminal) {
-        throw new Error("Đối tượng không tồn tại");
-    }
-    return updatedCriminal;
-};
+const updateCriminal = async (socialOrderId, newCriminals) => {
+    try {
+        if (!Array.isArray(newCriminals)) {
+            throw new Error("Dữ liệu đối tượng phải là một mảng");
+        }
 
+        // Xóa toàn bộ bản ghi cũ
+        await Criminal.deleteMany({ socialOrderId });
+
+        // Gắn socialOrderId và chèn vào DB
+        const criminalsToInsert = newCriminals.map(c => ({
+            ...c,
+            socialOrderId,
+        }));
+
+        const insertedCriminals = await Criminal.insertMany(criminalsToInsert);
+
+        // Sau khi thêm thành công, lưu vào CriminalHistory
+        for (const criminal of insertedCriminals) {
+            await CriminalHistory.create({
+                criminalId: criminal._id,
+                dataSnapshot: criminal.toObject(),
+                socialOrderHistoryId: newCriminals[0].socialOrderHistoryId,
+                updatedAt: new Date(),
+            });
+        }
+
+        return insertedCriminals;
+    } catch (error) {
+        console.error("Error updating Criminals:", error);
+        throw new Error("Không thể cập nhật thông tin đối tượng");
+    }
+};
+  
 const deleteCriminal = async (id) => {
     // Xóa đối tượng tội phạm
     const deletedCriminal = await Criminal.findByIdAndDelete(id);
@@ -99,6 +157,19 @@ const deleteCriminal = async (id) => {
     return deletedCriminal;
 };
 
+const getHistoryDetailByHistoryId = async (historyId) => {
+    try {
+        const historyRecords = await CriminalHistory.find({
+            socialOrderHistoryId: historyId
+        }).sort({ updatedAt: -1 }); // Sắp xếp giảm dần theo thời gian nếu cần
+
+        return historyRecords;
+    } catch (error) {
+        console.error("Lỗi khi lấy lịch sử đối tượng:", error);
+        throw new Error("Không thể lấy lịch sử đối tượng tội phạm");
+    }
+};
+
 module.exports = {
     createCriminal,
     getCriminals,
@@ -106,4 +177,5 @@ module.exports = {
     getCriminalBySocialOrderId,
     updateCriminal,
     deleteCriminal,
+    getHistoryDetailByHistoryId
 };

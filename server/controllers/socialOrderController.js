@@ -41,7 +41,8 @@ const getSocialOrderById = asyncHandler(async (req, res) => {
 
 // Cập nhật vụ việc
 const updateSocialOrder = asyncHandler(async (req, res) => {
-    const response = await SocialOrderService.updateSocialOrder(req.params.id, req.body);
+    const { _id: userId } = req.user;
+    const response = await SocialOrderService.updateSocialOrder(req.params.id, req.body, userId);
 
     res.status(response ? 200 : 400).json({
         success: !!response,
@@ -81,6 +82,33 @@ const deleteMultipleSocialOrders = asyncHandler(async (req, res) => {
     });
 });
 
+// Lấy lịch sử chỉnh sửa theo ID vụ việc
+const getHistoryBySocialOrderId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await SocialOrderService.getHistoryBySocialOrderId(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || [],
+        message: response
+            ? "Lấy lịch sử chỉnh sửa thành công"
+            : "Không tìm thấy lịch sử chỉnh sửa",
+    });
+});
+
+const getHistoryDetailByHistoryId = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const response = await SocialOrderService.getHistoryDetailByHistoryId(id);
+
+    res.status(response ? 200 : 404).json({
+        success: !!response,
+        data: response || [],
+        message: response
+            ? "Lấy lịch sử chỉnh sửa thành công"
+            : "Không tìm thấy lịch sử chỉnh sửa",
+    });
+});
+
 module.exports = {
     getSocialOrders,
     createSocialOrder,
@@ -88,4 +116,6 @@ module.exports = {
     updateSocialOrder,
     deleteSocialOrder,
     deleteMultipleSocialOrders,
+    getHistoryBySocialOrderId,
+    getHistoryDetailByHistoryId
 };

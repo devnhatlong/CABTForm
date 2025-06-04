@@ -10,4 +10,8 @@ router.put("/:id", verifyAccessToken, ctrls.updateSocialOrder);
 router.delete("/delete-multiple", verifyAccessToken, ctrls.deleteMultipleSocialOrders);
 router.delete("/:id", verifyAccessToken, ctrls.deleteSocialOrder);
 
+// history
+router.get("/:id/history", verifyAccessToken, ctrls.getHistoryBySocialOrderId);
+router.get("/:id/history-detail", verifyAccessToken, ctrls.getHistoryDetailByHistoryId);
+
 module.exports = router;

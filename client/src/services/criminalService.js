@@ -135,6 +135,16 @@ const criminalService = {
             throw error;
         }
     },
+
+    getHistoryDetailByHistoryId: async (id) => {
+        try {
+            const response = await axiosCriminal.get(`${BASE_URL}/${id}/history-detail`);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi lấy lịch sử chỉnh sửa vụ việc:", error);
+            throw error;
+        }
+    },
 };
 
 export default criminalService;

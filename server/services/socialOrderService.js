@@ -2,12 +2,55 @@ const User = require('../models/userModel');
 const Department = require('../models/departmentModel');
 const Criminal = require('../models/criminalModel');
 const FieldOfWork = require('../models/fieldOfWorkModel');
-const SocialOrder = require('../models/socialOrderModel'); 
+const SocialOrder = require('../models/socialOrderModel');
+const SocialOrderHistory = require('../models/socialOrderHistoryModel');
+const District = require('../models/districtModel');
+const Commune = require('../models/communeModel');
+const Crime = require('../models/crimeModel');
+
+const recordHistory = async ({ socialOrderId, userId, action, dataSnapshot }) => {
+    const history = await SocialOrderHistory.create({
+        socialOrderId,
+        updatedBy: userId,
+        action,
+        dataSnapshot,
+        updatedAt: new Date(),
+    });
+
+    return history;
+};
 
 const createSocialOrder = async (data, userId) => {
-    // Tạo mới vụ việc
-    const payload = { ...data, user: userId };
-    return await SocialOrder.create(payload);
+    try {
+        // Đảm bảo có userId
+        if (!data.user) {
+            data.user = userId;
+        }
+
+        // Tạo bản ghi SocialOrder
+        const created = await SocialOrder.create({ ...data, createdBy: userId });
+
+        // Gán originalId = _id chính nó
+        created.originalId = created._id;
+        await created.save();
+
+        // Ghi lịch sử tạo mới
+        const history = await recordHistory({
+            socialOrderId: created._id,
+            userId,
+            action: 'Tạo mới',
+            dataSnapshot: created
+        });
+
+        // Trả về cả bản ghi và history
+        return {
+            socialOrder: created,
+            history: history,
+        };
+    } catch (error) {
+        console.error("Error creating SocialOrder:", error);
+        throw error;
+    }
 };
 
 const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
@@ -123,11 +166,6 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
     }
 };
 
-// const getSocialOrderById = async (id) => {
-//     // Lấy thông tin vụ việc theo ID
-//     return await SocialOrder.findById(id);
-// };
-
 const getSocialOrderById = async (id) => {
     try {
         const data = await SocialOrder.findById(id)
@@ -169,13 +207,36 @@ const getSocialOrderById = async (id) => {
     }
 };
 
-const updateSocialOrder = async (id, data) => {
-    // Cập nhật vụ việc
-    const updatedSocialOrder = await SocialOrder.findByIdAndUpdate(id, data, { new: true });
-    if (!updatedSocialOrder) {
-        throw new Error("Vụ việc không tồn tại");
+const updateSocialOrder = async (id, newData, userId) => {
+    try {
+        // Tìm bản ghi hiện tại (bản ghi cũ)
+        const current = await SocialOrder.findById(id);
+        if (!current) {
+            throw new Error("Vụ việc không tồn tại");
+        }
+    
+        // Loại bỏ các trường không cần thiết trước khi cập nhật
+        const { _id, createdAt, updatedAt, ...cleanedData } = newData;
+    
+        // Cập nhật dữ liệu mới, trả về bản ghi cập nhật
+        const updatedRecord = await SocialOrder.findByIdAndUpdate(id, cleanedData, { new: true });
+    
+        // Lưu bản lịch sử với snapshot của bản ghi mới (đã cập nhật)
+        const history = await recordHistory({
+            socialOrderId: updatedRecord.originalId || updatedRecord._id,  // fallback nếu originalId undefined
+            userId,
+            action: 'Cập nhật vụ việc',
+            dataSnapshot: updatedRecord.toObject(),
+        });
+    
+        return {
+            socialOrder: updatedRecord,
+            history: history,
+        };
+    } catch (error) {
+        console.error("Error updating SocialOrder:", error);
+        throw new Error("Không thể cập nhật vụ việc");
     }
-    return updatedSocialOrder;
 };
 
 const deleteSocialOrder = async (id) => {
@@ -196,6 +257,74 @@ const deleteMultipleSocialOrders = async (ids) => {
     };
 };
 
+const getHistoryBySocialOrderId = async (socialOrderId) => {
+    try {
+        // B1: Tìm bản ghi SocialOrder
+        const record = await SocialOrder.findById(socialOrderId);
+        if (!record) {
+            throw new Error("Vụ việc không tồn tại");
+        }
+
+        // B2: Lấy originalId, nếu không có thì dùng chính _id
+        const originalId = record.originalId;
+
+        // B3: Lấy lịch sử theo originalId
+        const histories = await SocialOrderHistory.find({ socialOrderId: originalId })
+            .populate('updatedBy', 'userName')
+            .sort({ createdAt: 1 });
+
+        return histories;
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        throw new Error("Không thể lấy lịch sử chỉnh sửa");
+    }
+};
+
+const getHistoryDetailByHistoryId = async (historyId) => {
+    try {
+        const historyRecord = await SocialOrderHistory.findById(historyId)
+            .populate('updatedBy', 'userName')
+            .lean(); // dùng lean để dễ thao tác với object JS thuần
+
+        if (!historyRecord) {
+            throw new Error("Không tìm thấy bản ghi lịch sử");
+        }
+
+        const snapshot = historyRecord.dataSnapshot;
+
+        // Dùng Promise.all để lấy thông tin chi tiết cho các trường có _id
+        const [
+            user,
+            fieldOfWork,
+            district,
+            commune,
+            crime
+        ] = await Promise.all([
+            snapshot.user ? User.findById(snapshot.user).select('userName') : null,
+            snapshot.fieldOfWork ? FieldOfWork.findById(snapshot.fieldOfWork).select('fieldName') : null,
+            snapshot.district ? District.findById(snapshot.district).select('districtName') : null,
+            snapshot.commune ? Commune.findById(snapshot.commune).select('communeName') : null,
+            snapshot.crime ? Crime.findById(snapshot.crime).select('crimeName') : null,
+        ]);
+
+        // Gộp thông tin lại
+        return {
+            ...historyRecord,
+            dataSnapshot: {
+                ...snapshot,
+                user,
+                fieldOfWork,
+                district,
+                commune,
+                crime
+            }
+        };
+    } catch (error) {
+        console.error("Error fetching history by ID:", error);
+        throw new Error("Không thể lấy bản ghi lịch sử");
+    }
+};
+
 module.exports = {
     createSocialOrder,
     getSocialOrders,
@@ -203,4 +332,6 @@ module.exports = {
     updateSocialOrder,
     deleteSocialOrder,
     deleteMultipleSocialOrders,
+    getHistoryBySocialOrderId,
+    getHistoryDetailByHistoryId
 };
