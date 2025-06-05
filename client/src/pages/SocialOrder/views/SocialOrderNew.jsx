@@ -848,14 +848,7 @@ export const SocialOrderNew = () => {
                     }));
                     await criminalService.updateCriminal(oldSocialOrderId, criminalDataPayload);
                 }
-    
                 // ✅ Update AnnexData
-                // const annexDataPayload = {
-                //     ...stateAnnexData,
-                //     socialOrderId: newSocialOrderId,
-                // };
-                // await socialOrderAnnexService.updateAnnex(oldSocialOrderId, annexDataPayload);
-
                 // Kiểm tra dữ liệu annex có thực sự có gì không
                 const isAnnexDataEmpty = Object.values(stateAnnexData.commonAnnex).every(value => !value) &&
                                         Object.values(stateAnnexData.drugAnnex).every(value => !value);

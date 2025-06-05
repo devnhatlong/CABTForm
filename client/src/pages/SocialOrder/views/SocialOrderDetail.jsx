@@ -102,7 +102,7 @@ export const SocialOrderDetail = () => {
             console.error("Lỗi khi tải lịch sử chỉnh sửa:", error);
         }
     };
-    console.log("historyCriminalDetail", historyCriminalDetail);
+
     const headerStyle = {
         backgroundColor: '#27567e',
         color: 'white',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyledButtonStatus, WrapperButton, WrapperHeader } from '../styles/style';
-import { Table, Space, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber } from "antd";
+import { Table, Space, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber, Modal } from "antd";
 import { DeleteOutlined, EyeOutlined, EditOutlined, SearchOutlined, FileExcelOutlined, ExpandAltOutlined, ReloadOutlined } from '@ant-design/icons'
 
 import { useSelector } from 'react-redux';
@@ -38,8 +38,6 @@ export const SocialOrderList = () => {
     const [rowSelected, setRowSelected] = useState();
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [isLoadingResetFilter, setIsLoadingResetFilter] = useState(false);
-    const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
-    const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
     const user = useSelector((state) => state?.user);
     const [serverDate, setServerDate] = useState([]);
     const [columnFilters, setColumnFilters] = useState({});
@@ -194,7 +192,7 @@ export const SocialOrderList = () => {
     const mutationDeleted = useMutationHooks(
         (data) => { 
             const { id } = data;
-            const response = districtService.deleteDistrict(id);
+            const response = socialOrderService.deleteSocialOrder(id);
             return response;
         }
     );
@@ -229,44 +227,14 @@ export const SocialOrderList = () => {
         return response;
     };
 
-    const fetchGetDetailRecord = async (rowSelected) => {
-        const response = await districtService.getDistrictById(rowSelected);
-
-        if (response?.data) {
-            setStateDistrictDetail({
-                districtName: response?.data?.districtName,
-                districtCode: response?.data?.districtCode,
-                provinceId: response?.data?.provinceId,
-            })
-        }
-        setIsLoadingUpdate(false);
-    }
-
     useEffect(() => {
         drawerForm.setFieldsValue(stateDistrictDetail)
     }, [stateDistrictDetail, drawerForm])
-
-    // useEffect(() => {
-    //     if (rowSelected) {
-    //         setIsLoadingUpdate(true);
-    //         fetchGetDetailRecord(rowSelected);
-    //     }
-    // }, [rowSelected])
-
-    const handleDetailLetter = () => {
-        setIsOpenDrawer(true);
-    }
 
     useEffect(() => {
         query.refetch();
         setIsLoadingResetFilter(false);
     }, [isLoadingResetFilter]);
-
-    const handleResetAllFilter = () => {
-        setIsLoadingResetFilter(true);
-        setColumnFilters("");
-        setFilters("");
-    }
 
     const query = useQuery({
         queryKey: ['allRecords'],
@@ -291,22 +259,8 @@ export const SocialOrderList = () => {
     }, [isSuccess]);
 
     useEffect(() => {
-        if(isSuccessUpdated && dataUpdated?.success) {
-            message.success(dataUpdated?.message);
-            handleCloseDrawer();
-        }
-        else if (isError) {
-            message.error("Có gì đó sai sai");
-        }
-        else if (isSuccessUpdated && !dataUpdated?.success) {
-            message.error(dataUpdated?.message);
-        }
-    }, [isSuccessUpdated]);
-
-    useEffect(() => {
         if(isSuccessDeleted && dataDeleted?.success) {
             message.success(dataDeleted?.message);
-            handleCancelDelete();
         }
         else if (isErrorDeleted) {
           message.error("Có gì đó sai sai");
@@ -333,31 +287,31 @@ export const SocialOrderList = () => {
         query.refetch();
     }
 
-    const onUpdate = async () => {
-        mutationUpdate.mutate(
-            {
-                id: rowSelected,
-                ...stateDistrictDetail
-            }, 
-            {
-                onSettled: () => {
-                    query.refetch();
+    const handleDelete = (record) => {
+        console.log(record);
+        Modal.confirm({
+            title: 'Bạn có chắc chắn muốn xóa vụ việc này?',
+            okText: 'Xóa',
+            cancelText: 'Hủy',
+            okType: 'danger',
+            onOk: async () => {
+                try {
+                    mutationDeleted.mutate(
+                        {
+                            id: record._id,
+                        },
+                        {
+                            onSettled: () => {
+                                query.refetch();
+                            }
+                        }
+                    )
+                } catch (error) {
+                    console.error(error);
+                    message.error('Xóa không thành công');
                 }
-            }
-        );
-    }
-
-    const handleDeleteLetter = () => {
-        mutationDeleted.mutate(
-          {
-            id: rowSelected
-          },
-          {
-            onSettled: () => {
-                query.refetch();
-            }
-          }
-        )
+            },
+        });
     }
 
     const handleDeleteMultipleRecords = (ids) => {
@@ -397,23 +351,6 @@ export const SocialOrderList = () => {
             };
         });
     };
-
-    const buttonReloadTable = () => {
-        return (
-            <div style={{display: "flex", justifyContent: "center"}}>
-                <ReloadOutlined style={{color: '#1677ff', fontSize: '18px', cursor: 'pointer'}} onClick={handleResetAllFilter}/>
-            </div>
-        )
-    }
-
-    const renderAction = () => {
-        return (
-            <div style={{display: "flex", justifyContent: "center", gap: "10px"}}>
-                <EditOutlined style={{color: 'orange', fontSize: '18px', cursor: 'pointer'}} onClick={handleDetailLetter}/>
-                <DeleteOutlined style={{color: 'red', fontSize: '18px', cursor: 'pointer'}} onClick={() => setIsModalOpenDelete(true)}/>
-            </div>
-        )
-    }
 
     const handleViewDetails = (record) => {
         navigate(`/social-order/detail/${record._id}`, { state: { record } });
@@ -585,7 +522,7 @@ export const SocialOrderList = () => {
                         type="link"
                         icon={<DeleteOutlined />}
                         danger
-                        // onClick={() => handleDelete(record)}
+                        onClick={() => handleDelete(record)}
                     >
                         Xóa
                     </Button>
@@ -608,16 +545,6 @@ export const SocialOrderList = () => {
             currentPage: page,
             pageSize: pageSize
         });
-    };
-
-    const handleCancelDelete = () => {
-        setIsModalOpenDelete(false);
-    }
-
-    // Đóng DrawerComponent
-    const handleCloseDrawer = () => {
-        fetchGetDetailRecord(rowSelected);
-        setIsOpenDrawer(false);
     };
 
     const handleFilterChange = (key, value) => {

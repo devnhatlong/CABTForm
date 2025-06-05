@@ -7,6 +7,9 @@ const SocialOrderHistory = require('../models/socialOrderHistoryModel');
 const District = require('../models/districtModel');
 const Commune = require('../models/communeModel');
 const Crime = require('../models/crimeModel');
+const SocialOrderAnnex = require('../models/socialOrderAnnexModel');
+const SocialOrderAnnexHistory = require('../models/socialOrderAnnexHistoryModel');
+const CriminalHistory = require('../models/criminalHistoryModel');
 
 const recordHistory = async ({ socialOrderId, userId, action, dataSnapshot }) => {
     const history = await SocialOrderHistory.create({
@@ -240,12 +243,33 @@ const updateSocialOrder = async (id, newData, userId) => {
 };
 
 const deleteSocialOrder = async (id) => {
-    // Xóa vụ việc
-    const deletedSocialOrder = await SocialOrder.findByIdAndDelete(id);
-    if (!deletedSocialOrder) {
-        throw new Error("Vụ việc không tồn tại");
+    try {
+        const deletedSocialOrder = await SocialOrder.findByIdAndDelete(id);
+        if (!deletedSocialOrder) throw new Error("Vụ việc không tồn tại");
+
+        const historyIds = await SocialOrderHistory.find({ socialOrderId: id }, '_id');
+        const historyIdList = historyIds.map(h => h._id);
+
+        const annexes = await SocialOrderAnnex.find({ socialOrderId: id });
+        const annexIds = annexes.map(a => a._id);
+
+        const criminals = await Criminal.find({ socialOrderId: id });
+        const criminalIds = criminals.map(c => c._id);
+
+        await Promise.all([
+            SocialOrderHistory.deleteMany({ socialOrderId: id }),
+            SocialOrderAnnex.deleteMany({ socialOrderId: id }),
+            SocialOrderAnnexHistory.deleteMany({ annexId: { $in: annexIds } }),
+            Criminal.deleteMany({ socialOrderId: id }),
+            CriminalHistory.deleteMany({ criminalId: { $in: criminalIds } }),
+            CriminalHistory.deleteMany({ socialOrderHistoryId: { $in: historyIdList } }),
+            SocialOrderAnnexHistory.deleteMany({ socialOrderHistoryId: { $in: historyIdList } })
+        ]);
+
+        return deletedSocialOrder;
+    } catch (error) {
+        throw error;
     }
-    return deletedSocialOrder;
 };
 
 const deleteMultipleSocialOrders = async (ids) => {

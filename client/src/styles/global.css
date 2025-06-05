@@ -60,3 +60,19 @@ textarea.ant-input {
 .anticon-search {
     font-size: 18px;
 }
+
+.ant-message {
+    font-size: 20px;
+}
+
+.ant-message-notice-content {
+    padding: 12px 24px;
+    border-radius: 8px;
+}
+
+/* Thêm dòng này để align icon và text */
+.ant-message-custom-content {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* hoặc 12px nếu muốn cách ra thêm giữa icon và chữ */
+}
