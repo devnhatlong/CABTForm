@@ -13,7 +13,8 @@ export const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || "/dashboard";
+    // const from = location.state?.from?.pathname || "/dashboard";
+    const from = "/dashboard";
 
     const [values, setValues] = useState({
         userName: '',

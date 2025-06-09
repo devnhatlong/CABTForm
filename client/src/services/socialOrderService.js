@@ -146,6 +146,46 @@ const socialOrderService = {
             throw error;
         }
     },
+
+    sendToDepartment: async (id, note) => {
+        try {
+            const response = await axiosSocialOrder.put(`${BASE_URL}/${id}/send-to-department`, { note });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi gửi vụ việc lên phòng chức năng:", error);
+            throw error;
+        }
+    },
+
+    approveSocialOrder: async (id, note) => {
+        try {
+            const response = await axiosSocialOrder.put(`${BASE_URL}/${id}/approve`, { note });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi phê duyệt vụ việc:", error);
+            throw error;
+        }
+    },
+
+    returnSocialOrder: async (id, note) => {
+        try {
+            const response = await axiosSocialOrder.put(`${BASE_URL}/${id}/return`, { note });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi trả lại vụ việc:", error);
+            throw error;
+        }
+    },
+
+    sendToMinistry: async (id, note) => {
+        try {
+            const response = await axiosSocialOrder.put(`${BASE_URL}/${id}/send-to-ministry`, { note });
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi gửi vụ việc lên Bộ:", error);
+            throw error;
+        }
+    },
 };
 
 export default socialOrderService;

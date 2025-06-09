@@ -35,7 +35,7 @@
     height: 100%; /* Adjust size as needed */
     background: url("../../../assets/images/circle.png") no-repeat center center;
     background-size: contain;
-    animation: rotateBackground 20s linear infinite;
+    animation: rotateBackground 30s linear infinite;
 }
 
 .text-login {

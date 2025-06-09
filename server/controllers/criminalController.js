@@ -81,7 +81,7 @@ const getHistoryDetailByHistoryId = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const response = await CriminalService.getHistoryDetailByHistoryId(id);
 
-    res.status(response ? 200 : 404).json({
+    res.status(200).json({
         success: !!response,
         data: response || [],
         message: response

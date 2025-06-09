@@ -9,6 +9,7 @@ import { Modal, Table, Button, Checkbox } from "antd";
 import { ArrowLeftOutlined, EditOutlined, HistoryOutlined } from "@ant-design/icons";
 import criminalService from "../../../services/criminalService";
 import Loading from "../../../components/LoadingComponent/Loading";
+import { STATUS } from "../../../constants/status";
 
 export const SocialOrderDetail = () => {
     const { id } = useParams();
@@ -32,7 +33,7 @@ export const SocialOrderDetail = () => {
         { label: 'Danh sách vụ việc về TTXH' },
         { label: 'Chi tiết vụ việc' },
     ];
-    
+
     useEffect(() => {
         setLoading(true);
         
@@ -433,6 +434,12 @@ export const SocialOrderDetail = () => {
             onHeaderCell: () => ({ style: headerStyle }),
         },
         {
+            title: "Ghi chú",
+            dataIndex: ["dataSnapshot", "note"],
+            key: "note",
+            onHeaderCell: () => ({ style: headerStyle }),
+        },
+        {
             title: "Nội dung",
             dataIndex: "_id",
             key: "_id",
@@ -520,14 +527,16 @@ export const SocialOrderDetail = () => {
                 </Button>
 
                 <div style={{ display: "flex", gap: 10 }}>
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
-                        onClick={() => navigate(`/social-order/edit/${record._id}`, { state: { record } })}
-                    >
-                        Sửa vụ việc
-                    </Button>
+                    {(record?.status === STATUS.NOT_SENT) || (record?.status === STATUS.RETURNED_BY_DEPARTMENT) && (
+                        <Button
+                            type="primary"
+                            icon={<EditOutlined />}
+                            style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
+                            onClick={() => navigate(`/social-order/edit/${record._id}`, { state: { record } })}
+                        >
+                            Sửa vụ việc
+                        </Button>
+                    )}
 
                     <Button
                         type="primary"

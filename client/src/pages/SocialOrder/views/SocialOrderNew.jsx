@@ -25,6 +25,7 @@ import communeService from '../../../services/communeService';
 import CrimeService from '../../../services/crimeService';
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Loading from '../../../components/LoadingComponent/Loading';
+import { STATUS } from '../../../constants/status';
 
 export const SocialOrderNew = () => {
     const location = useLocation();
@@ -99,7 +100,49 @@ export const SocialOrderNew = () => {
     }, [user, form]);
 
     useEffect(() => {
-        if (!id) return;
+        if (!id) {
+            {
+                form.resetFields();
+                setStateSocialOrder({
+                    fieldOfWork: "",
+                    incidentDate: "",
+                    district: "",
+                    commune: "",
+                    crime: "",
+                    reportContent: "",
+                    investigationResult: "",
+                    handlingResult: "",
+                    severityLevel: "",
+                    isHandledByCommune: false,
+                    isExtendedCase: false,
+                    isGangRelated: false,
+                    hasAssignmentDecision: false,
+                });
+                setStateCriminalData([]);
+                setStateAnnexData({
+                    commonAnnex: {
+                        numberOfDeaths: "",
+                        numberOfInjuries: "",
+                        numberOfChildrenAbused: "",
+                        propertyDamage: "",
+                        propertyRecovered: "",
+                        gunsRecovered: "",
+                        explosivesRecovered: "",
+                    },
+                    drugAnnex: {
+                        heroin: "",
+                        opium: "",
+                        cannabis: "",
+                        drugPlants: "",
+                        syntheticDrugs: "",
+                        syntheticDrugPills: "",
+                        otherDrugsWeight: "",
+                        otherDrugsVolume: "",
+                    },
+                });
+            }
+            return;
+        }
 
         const fetchData = async () => {
             try {
@@ -1274,7 +1317,7 @@ export const SocialOrderNew = () => {
                             Quay lại danh sách
                         </Button>
 
-                        {id ? (
+                        {id && ((record?.status === STATUS.NOT_SENT) || (record?.status === STATUS.RETURNED_BY_DEPARTMENT)) ? (
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
@@ -1283,16 +1326,18 @@ export const SocialOrderNew = () => {
                             >
                                 Cập nhật vụ việc
                             </Button>
-                        ) : 
-                            <Button 
-                                type="primary" 
-                                htmlType="submit"
-                                style={{ width: "150px", display: 'flex', justifyContent: "center", alignItems: 'center' }}
-                            >
-                                <SaveOutlined style={{ fontSize: '18px' }} />
-                                Lưu vụ việc
-                            </Button>
-                        }
+                        ) : (
+                            !id && (
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    style={{ width: "150px", display: 'flex', justifyContent: "center", alignItems: 'center' }}
+                                >
+                                    <SaveOutlined style={{ fontSize: '18px' }} />
+                                    Lưu vụ việc
+                                </Button>
+                            )
+                        )}
                     </div>
                 </Form>
             </Loading>

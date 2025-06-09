@@ -61,16 +61,32 @@ export const FormContainer = styled.div`
 export const StyledButtonStatus = styled.div`
     display: inline-block;
     text-align: center;
-    background-color: ${(props) => (props.disabled ? "#d9d9d9" : "#1890ff")};
-    border: 1px solid ${(props) => (props.disabled ? "#d9d9d9" : "#1890ff")};
-    color: ${(props) => (props.disabled ? "#8c8c8c" : "#fff")};
-    height: 24px;
-    line-height: 24px;
-    font-size: 12px;
+    background-color: ${({ color }) => {
+        switch (color) {
+            case 'default': return '#d9d9d9';
+            case 'processing': return '#1890ff';
+            case 'error': return '#ff4d4f';
+            case 'success': return '#52c41a';
+            default: return '#d9d9d9';
+        }
+    }};
+    border: 1px solid ${({ color }) => {
+        switch (color) {
+            case 'default': return '#d9d9d9';
+            case 'processing': return '#1890ff';
+            case 'error': return '#ff4d4f';
+            case 'success': return '#52c41a';
+            default: return '#d9d9d9';
+        }
+    }};
+    color: #fff;
+    line-height: 26px;
+    font-size: 14px;
     font-style: italic;
     border-radius: 4px;
     padding: 0 12px;
-    user-select: none; /* Ngăn chọn văn bản */
+    user-select: none;
     margin: 10px;
     font-weight: 500;
+    width: max-content;
 `;

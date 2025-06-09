@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyledButtonStatus, WrapperButton, WrapperHeader } from '../styles/style';
-import { Table, Space, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber, Modal } from "antd";
+import { Table, Space, Button, Col, Form, Row, Select, DatePicker, ConfigProvider, Input, Checkbox, InputNumber, Modal, Typography } from "antd";
 import { DeleteOutlined, EyeOutlined, EditOutlined, SearchOutlined, FileExcelOutlined, ExpandAltOutlined, ReloadOutlined } from '@ant-design/icons'
 
 import { useSelector } from 'react-redux';
@@ -10,12 +10,9 @@ import 'dayjs/locale/vi';
 
 import TableComponent from '../../../components/TableComponent/TableComponent';
 import InputComponent from '../../../components/InputComponent/InputComponent';
-import ModalComponent from '../../../components/ModalComponent/ModalComponent';
 import Loading from '../../../components/LoadingComponent/Loading';
 import * as message from '../../../components/Message/Message';
-import DrawerComponent from '../../../components/DrawerComponent/DrawerComponent';
 import { useMutationHooks } from '../../../hooks/useMutationHook';
-import ImportExcel from "../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../constants/role';
 import { LIMIT_RECORD } from '../../../constants/limit';
@@ -28,6 +25,8 @@ import socialOrderService from '../../../services/socialOrderService';
 import { useQuery } from '@tanstack/react-query';
 import serverDateService from '../../../services/serverDateService';
 import { useNavigate } from 'react-router-dom';
+import { STATUS, STATUS_COLOR } from '../../../constants/status';
+import NoteComponent from '../../../components/NoteComponent/NoteComponent';
 
 export const SocialOrderList = () => {
     const { Option } = Select;
@@ -36,11 +35,9 @@ export const SocialOrderList = () => {
     const [drawerForm] = Form.useForm();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelected, setRowSelected] = useState();
-    const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [isLoadingResetFilter, setIsLoadingResetFilter] = useState(false);
     const user = useSelector((state) => state?.user);
     const [serverDate, setServerDate] = useState([]);
-    const [columnFilters, setColumnFilters] = useState({});
     const [dataTable, setDataTable] = useState([]);
     const [fieldOfWorks, setFieldOfWorks] = useState([]);
     const [provinces, setProvinces] = useState([]);
@@ -70,6 +67,12 @@ export const SocialOrderList = () => {
         { label: 'Vụ việc về TTXH' },
         { label: 'Danh sách vụ việc' },
     ];
+
+    const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isSendModalVisible, setIsSendModalVisible] = useState(false);
+    const [isReturnModalVisible, setIsReturnModalVisible] = useState(false);
+    const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
+    const [isSendMinistryModalVisible, setIsSendMinistryModalVisible] = useState(false);
 
     useEffect(() => {
         const defaultValues = {
@@ -160,34 +163,6 @@ export const SocialOrderList = () => {
         fetchCommunes();
         fetchCrimes();
     }, []);
-
-    const [stateDistrict, setStateDistrict] = useState({
-        districtName: "",
-        districtCode: "",
-        provinceId: "",
-    });
-
-    const [stateDistrictDetail, setStateDistrictDetail] = useState({
-        districtName: "",
-        districtCode: "",
-        provinceId: "",
-    });
-
-    const mutation = useMutationHooks(
-        (data) => {
-            const { districtName, districtCode, provinceId } = data;
-            const response = districtService.createDistrict({ districtName, districtCode, provinceId });
-            return response;
-        }
-    )
-
-    const mutationUpdate = useMutationHooks(
-        (data) => { 
-            const { id, ...rests } = data;
-            const response = districtService.updateDistrict(id, { ...rests });
-            return response;
-        }
-    );
     
     const mutationDeleted = useMutationHooks(
         (data) => { 
@@ -206,19 +181,6 @@ export const SocialOrderList = () => {
         }
     );
 
-    const handleCancel = () => {
-        setIsModalOpen(false);
-        setStateDistrict({
-            districtName: "",
-            districtCode: "",
-            provinceId: "",
-        });
-
-        modalForm.resetFields();
-    }
-
-    const { data, isSuccess, isError, isPending } = mutation;
-    const { data: dataUpdated, isSuccess: isSuccessUpdated, isError: isErrorUpdated, isPending: isPendingUpdated } = mutationUpdate;
     const { data: dataDeleted, isSuccess: isSuccessDeleted, isError: isErrorDeleted, isPending: isLoadingDeleted } = mutationDeleted;
     const { data: dataDeletedMultiple, isSuccess: isSuccessDeletedMultiple, isError: isErrorDeletedMultiple, isPending: isLoadingDeletedMultiple } = mutationDeletedMultiple;
 
@@ -226,10 +188,6 @@ export const SocialOrderList = () => {
         const response = await socialOrderService.getSocialOrders(currentPage, pageSize, filters);
         return response;
     };
-
-    useEffect(() => {
-        drawerForm.setFieldsValue(stateDistrictDetail)
-    }, [stateDistrictDetail, drawerForm])
 
     useEffect(() => {
         query.refetch();
@@ -244,19 +202,6 @@ export const SocialOrderList = () => {
     });
 
     const { isLoading: isLoadingAllRecords, data: allRecords } = query;
-
-    useEffect(() => {
-        if(isSuccess && data?.success) {
-            message.success(data?.message);
-            handleCancel();
-        }
-        else if (isError) {
-            message.error("Có gì đó sai sai");
-        }
-        else if (isSuccess && !data?.success) {
-            message.error(data?.message);
-        }
-    }, [isSuccess]);
 
     useEffect(() => {
         if(isSuccessDeleted && dataDeleted?.success) {
@@ -360,6 +305,104 @@ export const SocialOrderList = () => {
         navigate(`/social-order/edit/${record._id}`, { state: { record } });
     };
 
+    const handleConfirmReturn = async (record, note) => {
+        try {
+            const response = await socialOrderService.returnSocialOrder(record._id, note);
+    
+            if (!response?.success) {
+                message.error(response?.message || 'Trả lại không thành công!');
+                return;
+            }
+    
+            message.success(response.message || 'Trả lại thành công!');
+            setIsReturnModalVisible(false);
+            setSelectedRecord(null);
+            query.refetch();
+        } catch (error) {
+            console.error("Lỗi khi trả lại:", error);
+            message.error('Trả lại thất bại. Vui lòng thử lại.');
+        }
+    };
+
+    const handleReturnToUser = (record) => {
+        setSelectedRecord(record);
+        setIsReturnModalVisible(true); // mở modal dành cho trả lại
+    };
+
+    const handleConfirmSend = async (record, note) => {
+        try {
+            const response = await socialOrderService.sendToDepartment(record._id, note);
+    
+            if (!response?.success) {
+                message.error(response?.message || 'Gửi không thành công!');
+                return;
+            }
+    
+            message.success(response.message || 'Đã gửi đến Phòng chức năng!');
+            setIsSendModalVisible(false);
+            setSelectedRecord(null);
+            query.refetch();
+        } catch (error) {
+            console.error("Lỗi khi gửi:", error);
+            message.error('Gửi không thành công. Vui lòng thử lại.');
+        }
+    };
+
+    const handleSendToDepartment = (record) => {
+        setSelectedRecord(record);
+        setIsSendModalVisible(true); // mở modal ghi chú gửi
+    };
+
+    const handleConfirmApprove = async (record, note) => {
+        try {
+            const response = await socialOrderService.approveSocialOrder(record._id, note);
+    
+            if (!response?.success) {
+                message.error(response?.message || 'Phê duyệt không thành công!');
+                return;
+            }
+    
+            message.success(response.message || 'Phê duyệt thành công!');
+            query.refetch();
+        } catch (error) {
+            console.error('Lỗi khi phê duyệt:', error);
+            message.error('Có lỗi xảy ra khi phê duyệt!');
+        } finally {
+            setIsApproveModalVisible(false);
+            setSelectedRecord(null);
+        }
+    };
+
+    const handleOpenApprove = (record) => {
+        setSelectedRecord(record);
+        setIsApproveModalVisible(true);
+    };
+
+    const handleConfirmSendToMinistry = async (record, note) => {
+        try {
+            const response = await socialOrderService.sendToMinistry(record._id, note);
+    
+            if (!response?.success) {
+                message.error(response?.message || 'Gửi lên Bộ không thành công!');
+                return;
+            }
+    
+            message.success(response.message || 'Gửi lên Bộ thành công!');
+            query.refetch();
+        } catch (error) {
+            console.error('Lỗi khi gửi lên Bộ:', error);
+            message.error('Có lỗi xảy ra khi gửi!');
+        } finally {
+            setIsSendMinistryModalVisible(false);
+            setSelectedRecord(null);
+        }
+    };
+    
+    const handleOpenSendMinistry = (record) => {
+        setSelectedRecord(record);
+        setIsSendMinistryModalVisible(true);
+    };
+
     const columns = [
         {
             title: "Đơn vị thụ lý",
@@ -456,21 +499,71 @@ export const SocialOrderList = () => {
         },
         {
             title: "Phê duyệt của đơn vị",
-            dataIndex: "approvalStatus",
-            key: "approvalStatus",
+            dataIndex: "status",
+            key: "status",
             render: (_, record) => (
                 <>
-                    <StyledButtonStatus disabled={record.approvalStatus === "Chưa gửi"}>
-                        {record.approvalStatus}
-                    </StyledButtonStatus>
-                    <Button
-                        type="primary"
-                        // onClick={() => handleSendToDepartment(record)}
-                    >
-                        Gửi đến phòng chức năng
-                    </Button>
+                    {/* Hàng trạng thái */}
+                    {user?.role === ROLE.USER && (
+                        <div style={{ marginBottom: 8 }}>
+                            <StyledButtonStatus color={STATUS_COLOR[record.status]}>
+                                {record.status}
+                            </StyledButtonStatus>
+                        </div>
+                    )}
+
+                    {(record.status === STATUS.SENT_TO_MINISTRY) && user?.role === ROLE.CAT && (
+                        <div style={{ marginBottom: 8 }}>
+                            <StyledButtonStatus color={STATUS_COLOR[record.status]}>
+                                {record.status}
+                            </StyledButtonStatus>
+                        </div>
+                    )}
+                
+                    {/* Hàng các nút button */}
+                    <div>
+                        {(record.status === STATUS.NOT_SENT || record.status === STATUS.RETURNED_BY_DEPARTMENT) && user?.role === ROLE.USER && (
+                            <Button 
+                                type="primary" 
+                                style={{ backgroundColor: '#13C2C2', borderColor: '#13C2C2', color: '#fff' }} 
+                                onClick={() => handleSendToDepartment(record)}
+                            >
+                                Gửi đến phòng chức năng
+                            </Button>
+                        )}
+                
+                        {record.status === STATUS.SENT_TO_DEPARTMENT && user?.role === ROLE.CAT && (
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                                <Button
+                                    type="primary"
+                                    danger
+                                    onClick={() => handleReturnToUser(record)}
+                                >
+                                    Trả lại
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    style={{ backgroundColor: '#13C2C2', borderColor: '#13C2C2', color: '#fff' }}
+                                    onClick={() => handleOpenApprove(record)}
+                                >
+                                    Duyệt
+                                </Button>
+                            </div>
+                        )}
+
+                        {record.status === STATUS.APPROVED_BY_DEPARTMENT && user?.role === ROLE.CAT && (
+                            <Button
+                                type="primary"
+                                color={STATUS_COLOR[record.status]}
+                                danger
+                                onClick={() => handleOpenSendMinistry(record)}
+                            >
+                                Gửi bộ
+                            </Button>
+                        )}
+                    </div>
                 </>
-            ),
+            ),            
             onHeaderCell: () => ({
                 style: {
                     backgroundColor: '#27567e',
@@ -509,31 +602,60 @@ export const SocialOrderList = () => {
         {
             title: "Thao tác",
             key: "actions",
-            render: (_, record) => (
-                <Space>
-                    <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => handleViewEdit(record)}
-                    >
-                        Sửa
-                    </Button>
-                    <Button
-                        type="link"
-                        icon={<DeleteOutlined />}
-                        danger
-                        onClick={() => handleDelete(record)}
-                    >
-                        Xóa
-                    </Button>
-                </Space>
-            ),
+            render: (_, record) => {
+                const isNotSent = record.status === STATUS.NOT_SENT;
+                const isReturned = record.status === STATUS.RETURNED_BY_DEPARTMENT;
+            
+                if (isNotSent) {
+                    return (
+                        <Space>
+                            <Button
+                                type="link"
+                                icon={<EditOutlined />}
+                                onClick={() => handleViewEdit(record)}
+                            >
+                                Sửa
+                            </Button>
+            
+                            <Button
+                                type="link"
+                                icon={<DeleteOutlined />}
+                                danger
+                                onClick={() => handleDelete(record)}
+                            >
+                                Xóa
+                            </Button>
+                        </Space>
+                    );
+                }
+            
+                if (isReturned) {
+                    return (
+                        <Space>
+                            <Button
+                                type="link"
+                                icon={<EditOutlined />}
+                                onClick={() => handleViewEdit(record)}
+                            >
+                                Sửa
+                            </Button>
+                        </Space>
+                    );
+                }
+            
+                return <Typography.Text type="secondary">Không thể thao tác</Typography.Text>;
+            },
             onHeaderCell: () => ({
                 style: {
                     backgroundColor: '#27567e',
                     color: 'white',
                     fontWeight: 'bold',
                     textAlign: 'center',
+                },
+            }),
+            onCell: () => ({
+                style: {
+                    textAlign: 'center', // Căn giữa nội dung ô
                 },
             }),
         },
@@ -809,10 +931,59 @@ export const SocialOrderList = () => {
                                         },
                                     };
                                 }}
+                                rowSelection={null}
                             />
                         </Col>
                     </Row>
                 </Form>
+
+                <NoteComponent
+                    visible={isSendModalVisible}
+                    onCancel={() => {
+                        setIsSendModalVisible(false);
+                        setSelectedRecord(null);
+                    }}
+                    onConfirm={handleConfirmSend}
+                    record={selectedRecord}
+                    title="Ghi chú gửi lên phòng chức năng"
+                    placeholder="Nhập nội dung gửi..."
+                />
+
+                <NoteComponent
+                    visible={isReturnModalVisible}
+                    onCancel={() => {
+                        setIsReturnModalVisible(false);
+                        setSelectedRecord(null);
+                    }}
+                    onConfirm={handleConfirmReturn}
+                    record={selectedRecord}
+                    title="Lý do trả lại"
+                    placeholder="Nhập lý do trả lại..."
+                />
+
+                <NoteComponent
+                    visible={isApproveModalVisible}
+                    onCancel={() => {
+                        setIsApproveModalVisible(false);
+                        setSelectedRecord(null);
+                    }}
+                    onConfirm={handleConfirmApprove}
+                    record={selectedRecord}
+                    title="Ghi chú phê duyệt"
+                    placeholder="Nhập ghi chú..."
+                />
+
+                <NoteComponent
+                    visible={isSendMinistryModalVisible}
+                    onCancel={() => {
+                        setIsSendMinistryModalVisible(false);
+                        setSelectedRecord(null);
+                    }}
+                    onConfirm={handleConfirmSendToMinistry}
+                    record={selectedRecord}
+                    title="Ghi chú gửi lên Bộ"
+                    placeholder="Nhập ghi chú..."
+                />
             </Loading>
         </ConfigProvider>
     )

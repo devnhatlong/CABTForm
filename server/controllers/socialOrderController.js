@@ -100,12 +100,72 @@ const getHistoryDetailByHistoryId = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const response = await SocialOrderService.getHistoryDetailByHistoryId(id);
 
-    res.status(response ? 200 : 404).json({
+    res.status(200).json({
         success: !!response,
         data: response || [],
         message: response
             ? "Lấy lịch sử chỉnh sửa thành công"
             : "Không tìm thấy lịch sử chỉnh sửa",
+    });
+});
+
+// Gửi vụ việc lên Phòng
+const sendToDepartment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { note } = req.body;
+
+    const result = await SocialOrderService.sendToDepartment(id, userId, note);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+        message: "Đã gửi vụ việc lên Phòng",
+    });
+});
+
+// Phòng phê duyệt vụ việc
+const approveSocialOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { note } = req.body;
+
+    const result = await SocialOrderService.approveSocialOrder(id, userId, note);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+        message: "Phê duyệt vụ việc thành công",
+    });
+});
+
+// Phòng trả lại vụ việc cho xã
+const returnSocialOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { note } = req.body;
+
+    const result = await SocialOrderService.returnSocialOrder(id, userId, note);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+        message: "Đã trả lại vụ việc cho xã",
+    });
+});
+
+// Gửi vụ việc lên Bộ
+const sendToMinistry = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const { note } = req.body;
+
+    const result = await SocialOrderService.sendToMinistry(id, userId, note);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+        message: "Đã gửi vụ việc lên Bộ",
     });
 });
 
@@ -117,5 +177,9 @@ module.exports = {
     deleteSocialOrder,
     deleteMultipleSocialOrders,
     getHistoryBySocialOrderId,
-    getHistoryDetailByHistoryId
+    getHistoryDetailByHistoryId,
+    sendToDepartment,
+    approveSocialOrder,
+    returnSocialOrder,
+    sendToMinistry,
 };

@@ -23,6 +23,29 @@ const recordHistory = async ({ socialOrderId, userId, action, dataSnapshot }) =>
     return history;
 };
 
+const saveCriminalAndAnnexHistory = async (socialOrderId, socialOrderHistoryId) => {
+    const criminals = await Criminal.find({ socialOrderId });
+    const annex = await SocialOrderAnnex.findOne({ socialOrderId });
+
+    for (const criminal of criminals) {
+        await CriminalHistory.create({
+            criminalId: criminal._id,
+            dataSnapshot: criminal.toObject(),
+            socialOrderHistoryId,
+            updatedAt: new Date(),
+        });
+    }
+
+    if (annex) {
+        await SocialOrderAnnexHistory.create({
+            annexId: annex._id,
+            dataSnapshot: annex.toObject(),
+            socialOrderHistoryId,
+            updatedAt: new Date(),
+        });
+    }
+};
+
 const createSocialOrder = async (data, userId) => {
     try {
         // Đảm bảo có userId
@@ -72,17 +95,30 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
                 throw new Error("Không tìm thấy thông tin phòng ban");
             }
             
+            // if (departmentData.departmentType === "Phòng ban") {
+            //     // Lấy danh sách fieldOfWorkId nếu departmentType là "Phòng ban"
+            //     const fieldOfWorks = await FieldOfWork.find({ departmentId: userData.departmentId }).select('_id');
+            //     const fieldOfWorkIds = fieldOfWorks.map((field) => field._id);
+            //     queries.fieldOfWork = { $in: fieldOfWorkIds };
+            // } else if (departmentData.departmentType === "Xã, phường, thị trấn") {
+            //     // Lọc theo user nếu departmentType là "Xã, phường, thị trấn"
+            //     queries.user = user._id;
+            // }
             if (departmentData.departmentType === "Phòng ban") {
                 // Lấy danh sách fieldOfWorkId nếu departmentType là "Phòng ban"
                 const fieldOfWorks = await FieldOfWork.find({ departmentId: userData.departmentId }).select('_id');
                 const fieldOfWorkIds = fieldOfWorks.map((field) => field._id);
+                
                 queries.fieldOfWork = { $in: fieldOfWorkIds };
-            } else if (departmentData.departmentType === "Xã, phường, thị trấn") {
+                queries.status = { $in: ["Đã gửi lên Phòng", "Phòng đã phê duyệt", "Đã gửi lên Bộ"] };
+                queries.sentToDepartmentBy = { $ne: null };
+            }
+            else if (departmentData.departmentType === "Xã, phường, thị trấn") {
                 // Lọc theo user nếu departmentType là "Xã, phường, thị trấn"
                 queries.user = user._id;
             }
         }
-
+        
         // Xử lý các trường trong fields để tạo bộ lọc
         if (fields) {
             for (const key in fields) {
@@ -349,6 +385,98 @@ const getHistoryDetailByHistoryId = async (historyId) => {
     }
 };
 
+const sendToDepartment = async (socialOrderId, userId, note) => {
+    const order = await SocialOrder.findById(socialOrderId);
+    if (!order) throw new Error("Vụ việc không tồn tại");
+
+    order.status = 'Đã gửi lên Phòng';
+    order.sentToDepartmentBy = userId;
+    order.sentToDepartmentAt = new Date();
+    order.note = note;
+
+    await order.save();
+
+    // Ghi SocialOrderHistory trước
+    const history = await recordHistory({
+        socialOrderId,
+        userId,
+        action: 'Gửi lên Phòng',
+        dataSnapshot: order.toObject(),
+    });
+
+    // Ghi CriminalHistory và AnnexHistory kèm theo history id
+    await saveCriminalAndAnnexHistory(socialOrderId, history._id);
+
+    return order;
+};
+
+const approveSocialOrder = async (socialOrderId, userId, note) => {
+    const order = await SocialOrder.findById(socialOrderId);
+    if (!order) throw new Error("Vụ việc không tồn tại");
+
+    order.status = 'Phòng đã phê duyệt';
+    order.departmentApprovedBy = userId;
+    order.departmentApprovedAt = new Date();
+    order.note = note;
+
+    await order.save();
+
+    const history = await recordHistory({
+        socialOrderId,
+        userId,
+        action: 'Phòng đã phê duyệt',
+        dataSnapshot: order.toObject(),
+    });
+
+    await saveCriminalAndAnnexHistory(socialOrderId, history._id);
+
+    return order;
+};
+
+const returnSocialOrder = async (socialOrderId, userId, note) => {
+    const order = await SocialOrder.findById(socialOrderId);
+    if (!order) throw new Error("Vụ việc không tồn tại");
+
+    order.status = 'Phòng trả lại';
+    order.note = note;
+
+    await order.save();
+
+    const history = await recordHistory({
+        socialOrderId,
+        userId,
+        action: 'Phòng trả lại',
+        dataSnapshot: order.toObject(),
+    });
+
+    await saveCriminalAndAnnexHistory(socialOrderId, history._id);
+
+    return order;
+};
+
+const sendToMinistry = async (socialOrderId, userId, note) => {
+    const order = await SocialOrder.findById(socialOrderId);
+    if (!order) throw new Error("Vụ việc không tồn tại");
+
+    order.status = 'Đã gửi lên Bộ';
+    order.sentToMinistryBy = userId;
+    order.sentToMinistryAt = new Date();
+    order.note = note;
+
+    await order.save();
+
+    const history = await recordHistory({
+        socialOrderId,
+        userId,
+        action: 'Gửi lên Bộ',
+        dataSnapshot: order.toObject(),
+    });
+
+    await saveCriminalAndAnnexHistory(socialOrderId, history._id);
+
+    return order;
+};
+
 module.exports = {
     createSocialOrder,
     getSocialOrders,
@@ -357,5 +485,9 @@ module.exports = {
     deleteSocialOrder,
     deleteMultipleSocialOrders,
     getHistoryBySocialOrderId,
-    getHistoryDetailByHistoryId
+    getHistoryDetailByHistoryId,
+    sendToDepartment,
+    approveSocialOrder,
+    returnSocialOrder,
+    sendToMinistry,
 };

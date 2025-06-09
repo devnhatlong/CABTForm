@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-var SocialOrderSchema = new mongoose.Schema(
+const SocialOrderSchema = new mongoose.Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -66,20 +66,47 @@ var SocialOrderSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        approvalStatus: {
+
+        // === Trạng thái xử lý
+        status: {
             type: String,
-            enum: ['Chưa gửi', 'Đã gửi lên Phòng', 'Đã phê duyệt', 'Đã gửi Bộ'],
+            enum: [
+                'Chưa gửi',
+                'Đã gửi lên Phòng',
+                'Phòng trả lại',
+                'Phòng đã phê duyệt',
+                'Đã gửi lên Bộ',
+            ],
             default: 'Chưa gửi',
         },
-        approvedBy: {
+
+        // === Gửi lên phòng
+        sentToDepartmentBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // Hoặc 'Officer' nếu có schema riêng cho cán bộ phòng/ban
+            ref: 'User',
             default: null,
         },
-        approvedAt: {
+        sentToDepartmentAt: {
             type: Date,
             default: null,
         },
+
+        // === Phòng phê duyệt hoặc trả lại
+        departmentApprovedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            default: null,
+        },
+        departmentApprovedAt: {
+            type: Date,
+            default: null,
+        },
+        note: {
+            type: String,
+            default: "",
+        },
+
+        // === Gửi lên Bộ
         sentToMinistryBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
