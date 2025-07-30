@@ -16,7 +16,7 @@ const BreadcrumbComponent = ({ items }) => {
 
     return (
         <Breadcrumb
-            style={{ marginBottom: '20px', fontSize: '16px' }}
+            style={{ marginBottom: '20px', fontSize: '14px' }}
             items={breadcrumbItems} // Sử dụng thuộc tính `items` mới
         />
     );

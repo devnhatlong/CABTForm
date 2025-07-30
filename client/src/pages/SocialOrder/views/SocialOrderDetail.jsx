@@ -527,7 +527,7 @@ export const SocialOrderDetail = () => {
                 </Button>
 
                 <div style={{ display: "flex", gap: 10 }}>
-                    {(record?.status === STATUS.NOT_SENT) || (record?.status === STATUS.RETURNED_BY_DEPARTMENT) && (
+                    {((record?.status === STATUS.NOT_SENT) || (record?.status === STATUS.RETURNED_BY_DEPARTMENT)) && (
                         <Button
                             type="primary"
                             icon={<EditOutlined />}

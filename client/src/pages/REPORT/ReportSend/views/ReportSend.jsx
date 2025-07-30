@@ -814,17 +814,17 @@ export const ReportSend = () => {
 
                             {/* Hiển thị tên file đã chọn */}
                             {selectedFile && (
-                                <span style={{ marginLeft: 10, fontStyle: 'italic', color: '#555', fontSize: '16px' }}>
+                                <span style={{ marginLeft: 10, fontStyle: 'italic', color: '#555', fontSize: '14px' }}>
                                     {selectedFile.name}
                                 </span>
                             )}
                         </Col>
                     </Row>
-                    {remainingTimeText && <div style={{ color: 'red', marginBottom: '10px', fontSize: '16px', fontWeight: '500' }}>{remainingTimeText}</div>}
+                    {remainingTimeText && <div style={{ color: 'red', marginBottom: '10px', fontSize: '14px', fontWeight: '500' }}>{remainingTimeText}</div>}
                     {/* Nút gửi báo cáo */}
                     <Row>
                         <Col span={24} style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                            <Button disabled={disableSendButton} type="primary" style={{ display: 'flex', alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '16px'}}/>Gửi báo cáo</Button>
+                            <Button disabled={disableSendButton} type="primary" style={{ display: 'flex', alignItems: 'center' }} htmlType="submit"><SendOutlined style={{fontSize: '14px'}}/>Gửi báo cáo</Button>
                         </Col>
                     </Row>
                 </Form>

@@ -50,7 +50,7 @@ const TableComponent = (props) => {
         </div>
       )}
       <StyledTable
-        style={{ fontSize: '16px' }}
+        style={{ fontSize: '14px' }}
         rowSelection={{
           type: selectionType,
           ...rowSelection,

@@ -547,7 +547,7 @@ export const PermissionFunction = () => {
                         type="primary" 
                         style={{
                             display: 'flex',
-                            fontSize: '16px',
+                            fontSize: '14px',
                             height: '40px',
                             alignItems: 'center'
                         }}

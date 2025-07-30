@@ -77,7 +77,7 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                     loading={isImporting}
                     style={{
                         display: 'flex',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         height: '40px',
                         alignItems: 'center',
                         backgroundColor: "#5eb12b",
@@ -102,7 +102,7 @@ const ImportExcel = ({ service, onSuccess, onError }) => {
                         onClick={handleShowLog}
                         style={{
                             display: 'flex',
-                            fontSize: '16px',
+                            fontSize: '14px',
                             height: '40px',
                             alignItems: 'center',
                             backgroundColor: "white",

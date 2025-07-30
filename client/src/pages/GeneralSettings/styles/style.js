@@ -5,7 +5,7 @@ import styled from "styled-components";
 export const StyledCard = styled(Card)`
   max-width: 1200px;
   margin: 0 auto;
-  font-size: 18px;
+  font-size: 14px;
 
   .ant-card-head {
     font-size: 30px; /* Kích thước chữ */
@@ -20,8 +20,8 @@ export const StyledCard = styled(Card)`
 export const SettingItem = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #d9d9d9;
 `;
 
@@ -35,7 +35,7 @@ export const SettingLabel = styled.span`
 
 // Tùy chỉnh TimePicker
 export const StyledTimePicker = styled(TimePicker)`
-  font-size: 16px; /* Kích thước chữ */
+  font-size: 14px; /* Kích thước chữ */
   width: 180px; /* Chiều rộng */
 `;
 

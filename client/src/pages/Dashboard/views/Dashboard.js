@@ -45,7 +45,7 @@ export const Dashboard = () => {
     const menuItemStyle = {
         whiteSpace: 'normal',
         lineHeight: 'normal',
-        fontSize: "16px",
+        fontSize: "14px",
         fontWeight: "600",
         margin: "14px 0",
     };
@@ -53,7 +53,7 @@ export const Dashboard = () => {
     const menuChildrenItemStyle = {
         display: "flex",
         alignItems: "center",
-        fontSize: "16px",
+        fontSize: "14px",
         fontWeight: "600",
     };
 

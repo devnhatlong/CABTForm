@@ -7,7 +7,7 @@
 }
 
 .ant-form-item .ant-form-item-label > label {
-    font-size: 18px;
+    font-size: 16px;
     color: #012970;
 }
 
@@ -38,16 +38,16 @@
 }
 
 .ant-select-single .ant-select-selector {
-    font-size: 18px;
+    font-size: 16px;
     height: 36px !important;
 }
 
 .ant-select-item .ant-select-item-option-content {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 textarea.ant-input {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .ant-select {
@@ -58,7 +58,7 @@ textarea.ant-input {
 .ant-picker .ant-picker-input >input,
 .ant-picker-time-panel-column,
 .anticon-search {
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .ant-message {

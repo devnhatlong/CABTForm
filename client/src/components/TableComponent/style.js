@@ -4,6 +4,6 @@ import { styled } from "styled-components";
 export const StyledTable = styled(Table)`
   .ant-table-content {
     overflow: auto;
-    font-size: 16px;
+    font-size: 14px;
   }
 `;
