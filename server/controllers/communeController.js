@@ -1,6 +1,6 @@
 require('dotenv').config();
 const CommuneService = require("../services/communeService");
-const District = require("../models/districtModel");
+const Province = require("../models/provinceModel");
 const Commune = require("../models/communeModel");
 const asyncHandler = require("express-async-handler");
 const xlsx = require('xlsx');
@@ -24,23 +24,23 @@ const importFromExcel = async (req, res) => {
         // Iterate over the data and create communes
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            const { communeName, communeCode, districtName } = row;
+            const { communeName, communeCode, provinceName } = row;
 
-            // Kiểm tra nếu thiếu communeName hoặc districtName
-            if (!communeName || !districtName) {
+            // Kiểm tra nếu thiếu communeName hoặc provinceName
+            if (!communeName || !provinceName) {
                 errors.push({
                     row: i + 1,
-                    message: "Thiếu tên xã, phường, thị trấn hoặc tên huyện",
+                    message: "Thiếu tên xã, phường, thị trấn hoặc tên tỉnh",
                 });
                 continue;
             }
 
-            // Kiểm tra xem districtName có tồn tại trong District hay không
-            const existingDistrict = await District.findOne({ districtName });
-            if (!existingDistrict) {
+            // Kiểm tra xem provinceName có tồn tại trong Province hay không
+            const existingProvince = await Province.findOne({ provinceName });
+            if (!existingProvince) {
                 errors.push({
                     row: i + 1,
-                    message: `Tên huyện không tồn tại (districtName: ${districtName})`,
+                    message: `Tên tỉnh không tồn tại (provinceName: ${provinceName})`,
                 });
                 continue;
             }
@@ -59,7 +59,7 @@ const importFromExcel = async (req, res) => {
             const newCommune = new Commune({
                 communeName,
                 communeCode: communeCode || "", // communeCode là tùy chọn
-                districtId: existingDistrict._id, // Liên kết với huyện
+                provinceId: existingProvince._id, // Liên kết với tỉnh
             });
 
             await newCommune.save();
@@ -80,10 +80,10 @@ const importFromExcel = async (req, res) => {
 };
 
 const createCommune = asyncHandler(async (req, res) => {
-    const { communeName, communeCode, districtId } = req.body;
+    const { communeName, communeCode, provinceId } = req.body;
 
-    if (!communeName || !districtId) {
-        throw new Error("Thiếu tên xã, phường, thị trấn hoặc mã huyện");
+    if (!communeName || !provinceId) {
+        throw new Error("Thiếu tên xã, phường, thị trấn hoặc mã tỉnh");
     }
 
     const response = await CommuneService.createCommune(req.body);
@@ -123,10 +123,10 @@ const getCommuneById = asyncHandler(async (req, res) => {
 
 const updateCommune = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { communeName, districtId } = req.body;
+    const { communeName, provinceId } = req.body;
 
-    if (!communeName || !districtId) {
-        throw new Error("Thiếu tên xã, phường, thị trấn hoặc mã huyện");
+    if (!communeName || !provinceId) {
+        throw new Error("Thiếu tên xã, phường, thị trấn hoặc mã tỉnh");
     }
 
     const response = await CommuneService.updateCommune(id, req.body);

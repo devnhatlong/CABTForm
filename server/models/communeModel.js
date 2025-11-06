@@ -12,9 +12,9 @@ var CommuneSchema = new mongoose.Schema({
         default: "",
         trim: true,
     },
-    districtId: {
+    provinceId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'District',
+        ref: 'Province',
         required: true,
     },
 }, {

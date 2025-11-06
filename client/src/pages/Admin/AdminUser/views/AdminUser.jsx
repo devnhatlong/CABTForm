@@ -423,6 +423,7 @@ export const AdminUser = () => {
                     style={{
                         marginBottom: 8,
                         display: 'block',
+                        fontSize: '14px'
                     }}
                 />
                 <Space>
@@ -434,7 +435,7 @@ export const AdminUser = () => {
                         style={{
                             width: 120,
                             height: 32,
-                            fontSize: 16,
+                            fontSize: 14,
                         }}
                     >
                         Tìm kiếm
@@ -445,7 +446,7 @@ export const AdminUser = () => {
                         style={{
                             width: 120,
                             height: 32,
-                            fontSize: 16,
+                            fontSize: 14,
                         }}
                     >
                         Xóa

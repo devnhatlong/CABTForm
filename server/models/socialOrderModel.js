@@ -16,11 +16,6 @@ const SocialOrderSchema = new mongoose.Schema(
             type: Date,
             required: true,
         },
-        district: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'District',
-            required: true,
-        },
         commune: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Commune',

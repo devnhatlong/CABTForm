@@ -2,7 +2,7 @@ require('dotenv').config();
 const Commune = require("../models/communeModel");
 
 const createCommune = async (data) => {
-    const { communeName, communeCode, districtId } = data;
+    const { communeName, communeCode, provinceId } = data;
 
     // Kiểm tra nếu communeName đã tồn tại
     const existingCommune = await Commune.findOne({ communeName });
@@ -14,7 +14,7 @@ const createCommune = async (data) => {
     const newCommune = new Commune({
         communeName,
         communeCode: communeCode || "",
-        districtId,
+        provinceId,
     });
 
     return await newCommune.save();
@@ -35,7 +35,7 @@ const getCommunes = async (page = 1, limit, fields, sort) => {
 
         // Nếu limit là "all", lấy toàn bộ dữ liệu
         if (limit === process.env.All_RECORDS) {
-            const data = await Commune.find(queries).populate("districtId", "districtName").sort(sort || "-createdAt");
+            const data = await Commune.find(queries).populate("provinceId", "provinceName").sort(sort || "-createdAt");
             const total = data.length;
 
             return {
@@ -49,7 +49,7 @@ const getCommunes = async (page = 1, limit, fields, sort) => {
         limit = limit || parseInt(process.env.DEFAULT_LIMIT, 10);
         const skip = (page - 1) * limit;
 
-        let queryCommand = Commune.find(queries).populate("districtId", "districtName");
+        let queryCommand = Commune.find(queries).populate("provinceId", "provinceName");
 
         if (sort) {
             const sortBy = sort.split(",").join(" ");
@@ -77,7 +77,7 @@ const getCommuneById = async (id) => {
 };
 
 const updateCommune = async (id, data) => {
-    const { communeName, communeCode, districtId } = data;
+    const { communeName, communeCode, provinceId } = data;
 
     // Kiểm tra nếu communeName đã tồn tại (ngoại trừ bản ghi hiện tại)
     const existingCommune = await Commune.findOne({
@@ -91,7 +91,7 @@ const updateCommune = async (id, data) => {
 
     const updatedCommune = await Commune.findByIdAndUpdate(
         id,
-        { communeName, communeCode, districtId },
+        { communeName, communeCode, provinceId },
         { new: true }
     );
 

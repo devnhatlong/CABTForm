@@ -130,10 +130,10 @@ export const Dashboard = () => {
             icon: <UserOutlined />,
             style: menuItemStyle,
             children: [
-                getItem('Tài khoản', PATHS.ADMIN.USER, null, null, menuChildrenItemStyle),
+                getItem('Tài khoản người dùng', PATHS.ADMIN.USER, null, null, menuChildrenItemStyle),
                 getItem('Đơn vị / Phòng ban', PATHS.ADMIN.DEPARTMENT, null, null, menuChildrenItemStyle),
                 getItem('Tỉnh / thành phố', PATHS.ADMIN.PROVINCE, null, null, menuChildrenItemStyle),
-                getItem('Quận / huyện', PATHS.ADMIN.DISTRICT, null, null, menuChildrenItemStyle),
+                // getItem('Quận / huyện', PATHS.ADMIN.DISTRICT, null, null, menuChildrenItemStyle),
                 getItem('Xã, phường, thị trấn', PATHS.ADMIN.COMMUNE, null, null, menuChildrenItemStyle),
             ]
         },
@@ -182,7 +182,7 @@ export const Dashboard = () => {
             [PATHS.ADMIN.USER]: 'admin',
             [PATHS.ADMIN.DEPARTMENT]: 'admin',
             [PATHS.ADMIN.PROVINCE]: 'admin',
-            [PATHS.ADMIN.DISTRICT]: 'admin',
+            // [PATHS.ADMIN.DISTRICT]: 'admin',
             [PATHS.ADMIN.COMMUNE]: 'admin',
         };
 
@@ -274,7 +274,7 @@ export const Dashboard = () => {
                         <Route path={PATHS.ADMIN.USER} element={<AdminUser />} />
                         <Route path={PATHS.ADMIN.DEPARTMENT} element={<AdminDepartment />} />
                         <Route path={PATHS.ADMIN.PROVINCE} element={<AdminProvince />} />
-                        <Route path={PATHS.ADMIN.DISTRICT} element={<AdminDistrict />} />
+                        {/* <Route path={PATHS.ADMIN.DISTRICT} element={<AdminDistrict />} /> */}
                         <Route path={PATHS.ADMIN.COMMUNE} element={<AdminCommune />} />
                         <Route
                             path="*"

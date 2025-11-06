@@ -4,7 +4,6 @@ const Criminal = require('../models/criminalModel');
 const FieldOfWork = require('../models/fieldOfWorkModel');
 const SocialOrder = require('../models/socialOrderModel');
 const SocialOrderHistory = require('../models/socialOrderHistoryModel');
-const District = require('../models/districtModel');
 const Commune = require('../models/communeModel');
 const Crime = require('../models/crimeModel');
 const SocialOrderAnnex = require('../models/socialOrderAnnexModel');
@@ -123,10 +122,10 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
         if (fields) {
             for (const key in fields) {
                 if (fields[key] && fields[key] !== 'all') {
-                    if (['district', 'fieldOfWork', 'crime', 'commune'].includes(key)) {
+                    if (['fieldOfWork', 'crime', 'commune'].includes(key)) {
                         queries[key] = fields[key];
                     }
-                    if (!['district', 'fieldOfWork', 'crime', 'commune', 'fromDate', 'toDate', 'dateType'].includes(key)) {
+                    if (!['fieldOfWork', 'crime', 'commune', 'fromDate', 'toDate', 'dateType'].includes(key)) {
                         queries[key] = { $regex: fields[key], $options: "i" };
                     }
                 }
@@ -144,7 +143,6 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
                 }
             })
             .populate('fieldOfWork', 'fieldName')
-            .populate('district', 'districtName')
             .populate('commune', 'communeName')
             .populate('crime', 'crimeName')
             .sort(sort || "-createdAt");
@@ -217,7 +215,6 @@ const getSocialOrderById = async (id) => {
                 }
             })
             .populate('fieldOfWork', 'fieldName')
-            .populate('district', 'districtName')
             .populate('commune', 'communeName')
             .populate('crime', 'crimeName');
 
@@ -356,13 +353,11 @@ const getHistoryDetailByHistoryId = async (historyId) => {
         const [
             user,
             fieldOfWork,
-            district,
             commune,
             crime
         ] = await Promise.all([
             snapshot.user ? User.findById(snapshot.user).select('userName') : null,
             snapshot.fieldOfWork ? FieldOfWork.findById(snapshot.fieldOfWork).select('fieldName') : null,
-            snapshot.district ? District.findById(snapshot.district).select('districtName') : null,
             snapshot.commune ? Commune.findById(snapshot.commune).select('communeName') : null,
             snapshot.crime ? Crime.findById(snapshot.crime).select('crimeName') : null,
         ]);
@@ -374,7 +369,6 @@ const getHistoryDetailByHistoryId = async (historyId) => {
                 ...snapshot,
                 user,
                 fieldOfWork,
-                district,
                 commune,
                 crime
             }

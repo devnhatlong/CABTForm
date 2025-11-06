@@ -1,7 +1,6 @@
 const Criminal = require('../models/criminalModel');
 const CriminalHistory = require('../models/criminalHistoryModel');
 const Province = require('../models/provinceModel');
-const District = require('../models/districtModel');
 const Commune = require('../models/communeModel');
 const Crime = require('../models/crimeModel');
 
@@ -114,7 +113,6 @@ const getCriminalBySocialOrderId = async (socialOrderId) => {
         .populate('socialOrderId')
         .populate('crime')
         .populate('province')
-        .populate('district')
         .populate('commune');
 };
 
@@ -178,11 +176,6 @@ const getHistoryDetailByHistoryId = async (historyId) => {
             if (ds.province) {
                 const province = await Province.findById(ds.province);
                 ds.province = province ? { _id: province._id, provinceName: province.provinceName } : null;
-            }
-
-            if (ds.district) {
-                const district = await District.findById(ds.district);
-                ds.district = district ? { _id: district._id, districtName: district.districtName } : null;
             }
 
             if (ds.commune) {

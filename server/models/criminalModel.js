@@ -25,11 +25,6 @@ var CriminalSchema = new mongoose.Schema(
             ref: 'Province',
             required: true,
         },
-        district: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'District',
-            required: true,
-        },
         commune: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Commune',
