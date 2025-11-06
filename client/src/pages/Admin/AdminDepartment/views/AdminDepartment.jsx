@@ -36,7 +36,7 @@ export const AdminDepartment = () => {
     const [resetSelection, setResetSelection] = useState(false);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 50 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();

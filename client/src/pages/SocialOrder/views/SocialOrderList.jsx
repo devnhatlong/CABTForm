@@ -18,7 +18,6 @@ import { ROLE } from '../../../constants/role';
 import { LIMIT_RECORD } from '../../../constants/limit';
 import fieldOfWorkService from '../../../services/fieldOfWorkService';
 import provinceService from '../../../services/provinceService';
-import districtService from '../../../services/districtService';
 import communeService from '../../../services/communeService';
 import CrimeService from '../../../services/crimeService';
 import socialOrderService from '../../../services/socialOrderService';
@@ -41,13 +40,12 @@ export const SocialOrderList = () => {
     const [dataTable, setDataTable] = useState([]);
     const [fieldOfWorks, setFieldOfWorks] = useState([]);
     const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
     const [communes, setCommunes] = useState([]);
     const [crimes, setCrimes] = useState([]);
     const [filters, setFilters] = useState({
         reportContent: "",
         fieldOfWork: "",
-        district: "",
+        province: "",
         crime: "",
         fromDate: null,
         toDate: null,
@@ -77,7 +75,7 @@ export const SocialOrderList = () => {
     useEffect(() => {
         const defaultValues = {
           fieldOfWork: "all",
-          district: "all",
+          province: "all",
           crime: "all",
           dateType: "all",
           investigationResult: "all",
@@ -109,17 +107,6 @@ export const SocialOrderList = () => {
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy danh sách lĩnh vực vụ việc:", error);
-            }
-        };
-
-        const fetchDistricts = async () => {
-            try {
-                const response = await districtService.getDistricts(1, LIMIT_RECORD.ALL);
-                if (response?.data) {
-                    setDistricts(response.data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách quận/huyện:", error);
             }
         };
 
@@ -159,7 +146,6 @@ export const SocialOrderList = () => {
         fetchServerDate();
         fetchFieldOfWorks();
         fetchProvinces();
-        fetchDistricts();
         fetchCommunes();
         fetchCrimes();
     }, []);
@@ -175,7 +161,7 @@ export const SocialOrderList = () => {
     const mutationDeletedMultiple = useMutationHooks(
         (data) => { 
           const { ids } = data;
-          const response = districtService.deleteMultipleRecords(ids);
+          const response = socialOrderService.deleteMultipleSocialOrders(ids);
     
           return response;
         }
@@ -287,10 +273,9 @@ export const SocialOrderList = () => {
                 key: record._id,
                 userName: record?.user?.userName,
                 fieldOfWork: record?.fieldOfWork?.fieldName,
-                district: record?.district?.districtName,
+                province: record?.province?.provinceName,
                 commune: record?.commune?.communeName,
                 crime: record?.crime?.crimeName,
-                provinceName: record?.provinceId?.provinceName,
                 createdAt: new Date(record.createdAt),
                 updatedAt: new Date(record.updatedAt),
             };
@@ -418,9 +403,9 @@ export const SocialOrderList = () => {
             }),
         },
         {
-            title: "Huyện, TX, TP",
-            dataIndex: "district",
-            key: "district",
+            title: "Tỉnh/Thành phố",
+            dataIndex: "province",
+            key: "province",
             onHeaderCell: () => ({
                 style: {
                     backgroundColor: '#27567e',
@@ -730,25 +715,25 @@ export const SocialOrderList = () => {
 
                         <Col xs={24} sm={24} md={24} lg={8}>
                             <Form.Item
-                                label="Địa bàn Huyện, TX, TP"
-                                name="district"
+                                label="Địa bàn Tỉnh/Thành phố"
+                                name="province"
                                 labelCol={{ span: 24 }}
                                 wrapperCol={{ span: 24 }}
                                 style={{ marginBottom: 10 }}
                             >
                                 <Select
                                     showSearch
-                                    placeholder="Chọn địa bàn Huyện, TX, TP"
+                                    placeholder="Chọn địa bàn Tỉnh/Thành phố"
                                     style={{ height: 36 }}
-                                    onChange={(value) => handleFilterChange("district", value)}
+                                    onChange={(value) => handleFilterChange("province", value)}
                                     filterOption={(input, option) =>
                                         option?.children?.toLowerCase().includes(input.toLowerCase())
                                     }
                                 >
                                     <Select.Option value="all">Tất cả</Select.Option>
-                                    {districts.map((field) => (
-                                        <Select.Option key={field._id} value={field._id}>
-                                            {field.districtName}
+                                    {provinces.map((province) => (
+                                        <Select.Option key={province._id} value={province._id}>
+                                            {province.provinceName}
                                         </Select.Option>
                                     ))}
                                 </Select>

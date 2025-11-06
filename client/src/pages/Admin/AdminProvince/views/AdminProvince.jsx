@@ -36,7 +36,7 @@ export const AdminProvince = () => {
     const [resetSelection, setResetSelection] = useState(false);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 10 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();

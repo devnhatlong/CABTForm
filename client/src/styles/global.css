@@ -12,7 +12,7 @@
 }
 
 .ant-breadcrumb a {
-    height: 28px;
+    height: 24px;
 }
 
 .ant-menu-light .ant-menu-item:not(.ant-menu-item-selected):not(.ant-menu-submenu-selected):hover {
@@ -62,7 +62,7 @@ textarea.ant-input {
 }
 
 .ant-message {
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .ant-message-notice-content {

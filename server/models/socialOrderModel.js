@@ -21,6 +21,11 @@ const SocialOrderSchema = new mongoose.Schema(
             ref: 'Commune',
             required: true,
         },
+        province: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Province',
+            required: true,
+        },
         crime: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Crime',

@@ -44,7 +44,7 @@ export const AdminUser = () => {
     const [departments, setDepartments] = useState([]);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 10 // Số lượng mục trên mỗi trang
     });
     const navigate = useNavigate();
 

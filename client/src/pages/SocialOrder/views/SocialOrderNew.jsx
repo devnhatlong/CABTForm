@@ -20,7 +20,6 @@ import { LIMIT_RECORD } from '../../../constants/limit';
 import { preventNonNumericInput } from '../../../utils/utils';
 import fieldOfWorkService from '../../../services/fieldOfWorkService';
 import provinceService from '../../../services/provinceService';
-import districtService from '../../../services/districtService';
 import communeService from '../../../services/communeService';
 import CrimeService from '../../../services/crimeService';
 import { useParams, useLocation, useNavigate } from "react-router-dom";
@@ -37,7 +36,6 @@ export const SocialOrderNew = () => {
     const [form] = Form.useForm();
     const [fieldOfWorks, setFieldOfWorks] = useState([]);
     const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
     const [communes, setCommunes] = useState([]);
     const [crimes, setCrimes] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -45,7 +43,7 @@ export const SocialOrderNew = () => {
     const [stateSocialOrder, setStateSocialOrder] = useState({
         fieldOfWork: "",
         incidentDate: "",
-        district: "",
+        province: "",
         commune: "",
         crime: "",
         reportContent: "",
@@ -106,7 +104,7 @@ export const SocialOrderNew = () => {
                 setStateSocialOrder({
                     fieldOfWork: "",
                     incidentDate: "",
-                    district: "",
+                    province: "",
                     commune: "",
                     crime: "",
                     reportContent: "",
@@ -160,7 +158,7 @@ export const SocialOrderNew = () => {
                         ...raw,
                         fieldOfWork: raw.fieldOfWork?._id,
                         crime: raw.crime?._id,
-                        district: raw.district?._id,
+                        province: raw.province?._id,
                         commune: raw.commune?._id,
                         incidentDate: raw.incidentDate ? dayjs(raw.incidentDate).startOf('day') : null,
                         userName: raw.user?.userName,
@@ -199,17 +197,6 @@ export const SocialOrderNew = () => {
             }
         };
 
-        const fetchDistricts = async () => {
-            try {
-                const response = await districtService.getDistricts(1, LIMIT_RECORD.ALL);
-                if (response?.data) {
-                    setDistricts(response.data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy danh sách quận/huyện:", error);
-            }
-        };
-
         const fetchProvinces = async () => {
             try {
                 const response = await provinceService.getProvinces(1, LIMIT_RECORD.ALL);
@@ -217,7 +204,7 @@ export const SocialOrderNew = () => {
                     setProvinces(response.data);
                 }
             } catch (error) {
-                console.error("Lỗi khi lấy danh sách quận/huyện:", error);
+                console.error("Lỗi khi lấy danh sách tỉnh/thành phố:", error);
             }
         };
 
@@ -245,7 +232,6 @@ export const SocialOrderNew = () => {
 
         fetchFieldOfWorks();
         fetchProvinces();
-        fetchDistricts();
         fetchCommunes();
         fetchCrimes();
     }, []);
@@ -318,28 +304,6 @@ export const SocialOrderNew = () => {
                         {province.provinceName}
                     </Option>
                 ))}
-                </Select>
-            ),
-            width: 200,
-            onHeaderCell: () => ({ style: headerStyle }),
-        },
-        {
-            title: "Huyện HKTT",
-            dataIndex: "district",
-            render: (value, record, index) => (
-                <Select
-                    showSearch
-                    placeholder="Chọn huyện"
-                    value={value._id}
-                    onChange={(val) => handleOnChangeCriminalData(index, "district", val)}
-                    style={{ width: "100%" }}
-                    optionFilterProp="children"
-                >
-                    {districts.map((district) => (
-                        <Option key={district._id} value={district._id}>
-                            {district.districtName}
-                        </Option>
-                    ))}
                 </Select>
             ),
             width: 200,
@@ -519,7 +483,6 @@ export const SocialOrderNew = () => {
                 birthDate: "",
                 crime: "",
                 province: "",
-                district: "",
                 commune: "",
                 job: "",
                 isFemale: false,
@@ -828,7 +791,7 @@ export const SocialOrderNew = () => {
                 setStateSocialOrder({
                     fieldOfWork: "",
                     incidentDate: "",
-                    district: "",
+                    province: "",
                     commune: "",
                     crime: "",
                     reportContent: "",
@@ -1035,25 +998,25 @@ export const SocialOrderNew = () => {
 
                         <Col xs={24} sm={24} md={24} lg={8}>
                             <Form.Item
-                                label="Địa bàn Huyện, TX, TP"
-                                name="district"
+                                label="Địa bàn Tỉnh/Thành phố"
+                                name="province"
                                 labelCol={{ span: 24 }}
                                 wrapperCol={{ span: 24 }}
                                 style={{ marginBottom: 10 }}
-                                rules={[{ required: true, message: 'Vui lòng chọn địa bàn Huyện, TX, TP!' }]}
+                                rules={[{ required: true, message: 'Vui lòng chọn địa bàn Tỉnh/Thành phố!' }]}
                             >
                                 <Select
                                     showSearch
-                                    placeholder="Chọn địa bàn Huyện, TX, TP"
+                                    placeholder="Chọn địa bàn Tỉnh/Thành phố"
                                     style={{ height: 36 }}
-                                    onChange={(value) => handleOnChangeSocialOrder("district", value)}
+                                    onChange={(value) => handleOnChangeSocialOrder("province", value)}
                                     filterOption={(input, option) =>
                                         option?.children?.toLowerCase().includes(input.toLowerCase())
                                     }
                                 >
-                                    {districts.map((field) => (
-                                        <Select.Option key={field._id} value={field._id}>
-                                            {field.districtName}
+                                    {provinces.map((province) => (
+                                        <Select.Option key={province._id} value={province._id}>
+                                            {province.provinceName}
                                         </Select.Option>
                                     ))}
                                 </Select>

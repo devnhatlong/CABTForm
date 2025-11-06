@@ -122,10 +122,10 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
         if (fields) {
             for (const key in fields) {
                 if (fields[key] && fields[key] !== 'all') {
-                    if (['fieldOfWork', 'crime', 'commune'].includes(key)) {
+                    if (['fieldOfWork', 'crime', 'commune', 'province'].includes(key)) {
                         queries[key] = fields[key];
                     }
-                    if (!['fieldOfWork', 'crime', 'commune', 'fromDate', 'toDate', 'dateType'].includes(key)) {
+                    if (!['fieldOfWork', 'crime', 'commune', 'province', 'fromDate', 'toDate', 'dateType'].includes(key)) {
                         queries[key] = { $regex: fields[key], $options: "i" };
                     }
                 }
@@ -144,6 +144,7 @@ const getSocialOrders = async (user, page = 1, limit, fields, sort) => {
             })
             .populate('fieldOfWork', 'fieldName')
             .populate('commune', 'communeName')
+            .populate('province', 'provinceName')
             .populate('crime', 'crimeName')
             .sort(sort || "-createdAt");
 
@@ -216,6 +217,7 @@ const getSocialOrderById = async (id) => {
             })
             .populate('fieldOfWork', 'fieldName')
             .populate('commune', 'communeName')
+            .populate('province', 'provinceName')
             .populate('crime', 'crimeName');
 
         if (!data) {

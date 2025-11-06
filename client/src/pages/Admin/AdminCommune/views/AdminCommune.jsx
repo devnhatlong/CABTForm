@@ -14,7 +14,7 @@ import Loading from '../../../../components/LoadingComponent/Loading';
 import * as message from '../../../../components/Message/Message';
 import DrawerComponent from '../../../../components/DrawerComponent/DrawerComponent';
 import communeService from '../../../../services/communeService';
-import districtService from '../../../../services/districtService';
+import provinceService from '../../../../services/provinceService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
@@ -36,10 +36,10 @@ export const AdminCommune = () => {
     const [dataTable, setDataTable] = useState([]);
     const [filters, setFilters] = useState({});
     const [resetSelection, setResetSelection] = useState(false);
-    const [district, setDistricts] = useState([]);
+    const [provinces, setProvinces] = useState([]);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        pageSize: 5 // Số lượng mục trên mỗi trang
+        pageSize: 10 // Số lượng mục trên mỗi trang
     });
 
     const navigate = useNavigate();
@@ -57,36 +57,36 @@ export const AdminCommune = () => {
     ];
 
     useEffect(() => {
-        const fetchDistricts = async () => {
+        const fetchProvinces = async () => {
             try {
-                const response = await districtService.getDistricts(1, LIMIT_RECORD.ALL); // Lấy tối đa 100 bản ghi
+                const response = await provinceService.getProvinces(1, LIMIT_RECORD.ALL); // Lấy tối đa 100 bản ghi
                 if (response?.data) {
-                    setDistricts(response.data);
+                    setProvinces(response.data);
                 }
             } catch (error) {
-                console.error("Lỗi khi lấy danh sách Quận/huyện:", error);
+                console.error("Lỗi khi lấy danh sách Tỉnh/Thành phố:", error);
             }
         };
     
-        fetchDistricts();
+        fetchProvinces();
     }, []);
 
     const [stateCommune, setStateCommune] = useState({
         communeName: "",
         communeCode: "",
-        districtId: "",
+        provinceId: "",
     });
 
     const [stateCommuneDetail, setStateCommuneDetail] = useState({
         communeName: "",
         communeCode: "",
-        districtId: "",
+        provinceId: "",
     });
 
     const mutation = useMutationHooks(
         (data) => {
-            const { communeName, communeCode, districtId } = data;
-            const response = communeService.createCommune({ communeName, communeCode, districtId });
+            const { communeName, communeCode, provinceId } = data;
+            const response = communeService.createCommune({ communeName, communeCode, provinceId });
             return response;
         }
     )
@@ -121,7 +121,7 @@ export const AdminCommune = () => {
         setStateCommune({
             communeName: "",
             communeCode: "",
-            districtId: "",
+            provinceId: "",
         });
 
         modalForm.resetFields();
@@ -144,7 +144,7 @@ export const AdminCommune = () => {
             setStateCommuneDetail({
                 communeName: response?.data?.communeName,
                 communeCode: response?.data?.communeCode,
-                districtId: response?.data?.districtId,
+                provinceId: response?.data?.provinceId,
             })
         }
         setIsLoadingUpdate(false);
@@ -311,7 +311,7 @@ export const AdminCommune = () => {
             return {
                 ...record, 
                 key: record._id,
-                districtName: record?.districtId?.districtName,
+                provinceName: record?.provinceId?.provinceName,
                 createdAt: new Date(record.createdAt),
                 updatedAt: new Date(record.updatedAt),
             };
@@ -433,9 +433,9 @@ export const AdminCommune = () => {
             onFilter: null, // Loại bỏ filter mặc định
         },
         {
-            title: 'Quận/Huyện',
-            dataIndex: 'districtName',
-            key: 'districtName',
+            title: 'Tỉnh/Thành phố',
+            dataIndex: 'provinceName',
+            key: 'provinceName',
             filteredValue: null, // Loại bỏ filter mặc định
             onFilter: null, // Loại bỏ filter mặc định
         },
@@ -622,25 +622,25 @@ export const AdminCommune = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label="Quận/huyện"
-                            name="districtId"
+                            label="Tỉnh/Thành phố"
+                            name="provinceId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn quận/huyện!' }]}
+                            rules={[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố!' }]}
                         >
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn quận/huyện"
-                                value={stateCommune.districtId}
-                                onChange={(value) => handleOnChange('districtId', value)}
+                                placeholder="Chọn tỉnh/thành phố"
+                                value={stateCommune.provinceId}
+                                onChange={(value) => handleOnChange('provinceId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên quận/huyện
+                                } // Tìm kiếm theo tên tỉnh/thành phố
                             >
-                                {district.map((field) => (
-                                    <Select.Option key={field._id} value={field._id}>
-                                        {field.districtName}
+                                {provinces.map((province) => (
+                                    <Select.Option key={province._id} value={province._id}>
+                                        {province.provinceName}
                                     </Select.Option>
                                 ))}
                             </Select>
@@ -696,25 +696,25 @@ export const AdminCommune = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label="Xã, phường, thị trấn"
-                            name="districtId"
+                            label="Tỉnh/Thành phố"
+                            name="provinceId"
                             labelCol={{ span: 24 }}
                             wrapperCol={{ span: 24 }}
                             style={{ marginBottom: 10 }}
-                            rules={[{ required: true, message: 'Vui lòng chọn xã, phường, thị trấn!' }]}
+                            rules={[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố!' }]}
                         >
                             <Select
                                 showSearch // Bật tính năng tìm kiếm
-                                placeholder="Chọn xã, phường, thị trấn"
-                                value={stateCommuneDetail.districtId}
-                                onChange={(value) => handleOnChangeDetail('districtId', value)}
+                                placeholder="Chọn tỉnh/thành phố"
+                                value={stateCommuneDetail.provinceId}
+                                onChange={(value) => handleOnChangeDetail('provinceId', value)}
                                 filterOption={(input, option) =>
                                     option?.children?.toLowerCase().includes(input.toLowerCase())
-                                } // Tìm kiếm theo tên quận/huyện
+                                } // Tìm kiếm theo tên tỉnh/thành phố
                             >
-                                {district.map((field) => (
-                                    <Select.Option key={field._id} value={field._id}>
-                                        {field.districtName}
+                                {provinces.map((province) => (
+                                    <Select.Option key={province._id} value={province._id}>
+                                        {province.provinceName}
                                     </Select.Option>
                                 ))}
                             </Select>

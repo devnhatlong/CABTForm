@@ -41,7 +41,7 @@ export const SocialOrderDetail = () => {
             fetchData();
         }, 0);
     }, [id]);
-    
+
     const fetchData = async () => {
         try {
             const [socialOrderResponse, socialOrderAnnexResponse, criminalResponse] = await Promise.all([
@@ -133,11 +133,6 @@ export const SocialOrderDetail = () => {
         {
             title: "Tỉnh",
             dataIndex: ["province", "provinceName"],
-            onHeaderCell: () => ({ style: headerStyle }),
-        },
-        {
-            title: "Huyện",
-            dataIndex: ["district", "districtName"],
             onHeaderCell: () => ({ style: headerStyle }),
         },
         {
@@ -235,7 +230,7 @@ export const SocialOrderDetail = () => {
         {
             key: "2",
             fieldName: "Địa bàn xảy ra",
-            value: `${record.commune.communeName || "N/A"} - ${record.district.districtName || "N/A"}`
+            value: `${record.commune.communeName || "N/A"} - ${record.province.provinceName || "N/A"}`
         },
         { key: "3", fieldName: "Ngày báo cáo", value: moment(record.createdAt).format("DD/MM/YYYY") },
         { key: "4", fieldName: "Ngày xảy ra", value: moment(record.incidentDate).format("DD/MM/YYYY") },
@@ -256,7 +251,7 @@ export const SocialOrderDetail = () => {
         {
             key: "2",
             fieldName: "Địa bàn xảy ra",
-            value: `${historySocialOrderDetail.dataSnapshot?.commune.communeName || "N/A"} - ${historySocialOrderDetail.dataSnapshot?.district.districtName || "N/A"}`
+            value: `${historySocialOrderDetail.dataSnapshot?.commune.communeName || "N/A"} - ${historySocialOrderDetail.dataSnapshot?.province.provinceName || "N/A"}`
         },
         { key: "3", fieldName: "Ngày báo cáo", value: moment(historySocialOrderDetail.dataSnapshot?.createdAt).format("DD/MM/YYYY") },
         { key: "4", fieldName: "Ngày xảy ra", value: moment(historySocialOrderDetail.dataSnapshot?.incidentDate).format("DD/MM/YYYY") },
@@ -323,11 +318,6 @@ export const SocialOrderDetail = () => {
         {
             title: "Tỉnh",
             dataIndex: ["dataSnapshot", "province", "provinceName"],
-            onHeaderCell: () => ({ style: headerStyle }),
-        },
-        {
-            title: "Huyện",
-            dataIndex: ["dataSnapshot", "district", "districtName"],
             onHeaderCell: () => ({ style: headerStyle }),
         },
         {
