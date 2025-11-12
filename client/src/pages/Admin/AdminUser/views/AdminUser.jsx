@@ -22,6 +22,7 @@ import { WrapperContentPopup } from '../../../../components/NavbarLoginComponent
 import ImportExcel from '../../../../components/ImportExcel/ImportExcel';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { PATHS } from '../../../../constants/path';
 import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const AdminUser = () => {
@@ -50,12 +51,12 @@ export const AdminUser = () => {
 
     useEffect(() => {
         if(user?.role !== ROLE.ADMIN) {
-            navigate(`/dashboard`);
+            navigate(`${PATHS.DASHBOARD}`);
         }
     }, [user]);
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Quản trị' },
         { label: 'Quản lý tài khoản' },
     ];

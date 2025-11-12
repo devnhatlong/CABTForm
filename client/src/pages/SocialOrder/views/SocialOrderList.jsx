@@ -26,6 +26,7 @@ import serverDateService from '../../../services/serverDateService';
 import { useNavigate } from 'react-router-dom';
 import { STATUS, STATUS_COLOR } from '../../../constants/status';
 import NoteComponent from '../../../components/NoteComponent/NoteComponent';
+import { PATHS } from '../../../constants/path';
 
 export const SocialOrderList = () => {
     const { Option } = Select;
@@ -61,7 +62,7 @@ export const SocialOrderList = () => {
     });
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Vụ việc về TTXH' },
         { label: 'Danh sách vụ việc' },
     ];

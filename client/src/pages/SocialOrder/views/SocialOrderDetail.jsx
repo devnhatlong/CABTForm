@@ -10,6 +10,7 @@ import { ArrowLeftOutlined, EditOutlined, HistoryOutlined } from "@ant-design/ic
 import criminalService from "../../../services/criminalService";
 import Loading from "../../../components/LoadingComponent/Loading";
 import { STATUS } from "../../../constants/status";
+import { PATHS } from "../../../constants/path";
 
 export const SocialOrderDetail = () => {
     const { id } = useParams();
@@ -29,7 +30,7 @@ export const SocialOrderDetail = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Danh sách vụ việc về TTXH' },
         { label: 'Chi tiết vụ việc' },
     ];
@@ -511,7 +512,7 @@ export const SocialOrderDetail = () => {
                 <Button
                     type="primary"
                     icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate("/social-order/list")}
+                    onClick={() => navigate(`${PATHS.SOCIAL_ORDER.LIST}`)}
                 >
                     Quay lại danh sách
                 </Button>

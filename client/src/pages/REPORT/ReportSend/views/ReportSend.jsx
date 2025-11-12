@@ -27,7 +27,7 @@ import { validateAndAttachFile } from '../../../../utils/utils';
 import { ROLE } from '../../../../constants/role';
 import { SETTING_KEYS } from '../../../../constants/settingKeys';
 import { LIMIT_RECORD } from '../../../../constants/limit';
-
+import { PATHS } from '../../../../constants/path';
 
 export const ReportSend = () => {
     const [modalForm] = Form.useForm();
@@ -60,7 +60,7 @@ export const ReportSend = () => {
     });
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Báo cáo' },
         { label: 'Gửi báo cáo' },
     ];

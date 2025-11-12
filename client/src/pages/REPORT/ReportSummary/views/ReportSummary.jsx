@@ -21,7 +21,7 @@ import topicService from '../../../../services/topicService';
 import reportTypeService from '../../../../services/reportTypeService';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { LIMIT_RECORD } from '../../../../constants/limit';
-
+import { PATHS } from '../../../../constants/path';
 
 export const ReportSummary = () => {
     const [modalForm] = Form.useForm();
@@ -48,7 +48,7 @@ export const ReportSummary = () => {
     });
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Tổng hợp - thống kê' },
         { label: 'Báo cáo' },
     ];

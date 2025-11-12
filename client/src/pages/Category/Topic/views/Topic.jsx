@@ -18,6 +18,7 @@ import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import ImportExcel from "../../../../components/ImportExcel/ImportExcel";
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { PATHS } from '../../../../constants/path';
 
 export const Topic = () => {
     const [modalForm] = Form.useForm();
@@ -43,12 +44,12 @@ export const Topic = () => {
 
     useEffect(() => {
         if(user?.role !== ROLE.ADMIN) {
-            navigate(`/dashboard`);
+            navigate(`${PATHS.DASHBOARD}`);
         }
     }, [user]);
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Quản lý danh mục' },
         { label: 'Quản lý chuyên đề' },
     ];

@@ -25,6 +25,7 @@ import CrimeService from '../../../services/crimeService';
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Loading from '../../../components/LoadingComponent/Loading';
 import { STATUS } from '../../../constants/status';
+import { PATHS } from '../../../constants/path';
 
 export const SocialOrderNew = () => {
     const location = useLocation();
@@ -84,7 +85,7 @@ export const SocialOrderNew = () => {
     const drugAnnexData = [stateAnnexData.drugAnnex]; // Dữ liệu cho phụ lục ma túy
 
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: id ? 'Danh sách vụ việc' : 'Vụ việc về TTXH' },
         { label: id ? 'Cập nhật vụ việc' : 'Thêm mới vụ việc' },
     ];

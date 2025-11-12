@@ -18,6 +18,7 @@ import departmentService from '../../../../services/departmentService';
 import { useMutationHooks } from '../../../../hooks/useMutationHook';
 import BreadcrumbComponent from '../../../../components/BreadcrumbComponent/BreadcrumbComponent';
 import { ROLE } from '../../../../constants/role';
+import { PATHS } from '../../../../constants/path';
 import { LIMIT_RECORD } from '../../../../constants/limit';
 
 export const PermissionField = () => {
@@ -45,12 +46,12 @@ export const PermissionField = () => {
 
     useEffect(() => {
         if(user?.role !== ROLE.ADMIN) {
-            navigate(`/dashboard`);
+            navigate(`${PATHS.DASHBOARD}`);
         }
     }, [user]);
     
     const breadcrumbItems = [
-        { label: 'Trang chủ', path: '/dashboard' },
+        { label: 'Trang chủ', path: `${PATHS.ROOT}` },
         { label: 'Cấu hình' },
         { label: 'Phân quyền lĩnh vực vụ việc' },
     ];
