@@ -19,7 +19,7 @@ import { ReportSummary } from "../../REPORT/ReportSummary/views/ReportSummary";
 import { Topic } from "../../Category/Topic/views/Topic";
 import { ReportType } from "../../Category/ReportType/views/ReportType";
 import { AdminProvince } from "../../Admin/AdminProvince/views/AdminProvince";
-import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
+// import { AdminDistrict } from "../../Admin/AdminDistrict/views/AdminDistrict";
 import { AdminCommune } from "../../Admin/AdminCommune/views/AdminCommune";
 import { ROLE } from "../../../constants/role";
 import { GeneralSetting } from "../../GeneralSettings/views/GeneralSetting";

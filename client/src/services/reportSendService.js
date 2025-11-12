@@ -1,57 +1,6 @@
-import axios from 'axios';
-import { getTokenFromCookie } from '../utils/utils';
-import userService from './userService';
+import { createAxiosInstance } from '../utils/axiosUtils';
 
-export const axiosReport = axios.create();
-
-// Add a request interceptor to add the JWT token to the authorization header
-axiosReport.interceptors.request.use(
-    (config) => {
-        const accessToken = getTokenFromCookie("accessToken_SLCB");
-
-        if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
-
-// Add a response interceptor to refresh the JWT token if it's expired
-axiosReport.interceptors.response.use(
-    async (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-        const refreshToken = getTokenFromCookie("refreshToken_SLCB");
-
-        if (error.response.status === 401 && refreshToken) {
-            try {
-                const { newAccessToken } = await userService.getRefreshToken(refreshToken);
-                document.cookie = `accessToken_SLCB=${newAccessToken}; path=/`;
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-                return axiosReport(originalRequest);
-            } catch (refreshError) {
-                console.error(refreshError);
-                redirectToLogin();
-                return Promise.reject(error);
-            }
-        }
-
-        if (error.response.status === 401 && !refreshToken) {
-            redirectToLogin();
-        }
-
-        return Promise.reject(error);
-    }
-);
-
-const redirectToLogin = () => {
-    document.cookie = "accessToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "refreshToken_SLCB=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = "/login";
-};
+export const axiosReport = createAxiosInstance();
 
 const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/report`;
 

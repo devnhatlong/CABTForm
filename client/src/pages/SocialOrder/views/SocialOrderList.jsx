@@ -268,10 +268,12 @@ export const SocialOrderList = () => {
 
     const fetchDataForDataTable = (allRecords) => {
         return allRecords?.data?.map((record) => {
+
+            console.log("Record:", record);
             return {
                 ...record, 
                 key: record._id,
-                userName: record?.user?.userName,
+                userName: record?.user?.departmentId?.departmentName,
                 fieldOfWork: record?.fieldOfWork?.fieldName,
                 province: record?.province?.provinceName,
                 commune: record?.commune?.communeName,
